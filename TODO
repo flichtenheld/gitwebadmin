@@ -1,0 +1,25 @@
+TODO
+====
+
+General
+ * Improve layout of Homepage
+
+Repo
+ * show private/public status
+ * do not list private repositories in lists
+ * split paths in lists
+
+User
+ * can set and change his pubkey                            - DONE
+ * can edit description and options of repositories he owns - DONE
+ * can fork existing repositories into private repositories
+ * can create new private repositories
+ * can edit permissions of private repositories
+ * can delete private repositories
+
+Admin
+ * can fork existing repositories into public repositories
+ * can create new repositories
+ * can edit description and options of all repositories
+ * can edit permissions of all repositories
+ * can delete repositories
