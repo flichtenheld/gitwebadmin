@@ -29,6 +29,13 @@ __PACKAGE__->add_columns(
     is_nullable => 1,
     size => undef,
   },
+  "private",
+  {
+    data_type => "boolean",
+    default_value => "false",
+    is_nullable => 0,
+    size => 1,
+  },
   "daemon",
   {
     data_type => "boolean",
@@ -47,7 +54,7 @@ __PACKAGE__->add_columns(
   {
     data_type => "text",
     default_value => undef,
-    is_nullable => 1,
+    is_nullable => 0,
     size => undef,
   },
   "forkof",
@@ -55,6 +62,7 @@ __PACKAGE__->add_columns(
 );
 __PACKAGE__->set_primary_key("id");
 __PACKAGE__->add_unique_constraint("repos_pkey", ["id"]);
+__PACKAGE__->add_unique_constraint("repos_name_key", ["name"]);
 __PACKAGE__->has_many(
   "readables",
   "GitWebAdmin::Schema::Readable",
@@ -74,8 +82,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-06-18 22:43:30
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:/gLdMgYHIFcuYxfdkLfMgQ
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-06-23 15:27:50
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:7ma2RKUyIIl8YLZ4HIOw6w
 
 __PACKAGE__->many_to_many('w_groups' => 'writables', 'gid');
 __PACKAGE__->many_to_many('r_groups' => 'readables', 'gid');

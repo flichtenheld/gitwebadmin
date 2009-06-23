@@ -44,8 +44,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-06-18 22:43:30
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:JsK527/Cqgm59tRtYFdGcQ
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-06-23 15:27:50
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:9s0l8sKQHvW7+CHBypczAA
 
 __PACKAGE__->many_to_many('groups' => 'members', 'gid');
 
