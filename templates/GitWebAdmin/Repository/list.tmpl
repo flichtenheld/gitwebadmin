@@ -1,0 +1,26 @@
+[% UNLESS path.length();
+     SET nav = [ { name => 'Repositories' } ];
+   ELSE;
+     SET nav = [ { url => 'repo/', name => 'Repositories' } ];
+     FOREACH p IN path.split('/');
+       SET ppath = ppath _ p _ '/';
+       nav.push({ url => 'repo/' _ ppath, name => p });
+     END;
+   END;
+   INCLUDE header.tmpl page_title="Repository List"
+   navigation = nav
+%]
+
+<h1>Repositories</h1>
+
+[% IF path.length() %]
+<h2>Directory [% path | html %]/</h2>
+[% END %]
+
+[% FOREACH r IN repos.sort('name') %]
+[% '<ul>' IF loop.first() %]
+<li><a href="[% c.url('repo/' _ r.name()) %]">[% r.name().remove("^$path/") | html %]</a></li>
+[% '</ul>' IF loop.last() %]
+[% END %]
+
+[% INCLUDE footer.tmpl %]

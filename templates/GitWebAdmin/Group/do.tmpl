@@ -1,0 +1,28 @@
+[% INCLUDE header.tmpl page_title="Group Page"
+   navigation=[ { url => 'group/', name => 'Groups' },
+                { name => group.gid() },
+              ]
+%]
+
+<h1>Group [% group.name() | html %]</h1>
+
+[% FOREACH u IN group.users() %]
+[% '<p>The following users are members of this group:</p><ul>' IF loop.first() %]
+<li><a href="[% c.url('user/' _ u.uid()) %]">[% u.name() | html %]</a></li>
+[% '</ul>' IF loop.last() %]
+[% END %]
+
+[% FOREACH r IN group.w_repos %]
+[% '<p>The group has write access to the following repositories:</p><ul>' IF loop.first() %]
+<li><a href="[% c.url('repo/' _ r.name()) %]">[% r.name() | html %]</a></li>
+[% '</ul>' IF loop.last() %]
+[% END %]
+
+[% FOREACH r IN group.r_repos %]
+[% '<p>The group has read access to the following repositories:</p><ul>' IF loop.first() %]
+<li><a href="[% c.url('repo/' _ r.name()) %]">[% r.name() | html %]</a></li>
+[% '</ul>' IF loop.last() %]
+[% END %]
+
+
+[% INCLUDE footer.tmpl %]

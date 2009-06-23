@@ -1,0 +1,15 @@
+[% INCLUDE header.tmpl page_title="User Public Key"
+   navigation=[ { url => 'user/', name => 'Users' },
+                { url => 'user/' _ user.uid, name => user.uid },
+                { name => 'Key' },
+              ]
+%]
+
+<h1>User [% user.name() | html %] </h1>
+
+<p>Key changed.</p>
+[% IF c.param('user') == user.uid %]
+<pre>[% user.key.chunk(80).join("\n") %]</pre>
+[% END %]
+
+[% INCLUDE footer.tmpl %]

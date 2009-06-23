@@ -1,0 +1,29 @@
+[% INCLUDE header.tmpl page_title="User Page"
+   navigation=[ { url => 'user/', name => 'Users' },
+                { name => user.uid() }
+              ]
+%]
+
+<h1>User [% user.name() | html %] </h1>
+
+[% FOREACH g IN user.groups %]
+[% '<p>Member of the following groups:</p><ul>' IF loop.first() %]
+<li><a href="[% c.url('group/' _ g.gid()) %]">[% g.name() | html %]</a></li>
+[% '</ul>' IF loop.last() %]
+[% END %]
+
+[% FOREACH r IN user.repo %]
+[% '<p>Owner of the following repositories:</p><ul>' IF loop.first() %]
+<li><a href="[% c.url('repo/' _ r.name()) %]">[% r.name() | html %]</a></li>
+[% '</ul>' IF loop.last() %]
+[% END %]
+
+[% IF c.param('user') == user.uid %]
+<p><label for="pubkey">Public Key for SSH access:</label></p>
+<form method="post" action="[% c.url('user/' _ user.uid _ '/key') %]">
+  <p><textarea name="pubkey" cols="80" rows="10">[% user.key %]</textarea></p>
+  <p><input type="submit" value="Submit"></p>
+</form>
+[% END %]
+
+[% INCLUDE footer.tmpl %]

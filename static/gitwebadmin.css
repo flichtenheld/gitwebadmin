@@ -1,0 +1,43 @@
+body {
+    color: black;
+    background: white;
+    font-size: 100%;
+}
+
+img {
+    border: 0;
+}
+
+#navbar {
+    border-top: black 1px double;
+    border-bottom: black 1px double;
+    padding: .5em;
+}
+
+#footer {
+    border-top: black 1px double;
+    font-size: 90%;
+}
+
+#footer p {
+    margin-top: .5ex;
+    margin-bottom: .1ex;
+}
+
+#repometa th {
+    text-align: left;
+}
+
+.yes {
+    color: #0d0;
+}
+
+.no {
+    color: #d00;
+}
+
+#userlogin {
+    font-size: 90%;
+    text-align: right;
+    float: right;
+}

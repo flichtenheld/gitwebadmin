@@ -1,0 +1,21 @@
+[% INCLUDE header.tmpl page_title="Homepage" %]
+
+<h1>GitWebAdmin</h1>
+
+<p>Welcome to GitWebAdmin, your interface to the
+<a href="http://git-scm.org/">Git</a> repositories of
+[% c.cfg('branding').organisation %].</p>
+
+<h2>Repositories</h2>
+
+<p>The following repositories are available:</p>
+<dl>
+  [% FOREACH r IN repos.all() %]
+  <dt><a href="[% c.url('repo/' _ r.name()) %]">[% r.name() %]</a></dt>
+  <dd>Owner: <a href="[% c.url('user/' _ r.owner().uid()) %]">[% r.owner().name() %]</a>
+    [% IF r.descr() %]<p>[% r.descr() | html %]</p>[% END %]
+  </dd>
+  [% END %]
+</dl>
+
+[% INCLUDE footer.tmpl %]

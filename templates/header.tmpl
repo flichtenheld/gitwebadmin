@@ -1,0 +1,48 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+<head>
+  <title>[% page_title %] -- [% c.cfg('branding').organisation %] GitWebAdmin</title>
+  <link rev="made" href="mailto:[% c.cfg('admin').email %]">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="Author" content="[% c.cfg('admin').name %], [% c.cfg('admin').email %]">
+[% html_meta %]
+  <link href="[% c.cfg('setup').static %]gitwebadmin.css" rel="stylesheet" type="text/css" media="all">
+  <link href="[% c.cfg('setup').static _ c.cfg('branding').css %]" rel="stylesheet" type="text/css" media="all">
+[%- IF rss_alternate %]
+<link rel="alternate" type="application/rss+xml" title="RSS" href="[% rss_alternate %]">
+[% END %]
+<script src="[% c.cfg('setup').static %]gitwebadmin.js" type="text/javascript"></script>
+</head>
+<body>
+
+[%- IF c.cfg('sitewidemsg').size -%]
+<div id="sitewidemsg" class="[% c.cfg('sitewidemsg').importance %]">
+[%- IF c.cfg('sitewidemsg').title -%]<h2>[% c.cfg('sitewidemsg').title %]</h2>[% END %]
+[% c.cfg('sitewidemsg').txt %]
+</div>
+[%- END -%]
+
+<div id="header">
+   <div id="upperheader">
+     <div id="logo">
+       <a href="[% c.cfg('branding').logo_url %]"><img src="[% c.cfg('setup').static %][% c.cfg('branding').logo_src %]" alt="[% c.cfg('branding').logo_alt %]"></a>
+     </div> <!-- end logo -->
+
+     <div id="userlogin">
+       [% IF c.param('user') %]
+       <p>Logged in as user <a href="[% c.url('user/' _ c.param('user')) %]">[% c.param('user') %]</a>.</p>
+       [% ELSE %]
+       <p>Not logged in.</p>
+       [% END %]
+     </div> <!-- end userlogin -->
+   </div> <!-- end upperheader -->
+
+   <div id="navbar">
+     &gt;&gt; <a href="[% c.cfg('setup').homepage %]" title="[% c.cfg('branding').organisation %] GitWebAdmin">GitWebAdmin</a>
+     [%- FOREACH n IN navigation %]
+     &gt;&gt; [% IF n.url %]<a href="[% c.url(n.url) %]" [% IF n.title %]title="[% n.title %]"[% END %]>[% n.name %]</a>[% ELSE %][% n.name %][% END %]
+     [% END -%]
+   </div> <!-- end navbar -->
+
+</div> <!-- end header -->
+<div id="outer">

@@ -1,0 +1,14 @@
+[% INCLUDE header.tmpl page_title="Group List"
+   navigation=[ { name => 'Groups' },
+              ]
+%]
+
+<h1>Groups</h1>
+
+[% FOREACH g IN groups %]
+[% '<ul>' IF loop.first() %]
+<li><a href="[% c.url('group/' _ g.gid()) %]">[% g.name() | html %]</a></li>
+[% '</ul>' IF loop.last() %]
+[% END %]
+
+[% INCLUDE footer.tmpl %]

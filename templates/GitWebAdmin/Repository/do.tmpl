@@ -1,0 +1,99 @@
+[% SET nav = [ { url => 'repo/', name => 'Repositories' } ];
+   FOREACH p IN repo.name().split('/');
+     SET path = path _ p _ '/';
+     IF loop.last();
+       nav.push({ name => p });
+     ELSE;
+       nav.push({ url => 'repo/' _ path, name => p });
+     END;
+   END;
+   INCLUDE header.tmpl page_title="Repository Page"
+   navigation = nav
+%]
+[% SET can_change = (repo.owner.uid == c.param('user')) %]
+
+[% BLOCK yes_no %]
+  [% IF switch %]
+  <span class="yes">yes</span>
+    [% IF can_change %]
+    <input type="checkbox" name="options" value="[% switch_name %]"
+     [% switch ? 'checked="checked"' : '' %]>
+    [% END %]
+  [% ELSE %]
+  <span class="no">no</span>
+    [% IF can_change %]
+    <input type="checkbox" name="options" value="[% switch_name %]"
+     [% switch ? 'checked="checked"' : '' %]>
+    [% END %]
+  [% END %]
+[% END %]
+
+<h1>Repository [% repo.name() | html %] </h1>
+[% IF changed == 1 %]
+<p class="yes">Changes applied successfully.</p>
+[% ELSIF changed == 0 %]
+<p>No Changes.</p>
+[% END %]
+[% IF can_change %]
+<form action="[% c.url('repo/' _ repo.name) %]" method="post">
+[% END %]
+<table id="repometa">
+  <tbody>
+    [% IF repo.descr || can_change %]
+    <tr>
+      [% IF can_change %]
+      <th><label for="description">Description:</label></th>
+      <td><input type="text" name="description" size="80" value="[% repo.descr | html %]"></td>
+      [% ELSE %]
+      <th>Description:</th>
+      <td>[% repo.descr | html %]</td>
+      [% END %]
+    </tr>
+    [% END %]
+    <tr>
+      <th>Owner:</th>
+      <td><a href="[% c.url('user/' _ repo.owner().uid()) %]">
+          [% repo.owner().name() | html %]</a>
+      </td>
+    </tr>
+    [% IF repo.forkof().name() %]
+    <tr>
+      <th>Fork of</th>
+      <td><a href="[% c.url('repo/' _ repo.forkof().name()) %]">
+          [% repo.forkof().name() %]</a>
+      </td>
+    </tr>
+    [% END %]
+    <tr>
+      <th>Gitweb Access:</th>
+      <td>[% INCLUDE yes_no switch=repo.gitweb switch_name='gitweb' %]</td>
+    </tr>
+    <tr>
+      <th>git-daemon Access:</th>
+      <td>[% INCLUDE yes_no switch=repo.daemon switch_name='daemon' %]</td>
+    </tr>
+  </tbody>
+</table>
+[% IF can_change %]
+<p><input type="submit" value="Apply changes"></p>
+</form>
+[% END %]
+
+
+[% SET groups = [ repo.w_groups() ] %]
+[% FOREACH g IN groups %]
+[% NEXT UNLESS g.name() %]
+[% '<p>Writable by the following groups:</p><ul>' IF loop.first() %]
+<li><a href="[% c.url('group/' _ g.gid()) %]">[% g.name() | html %]</a></li>
+[% '</ul>' IF loop.last() %]
+[% END %]
+
+[% SET groups = [ repo.r_groups() ] %]
+[% FOREACH g IN groups %]
+[% NEXT UNLESS g.name() %]
+[% '<p>Readable by the following groups:</p><ul>' IF loop.first() %]
+<li><a href="[% c.url('group/' _ g.gid()) %]">[% g.name() | html %]</a></li>
+[% '</ul>' IF loop.last() %]
+[% END %]
+
+[% INCLUDE footer.tmpl %]

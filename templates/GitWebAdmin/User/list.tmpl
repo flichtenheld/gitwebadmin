@@ -1,0 +1,14 @@
+[% INCLUDE header.tmpl page_title="Users List"
+   navigation=[ { name => 'Users' },
+              ]
+%]
+
+<h1>Users</h1>
+
+[% FOREACH u IN users %]
+[% '<ul>' IF loop.first() %]
+<li><a href="[% c.url('user/' _ u.uid()) %]">[% u.name() | html %]</a></li>
+[% '</ul>' IF loop.last() %]
+[% END %]
+
+[% INCLUDE footer.tmpl %]
