@@ -1,0 +1,89 @@
+#!/usr/bin/perl
+
+use 5.010;
+
+use strict;
+use warnings;
+
+use autodie;
+use Config::Auto;
+use Template;
+use Data::Dumper;
+use File::Spec::Functions;
+use File::Slurp;
+
+use FindBin;
+use lib "$FindBin::Bin/../lib";
+
+use GitWebAdmin::Schema;
+
+my $config = Config::Auto::parse("$FindBin::Bin/../gitwebadmin.ini");
+my $tmpl = Template->new(
+  {
+    INCLUDE_PATH => "$FindBin::Bin/../templates",
+  });
+
+my $db_cfg = $config->{database};
+my $schema = GitWebAdmin::Schema->connect(
+  "dbi:$db_cfg->{driver}:dbname=$db_cfg->{name}",
+  $db_cfg->{username}, $db_cfg->{password});
+
+my %out_cfg = ();
+$out_cfg{gitosis} = $config->{gitosis};
+
+my $groups = $schema->resultset("Groups");
+say "Reading Groups:";
+while( my $grp = $groups->next ){
+  say "\t".$grp->gid;
+  $out_cfg{groups}{$grp->gid} = {
+    members => [ map { $_->uid } $grp->users ],
+    writable => [ map { $_->name } $grp->w_repos ],
+    readable => [ map { $_->name } $grp->r_repos ],
+  };
+}
+
+my $owners = $schema->resultset("Users");
+say "Creating Owner-Groups:";
+while( my $owner = $owners->next ){
+  next unless $owner->repo->count;
+  say "\t".$owner->uid;
+  $out_cfg{groups}{$owner->uid."-owner"} = {
+    members => [ $owner->uid ],
+    writable => [ map { $_->name } $owner->repo ],
+  };
+}
+
+my $repos = $schema->resultset("Repos");
+say "Reading Repositories:";
+while( my $repo = $repos->next ){
+  say "\t".$repo->name;
+  $out_cfg{repos}{$repo->name} = {
+    description => $repo->descr,
+    owner => $repo->owner->name,
+    gitweb => $repo->gitweb ? 'yes' : 'no',
+    daemon => $repo->daemon ? 'yes' : 'no',
+  };
+}
+
+my $cfg_file = catfile($config->{gitosis}{repository}, "gitosis.conf");
+say "Write out configuration to $cfg_file";
+#print Dumper(\%out_cfg);
+$tmpl->process('gitosis/gitosis.conf.tmpl', \%out_cfg, $cfg_file);
+
+say "Write out public keys";
+my @old_keys = glob(catfile($config->{gitosis}{repository}, "keydir", "*.pub"));
+#say "\told_keys = @old_keys";
+my %old_keys = map { $_ => 1 } @old_keys;
+my $users = $schema->resultset("Users");
+while( my $usr = $users->next ){
+  next unless $usr->key;
+  my $key_file = catfile($config->{gitosis}{repository}, "keydir", $usr->uid.".pub");
+  delete $old_keys{$key_file};
+  say "\twrite $key_file";
+  write_file($key_file, $usr->key);
+}
+
+foreach my $old_file (keys %old_keys){
+  say "\tdelete $old_file";
+  unlink $old_file;
+}
