@@ -1,3 +1,4 @@
+[% PROCESS methods.tmpl %]
 [% SET nav = [ { url => 'repo/', name => 'Repositories' } ];
    FOREACH p IN repo.name().split('/');
      SET path = path _ p _ '/';
@@ -10,38 +11,44 @@
    INCLUDE header.tmpl page_title="Repository Page"
    navigation = nav
 %]
-[% SET can_change = (repo.owner.uid == c.param('user')) %]
 
 [% BLOCK yes_no %]
   [% IF switch %]
   <span class="yes">yes</span>
-    [% IF can_change %]
+    [% IF c.has_change(repo) %]
     <input type="checkbox" name="options" value="[% switch_name %]"
      [% switch ? 'checked="checked"' : '' %]>
     [% END %]
   [% ELSE %]
   <span class="no">no</span>
-    [% IF can_change %]
+    [% IF c.has_change(repo) %]
     <input type="checkbox" name="options" value="[% switch_name %]"
      [% switch ? 'checked="checked"' : '' %]>
     [% END %]
   [% END %]
 [% END %]
 
-<h1>Repository [% repo.name() | html %] </h1>
+<h1>Repository [% repo.name() | html %]</h1>
+[% IF repo.private %]<p class="subheadline">(Private Repository)</p>[% END %]
 [% IF changed == 1 %]
 <p class="yes">Changes applied successfully.</p>
 [% ELSIF changed == 0 %]
 <p>No Changes.</p>
 [% END %]
-[% IF can_change %]
+[% IF c.has_change(repo) %]
 <form action="[% c.url('repo/' _ repo.name) %]" method="post">
 [% END %]
 <table id="repometa">
   <tbody>
-    [% IF repo.descr || can_change %]
+    [% IF c.has_admin(repo) %]
     <tr>
-      [% IF can_change %]
+      <th><label for="path">Name:</label></th>
+      <td><input type="text" name="path" size="80" value="[% repo.name | html %]"></td>
+    </tr>
+    [% END %]
+    [% IF repo.descr || c.has_change(repo) %]
+    <tr>
+      [% IF c.has_change(repo) %]
       <th><label for="description">Description:</label></th>
       <td><input type="text" name="description" size="80" value="[% repo.descr | html %]"></td>
       [% ELSE %]
@@ -50,12 +57,23 @@
       [% END %]
     </tr>
     [% END %]
+    [% IF c.is_admin %]
+    <tr>
+      <th><label for="owner">Owner:</label></th>
+      <td>[% INCLUDE user_dropdown select_name='owner' selected=repo.owner.uid %]</td>
+    </tr>
+    <tr>
+      <th>Private:</th>
+      <td>[% INCLUDE yes_no switch=repo.private switch_name='private' %]</td>
+    </tr>
+    [% ELSE %]
     <tr>
       <th>Owner:</th>
       <td><a href="[% c.url('user/' _ repo.owner().uid()) %]">
           [% repo.owner().name() | html %]</a>
       </td>
     </tr>
+    [% END %]
     [% IF repo.forkof().name() %]
     <tr>
       <th>Fork of</th>
@@ -74,26 +92,45 @@
     </tr>
   </tbody>
 </table>
-[% IF can_change %]
+[% IF c.has_change(repo) %]
 <p><input type="submit" value="Apply changes"></p>
 </form>
 [% END %]
-
-
-[% SET groups = [ repo.w_groups() ] %]
-[% FOREACH g IN groups %]
-[% NEXT UNLESS g.name() %]
-[% '<p>Writable by the following groups:</p><ul>' IF loop.first() %]
-<li><a href="[% c.url('group/' _ g.gid()) %]">[% g.name() | html %]</a></li>
-[% '</ul>' IF loop.last() %]
+<form action="[% c.url('repo/' _ repo.name) %]" method="get">
+<p><input type="submit" value="Fork Repository">
+<input type="hidden" name="_form" value="fork"></p>
+</form>
+[% IF c.has_admin(repo) %]
+<form action="[% c.url('repo/' _ repo.name) %]" method="post">
+<p><input type="submit" value="Delete Repository">
+<input type="hidden" name="_method" value="delete"></p>
+</form>
 [% END %]
 
-[% SET groups = [ repo.r_groups() ] %]
-[% FOREACH g IN groups %]
-[% NEXT UNLESS g.name() %]
-[% '<p>Readable by the following groups:</p><ul>' IF loop.first() %]
-<li><a href="[% c.url('group/' _ g.gid()) %]">[% g.name() | html %]</a></li>
-[% '</ul>' IF loop.last() %]
+<div id="permissions">
+[% IF c.has_admin(repo) %]
+  <form action="[% c.url('repo/' _ repo.name _ '/permissions') %]" method="post">
+  <p><label for="w_groups">Writable by the following groups:</label></p>
+  <p>[% PROCESS group_chooser select_name='w_groups' selected=DBIxRel(repo.w_groups) %]</p>
+  <p><label for="r_groups">Readable by the following groups:</label></p>
+  <p>[% PROCESS group_chooser select_name='r_groups' selected=DBIxRel(repo.r_groups) %]</p>
+  <p><input type="submit" value="Change Permissions"></p>
+  </form>
+[% ELSE %]
+  [% FOREACH g IN DBIxRel(repo.w_groups).sort('name') %]
+    [% NEXT UNLESS g.name() %]
+    [% '<p>Writable by the following groups:</p><ul>' IF loop.first() %]
+    <li><a href="[% c.url('group/' _ g.gid()) %]">[% g.name() | html %]</a></li>
+    [% '</ul>' IF loop.last() %]
+  [% END %]
+
+  [% FOREACH g IN DBIxRel(repo.r_groups).sort('name') %]
+    [% NEXT UNLESS g.name() %]
+    [% '<p>Readable by the following groups:</p><ul>' IF loop.first() %]
+    <li><a href="[% c.url('group/' _ g.gid()) %]">[% g.name() | html %]</a></li>
+    [% '</ul>' IF loop.last() %]
+  [% END %]
 [% END %]
+</div>
 
 [% INCLUDE footer.tmpl %]

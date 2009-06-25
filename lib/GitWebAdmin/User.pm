@@ -7,7 +7,7 @@ use warnings;
 sub setup {
   my $c = shift;
 
-  $c->run_modes([qw(do list change_key delete_key)]);
+  $c->run_modes([qw(change_key delete_key)]);
 }
 
 sub list {

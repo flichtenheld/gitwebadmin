@@ -9,13 +9,23 @@
 <h2>Repositories</h2>
 
 <p>The following repositories are available:</p>
-<dl>
-  [% FOREACH r IN repos.all() %]
-  <dt><a href="[% c.url('repo/' _ r.name()) %]">[% r.name() %]</a></dt>
-  <dd>Owner: <a href="[% c.url('user/' _ r.owner().uid()) %]">[% r.owner().name() %]</a>
-    [% IF r.descr() %]<p>[% r.descr() | html %]</p>[% END %]
-  </dd>
+<table id="repolist">
+  <thead>
+    <tr>
+      <th><a href="?sort_by=name#repolist">Repository</a></th>
+      <th><a href="?sort_by=owner#repolist">Owner</a></th>
+      <th><a href="?sort_by=descr#repolist">Description</a></th>
+    </tr>
+  </thead>
+  <tbody>
+  [% FOREACH r IN repos.all %]
+  <tr>
+    <td><a href="[% c.url('repo/' _ r.name()) %]">[% r.name() %]</a></td>
+    <td><a href="[% c.url('user/' _ r.owner().uid()) %]">[% r.owner().name() %]</td>
+    <td>[% r.descr() | html %]</td>
+  </tr>
   [% END %]
-</dl>
+  </tbody>
+</table>
 
 [% INCLUDE footer.tmpl %]

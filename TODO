@@ -2,24 +2,31 @@ TODO
 ====
 
 General
- * Improve layout of Homepage
+ * Improve layout of Homepage                               - DONE
+ * Move actions to sidebar
 
 Repo
- * show private/public status
- * do not list private repositories in lists
+ * show private/public status                               - DONE
+ * do not list private repositories in lists                - DONE
  * split paths in lists
 
 User
  * can set and change his pubkey                            - DONE
  * can edit description and options of repositories he owns - DONE
- * can fork existing repositories into private repositories
- * can create new private repositories
- * can edit permissions of private repositories
- * can delete private repositories
+ * can fork existing repositories into private repositories - DONE
+ * can create new private repositories                      - DONE
+ * can edit permissions of private repositories             - DONE
+ * can delete private repositories                          - DONE
+ * can rename private repositories
 
 Admin
- * can fork existing repositories into public repositories
- * can create new repositories
- * can edit description and options of all repositories
- * can edit permissions of all repositories
- * can delete repositories
+ * can fork existing repositories into public repositories  - DONE
+ * can create new repositories                              - DONE
+ * can edit description and options of all repositories     - DONE
+ * can edit permissions of all repositories                 - DONE
+ * can delete repositories                                  - DONE
+ * can rename all repositories
+
+Comments:
+
+Renaming repositories needs design of backend support first.

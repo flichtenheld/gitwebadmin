@@ -30,7 +30,11 @@
 
      <div id="userlogin">
        [% IF c.param('user') %]
-       <p>Logged in as user <a href="[% c.url('user/' _ c.param('user')) %]">[% c.param('user') %]</a>.</p>
+       <p>Logged in as user <a href="[% c.url('user/' _ c.param('user')) %]">[% c.param('user') %]</a>
+         [% IF c.param('user_obj').admin %]
+         <strong>(Admin)</strong>
+         [% END %]
+       </p>
        [% ELSE %]
        <p>Not logged in.</p>
        [% END %]

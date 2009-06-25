@@ -1,0 +1,16 @@
+[% SET nav = [ { url => 'repo/', name => 'Repositories' } ];
+   FOREACH p IN repo.name().split('/');
+     SET path = path _ p _ '/';
+     IF loop.last();
+       nav.push({ name => p });
+     ELSE;
+       nav.push({ url => 'repo/' _ path, name => p });
+     END;
+   END;
+   INCLUDE header.tmpl page_title="Repository Page"
+   navigation = nav
+%]
+
+<p class="no">Repository [% repo.name %] successfully deleted</p>
+
+[% INCLUDE footer.tmpl %]

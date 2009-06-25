@@ -19,8 +19,10 @@
 
 [% FOREACH r IN repos.sort('name') %]
 [% '<ul>' IF loop.first() %]
-<li><a href="[% c.url('repo/' _ r.name()) %]">[% r.name().remove("^$path/") | html %]</a></li>
+<li><a href="[% c.url('repo/' _ r.name()) %]">[% r.name().remove("^$path/") | html %]</a>[% IF r.private %] (private)[% END %]</li>
 [% '</ul>' IF loop.last() %]
 [% END %]
+
+<p><a href="[% c.url('repo/create', { at_path => path _ '/' }) %]">Create New Repository</a></p>
 
 [% INCLUDE footer.tmpl %]

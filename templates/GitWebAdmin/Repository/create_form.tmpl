@@ -1,0 +1,64 @@
+[% PROCESS methods.tmpl %]
+[% SET nav = [ { url => 'repo/', name => 'Repositories' } ];
+   nav.push({ name => 'Create' });
+   INCLUDE header.tmpl page_title="Create New Repository"
+   navigation = nav
+%]
+
+[% BLOCK yes_no %]
+  [% IF switch %]
+  <span class="yes">yes</span>
+    <input type="checkbox" name="options" value="[% switch_name %]"
+     [% switch ? 'checked="checked"' : '' %]>
+  [% ELSE %]
+  <span class="no">no</span>
+    <input type="checkbox" name="options" value="[% switch_name %]"
+     [% switch ? 'checked="checked"' : '' %]>
+  [% END %]
+[% END %]
+
+<h1>Create Repository</h1>
+<form action="[% c.url('repo/create') %]" method="post">
+<input type="hidden" name="_method" value="put">
+<table id="repometa">
+  <tbody>
+    <tr>
+      <th><label for="path">Name:</label></th>
+      [% SET path_init = 'user/' _ c.param('user') _ '/';
+         SET path_init = path_init _ c.query.param('at_path').remove('^user/(\w+/)?') %]
+      <td><input type="text" name="path" size="80"
+                 value="[% path_init _ '<something>.git' | html %]">
+      </td>
+    </tr>
+    <tr>
+      <th><label for="description">Description:</label></th>
+      <td><input type="text" name="description" size="80" value=""></td>
+    </tr>
+    <tr>
+      <th><label for="forkof">Fork off existing Repository:</label></th>
+      <td>[% INCLUDE repo_dropdown select_name='forkof' selected='' %]</td>
+    </tr>
+    [% IF c.is_admin %]
+    <tr>
+      <th><label for="owner">Owner:</label></th>
+      <td>[% INCLUDE user_dropdown select_name='owner' selected=c.param('user') %]</td>
+    </tr>
+    <tr>
+      <th>Private:</th>
+      <td>[% INCLUDE yes_no switch=1 switch_name='private' %]</td>
+    </tr>
+    [% END %]
+    <tr>
+      <th>Gitweb Access:</th>
+      <td>[% INCLUDE yes_no switch=1 switch_name='gitweb' %]</td>
+    </tr>
+    <tr>
+      <th>git-daemon Access:</th>
+      <td>[% INCLUDE yes_no switch=1 switch_name='daemon' %]</td>
+    </tr>
+  </tbody>
+</table>
+<p><input type="submit" value="Create Repository"></p>
+</form>
+
+[% INCLUDE footer.tmpl %]

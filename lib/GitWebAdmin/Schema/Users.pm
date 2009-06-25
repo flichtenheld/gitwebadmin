@@ -29,6 +29,13 @@ __PACKAGE__->add_columns(
     is_nullable => 1,
     size => undef,
   },
+  "admin",
+  {
+    data_type => "boolean",
+    default_value => "false",
+    is_nullable => 0,
+    size => 1,
+  },
 );
 __PACKAGE__->set_primary_key("uid");
 __PACKAGE__->add_unique_constraint("users_pkey", ["uid"]);
@@ -44,10 +51,11 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-06-23 15:27:50
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:9s0l8sKQHvW7+CHBypczAA
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-06-24 14:22:49
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:OzteEMBJSZfVZQIQ2pMzTQ
 
 __PACKAGE__->many_to_many('groups' => 'members', 'gid');
+
 
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;

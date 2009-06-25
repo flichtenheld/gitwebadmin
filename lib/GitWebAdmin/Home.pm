@@ -9,7 +9,7 @@ sub start {
 
   my $db = $c->param('db');
   my $repos = $db->resultset('Repos')->search(
-    {}, { order_by => 'name' });
+    { private => 0 }, { order_by => $c->query->param('sort_by') || 'name' });
 
   return $c->tt_process({ repos => $repos });
 }

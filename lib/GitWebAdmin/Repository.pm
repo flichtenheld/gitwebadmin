@@ -4,21 +4,53 @@ use base 'GitWebAdmin';
 use strict;
 use warnings;
 
-use List::MoreUtils qw(any);
+use CGI::Application::Plugin::Redirect;
 
 sub setup {
   my $c = shift;
 
-  $c->run_modes([qw(do list delete)]);
+  $c->run_modes([qw(create create_form delete)]);
+}
+
+sub find_repo {
+  my $c = shift;
+
+  my $db = $c->param('db');
+  my $path = $c->param('repo_path');
+  return unless $path;
+  my $repo;
+  if( $path =~ /^\d+$/ ){
+    $repo = $db->resultset('Repos')->find($path);
+  }else{
+    $repo = $db->resultset('Repos')->search({name => $path})->first;
+  }
+
+  return $repo;
+}
+
+sub repo_path_dispatch {
+  my $c = shift;
+
+  my $path = $c->param('repo_path');
+  if( $path =~ s;/permissions$;; ){
+    $c->param('repo_path', $path);
+    return 'permissions';
+  }elsif( $path !~ /\.git$/ ){
+    return 'list';
+  }
+  return '';
 }
 
 sub list {
   my $c = shift;
 
   my $db = $c->param('db');
-  my $path = $c->param('repo_path');
+  my $path = $c->param('repo_path') || '';
   my @repos;
-  my $rs = $db->resultset('Repos')->search({},{ order_by => 'name' });
+  my $show_private = $c->query->param('show_private') //
+    ($path =~ m;^user/; ? 1 : 0);
+  my $rs = $db->resultset('Repos')->search(
+    { private => $show_private },{ order_by => 'name' });
   if( $path ){
     @repos = $rs->search({name => { 'like', "$path/%" }});
   }else{
@@ -29,43 +61,156 @@ sub list {
   return $c->tt_process({ path => $path, repos => \@repos });
 }
 
+sub permissions {
+  my $c = shift;
+
+  my $repo = $c->find_repo;
+  die "404 Repository not found\n" unless $repo;
+
+  if( $ENV{REQUEST_METHOD} eq 'POST' ){
+    # only the owner can edit the repository
+    die "403 Not authorized\n"
+      unless $c->has_admin($repo);
+
+    my @w_groups = $c->query->param('w_groups');
+    my @r_groups = $c->query->param('r_groups');
+    my %w_groups = map { $_ => 1 } @w_groups;
+    my %r_groups = map { $_ => 1 } @r_groups;
+    delete $w_groups{none};
+    delete $r_groups{none};
+    foreach (keys %w_groups) {
+      delete $r_groups{$_};
+    }
+    my $rs = $c->param('db')->resultset('Groups');
+    @w_groups = map { $rs->find($_) } keys %w_groups;
+    @r_groups = map { $rs->find($_) } keys %r_groups;
+
+    $repo->set_w_groups(\@w_groups);
+    $repo->set_r_groups(\@r_groups);
+  }else{
+    #FIXME
+    die "405 Method not allowed\n";
+  }
+
+  return $c->redirect($c->url('repo/' . $repo->name, '', 'permissions'));
+}
+
 sub do {
   my $c = shift;
 
-  my $db = $c->param('db');
-  my $path = $c->param('repo_path');
-  my $repo;
-  if( $path !~ m;\.git$; ){
-    return $c->list();
-  }elsif( $path =~ /^\d+$/ ){
-    $repo = $db->resultset('Repos')->find($path);
-  }else{
-    $repo = $db->resultset('Repos')->search({name => $path})->first;
+  if( my $d = $c->rest_dispatch({ delete => 'delete', put => 'create' })){
+    return $c->$d();
   }
+  if( my $d = $c->repo_path_dispatch ){
+    return $c->$d();
+  }
+  my $repo = $c->find_repo;
   die "404 Repository not found\n" unless $repo;
 
   my $changed = -1;
   if( $ENV{REQUEST_METHOD} eq 'POST' ){
     # only the owner can edit the repository
     die "403 Not authorized\n"
-      unless $repo->owner->uid eq $c->param('user');
+      unless $c->has_change($repo);
 
     $repo->descr($c->query->param('description'));
     foreach my $opt (qw(gitweb daemon)){
       $repo->set_column(
         $opt,
-        (any { $_ eq $opt } $c->query->param('options')) ? 1 : 0
+        $c->get_checkbox_opt($opt)
       );
     }
+    if( $c->is_admin ){
+      $repo->owner($c->query->param('owner'));
+      $repo->private($c->get_checkbox_opt('private'));
+    }
     if( $repo->is_changed ){
-      $repo->update;
+      $repo->update->discard_changes;
       $changed = 1;
     }else{
       $changed = 0;
     }
   }
+  my $form = $c->query->param('_form') || '';
+  if( $form =~ /^\w+$/){
+    return $c->tt_process("GitWebAdmin/Repository/$form.tmpl",
+                          { repo => $repo, changed => $changed });
+  }
 
   return $c->tt_process({ repo => $repo, changed => $changed });
+}
+
+sub create_form {
+  return shift->tt_process();
+}
+
+sub create {
+  my $c = shift;
+
+  my $repo = $c->find_repo;
+  die "409 Repository already exists\n" if $repo;
+
+  my %opts = (
+    name => $c->query->param('path') || '',
+    owner => $c->query->param('owner') || '',
+    descr => $c->query->param('description') || '',
+    );
+  foreach my $opt (qw(private daemon gitweb)){
+    $opts{$opt} = $c->get_checkbox_opt($opt);
+  }
+  $opts{forkof} = $c->query->param('forkof')
+    if $c->query->param('forkof');
+
+  # Validity and Authorization checks
+  unless( $opts{name} =~ m/\.git$/ ){
+    die "400 Invalid repository path\n";
+  }
+  unless( $c->is_admin ){
+    my $username = $c->param('user');
+    unless( $opts{name} =~ m;^\Quser/$username/\E; ){
+      die "403 Not authorized\n";
+    }
+    $opts{private} = 1;
+    $opts{owner} = $username;
+  }
+
+  my $rs = $c->param('db')->resultset('Repos');
+  my $new_repo = $rs->create({ %opts });
+
+  return $c->redirect($c->url('repo/' . $new_repo->name));
+}
+
+sub delete {
+  my $c = shift;
+
+  my $repo = $c->find_repo;
+  die "404 Repository not found\n" unless $repo;
+  die "403 Not authorized\n" unless $c->has_admin($repo);
+
+  $repo->delete;
+
+  return $c->tt_process({ repo => $repo });
+}
+
+sub has_admin {
+  my ($c, $repo) = @_;
+
+  my $user = $c->param('user_obj') or return 0;
+  return 1 if $user->admin;
+  return 1 if $repo->private and
+    $repo->owner->uid eq $user->uid;
+
+  return 0;
+}
+
+sub has_change {
+  my ($c, $repo) = @_;
+
+  my $user = $c->param('user_obj') or return 0;
+  return 1 if $user->admin;
+  return 1 if $repo->owner->uid eq $user->uid;
+
+  return 0;
 }
 
 1;

@@ -1,0 +1,33 @@
+[% BLOCK user_dropdown %]
+<select name="[% select_name %]">
+[% db = c.param('db');
+   FOREACH u IN db.resultset('Users').search.sort('uid'); %]
+  <option value="[% u.uid %]"[% ' selected="selected"' IF selected == u.uid %]>[% u.name %]</option>
+[% END %]
+</select>
+[% END %]
+
+[% BLOCK repo_dropdown %]
+<select name="[% select_name %]">
+<option value="">None</option>
+[% db = c.param('db');
+   FOREACH r IN db.resultset('Repos').search({ private => 0 }).sort('name'); %]
+  <option value="[% r.id %]"[% ' selected="selected"' IF selected == r.name %]>[% r.name %]</option>
+[% END %]
+</select>
+[% END %]
+
+[% BLOCK group_chooser %]
+<select name="[% select_name %]" size="5" multiple="multiple">
+<option value="none"[% ' selected="selected"' UNLESS selected.size %]>None</option>
+[% db = c.param('db');
+   sgroups = {};
+   FOREACH gs IN selected;
+   SET sgroups.${gs.gid} = 1;
+   END;
+   FOREACH g IN db.resultset('Groups').search.sort('name'); %]
+  <option value="[% g.gid %]"[% ' selected="selected"' IF sgroups.${g.gid} %]>[% g.name %]</option>
+  [% END %]
+</select>
+[% END %]
+

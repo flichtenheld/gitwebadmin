@@ -1,0 +1,63 @@
+[% PROCESS methods.tmpl %]
+[% SET nav = [ { url => 'repo/', name => 'Repositories' } ];
+   FOREACH p IN repo.name().split('/');
+     SET path = path _ p _ '/';
+     nav.push({ url => 'repo/' _ path, name => p });
+   END;
+   nav.push({ name => 'Fork' });
+   INCLUDE header.tmpl page_title="Fork Repository"
+   navigation = nav
+%]
+
+[% BLOCK yes_no %]
+  [% IF switch %]
+  <span class="yes">yes</span>
+    <input type="checkbox" name="options" value="[% switch_name %]"
+     [% switch ? 'checked="checked"' : '' %]>
+  [% ELSE %]
+  <span class="no">no</span>
+    <input type="checkbox" name="options" value="[% switch_name %]"
+     [% switch ? 'checked="checked"' : '' %]>
+  [% END %]
+[% END %]
+
+<h1>Fork Repository [% repo.name() | html %]</h1>
+<form action="[% c.url('repo/create') %]" method="post">
+<input type="hidden" name="_method" value="put">
+<input type="hidden" name="forkof" value="[% repo.id %]">
+<table id="repometa">
+  <tbody>
+    <tr>
+      <th><label for="path">Name:</label></th>
+      <td><input type="text" name="path" size="80"
+                 value="[% 'user/' _ c.param('user') _ '/' _ repo.name | html %]">
+      </td>
+    </tr>
+    <tr>
+      <th><label for="description">Description:</label></th>
+      <td><input type="text" name="description" size="80" value="[% repo.descr | html %] (Fork)"></td>
+    </tr>
+    [% IF c.is_admin %]
+    <tr>
+      <th><label for="owner">Owner:</label></th>
+      <td>[% INCLUDE user_dropdown select_name='owner' selected=c.param('user') %]</td>
+    </tr>
+    <tr>
+      <th>Private:</th>
+      <td>[% INCLUDE yes_no switch=1 switch_name='private' %]</td>
+    </tr>
+    [% END %]
+    <tr>
+      <th>Gitweb Access:</th>
+      <td>[% INCLUDE yes_no switch=repo.gitweb switch_name='gitweb' %]</td>
+    </tr>
+    <tr>
+      <th>git-daemon Access:</th>
+      <td>[% INCLUDE yes_no switch=repo.daemon switch_name='daemon' %]</td>
+    </tr>
+  </tbody>
+</table>
+<p><input type="submit" value="Create Fork"></p>
+</form>
+
+[% INCLUDE footer.tmpl %]

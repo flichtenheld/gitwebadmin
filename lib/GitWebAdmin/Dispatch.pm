@@ -23,8 +23,12 @@ sub dispatch_args {
     table   => [
       ''                     => { app => 'Home', rm => 'start' },
       'repo[get]'            => { app => 'Repository', rm => 'list' },
+      'repo/create[get]'     => { app => 'Repository', rm => 'create_form' },
+      'repo/create[post]'    => { app => 'Repository', rm => 'create' },
+      'repo/create[put]'     => { app => 'Repository', rm => 'create' },
       'repo/*[get]'          => { app => 'Repository', rm => 'do', '*' => 'repo_path' },
       'repo/*[post]'         => { app => 'Repository', rm => 'do', '*' => 'repo_path' },
+      'repo/*[put]'          => { app => 'Repository', rm => 'create', '*' => 'repo_path' },
       'repo/*[delete]'       => { app => 'Repository', rm => 'delete', '*' => 'repo_path' },
       'user/:id/key[post]'   => { app => 'User', rm => 'change_key' },
       'user/:id/key[delete]' => { app => 'User', rm => 'delete_key' },
