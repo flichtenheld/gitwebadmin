@@ -10,6 +10,16 @@ sub setup {
   $c->run_modes([qw(change_key delete_key)]);
 }
 
+sub find_user {
+  my $c = shift;
+
+  my $db = $c->param('db');
+  my $uid = $c->param('id');
+  my $user = $db->resultset('Users')->find($uid);
+
+  return $user;
+}
+
 sub list {
   my $c = shift;
 
@@ -24,9 +34,7 @@ sub list {
 sub do {
   my $c = shift;
 
-  my $db = $c->param('db');
-  my $uid = $c->param('id');
-  my $user = $db->resultset('Users')->find($uid);
+  my $user = $c->find_user;
   die "404 User not found\n" unless $user;
 
   return $c->tt_process({ user => $user });
@@ -35,12 +43,10 @@ sub do {
 sub change_key {
   my $c = shift;
 
-  my $db = $c->param('db');
-  my $uid = $c->param('id');
-  my $user = $db->resultset('Users')->find($uid);
+  my $user = $c->find_user;
   die "404 User not found\n" unless $user;
   # users can only change their own keys
-  die "403 Not authorized\n" unless $uid eq $c->param('user');
+  die "403 Not authorized\n" unless $user->uid eq $c->param('user');
 
   my $key = $c->query->param('pubkey');
   $user->key($key);
