@@ -28,6 +28,22 @@
   [% END %]
 [% END %]
 
+<div id="actions">
+<h2>Actions</h2>
+<form action="[% c.url('repo/' _ repo.name) %]" method="get">
+<p><input type="submit" value="Fork Repository">
+<input type="hidden" name="_form" value="fork"></p>
+</form>
+[% IF c.has_admin(repo) %]
+<form action="[% c.url('repo/' _ repo.name) %]" method="post">
+<p><input type="submit" value="Delete Repository">
+<input type="hidden" name="_method" value="delete"></p>
+</form>
+[% END %]
+<h2>Links</h2>
+<a href="[% c.cfg('links').gitweb.replace('%name', repo.name) %]">gitweb</a>
+</div> <!-- end actions -->
+
 <h1>Repository [% repo.name() | html %]</h1>
 [% IF repo.private %]<p class="subheadline">(Private Repository)</p>[% END %]
 [% IF changed == 1 %]
@@ -94,16 +110,6 @@
 </table>
 [% IF c.has_change(repo) %]
 <p><input type="submit" value="Apply changes"></p>
-</form>
-[% END %]
-<form action="[% c.url('repo/' _ repo.name) %]" method="get">
-<p><input type="submit" value="Fork Repository">
-<input type="hidden" name="_form" value="fork"></p>
-</form>
-[% IF c.has_admin(repo) %]
-<form action="[% c.url('repo/' _ repo.name) %]" method="post">
-<p><input type="submit" value="Delete Repository">
-<input type="hidden" name="_method" value="delete"></p>
 </form>
 [% END %]
 

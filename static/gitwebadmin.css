@@ -56,3 +56,11 @@ img {
 #repolist tr {
     border: 1px black solid;
 }
+
+#actions {
+    margin-left: 1em;
+    float: right;
+    border: 1px black solid;
+    padding: 1em .5em;
+    width: auto;
+}
