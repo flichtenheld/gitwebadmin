@@ -93,6 +93,34 @@ sub get_checkbox_opt {
   return 0;
 }
 
+sub get_obj_list {
+  my ($c, $table, $param) = @_;
+
+  my %objs = map { $_ => 1 } $c->query->param($param);
+  delete $objs{none};
+  my $rs = $c->param('db')->resultset($table);
+  my @objs = map { $rs->find($_) } keys %objs;
+
+  return \@objs;
+}
+
+sub get_writable_readable {
+  my ($c, $table, $w_param, $r_param) = @_;
+
+  my %w = map { $_ => 1 } $c->query->param($w_param);
+  my %r = map { $_ => 1 } $c->query->param($r_param);
+  delete $w{none};
+  delete $r{none};
+  foreach my $key (keys %w) {
+    delete $r{$key};
+  }
+  my $rs = $c->param('db')->resultset($table);
+  my @w = map { $rs->find($_) } keys %w;
+  my @r = map { $rs->find($_) } keys %r;
+
+  return \@w, \@r;
+}
+
 sub is_admin {
   my $c = shift;
 

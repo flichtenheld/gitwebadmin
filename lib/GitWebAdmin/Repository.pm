@@ -74,21 +74,10 @@ sub permissions {
     die "403 Not authorized\n"
       unless $c->has_admin($repo);
 
-    my @w_groups = $c->query->param('w_groups');
-    my @r_groups = $c->query->param('r_groups');
-    my %w_groups = map { $_ => 1 } @w_groups;
-    my %r_groups = map { $_ => 1 } @r_groups;
-    delete $w_groups{none};
-    delete $r_groups{none};
-    foreach (keys %w_groups) {
-      delete $r_groups{$_};
-    }
-    my $rs = $c->param('db')->resultset('Groups');
-    @w_groups = map { $rs->find($_) } keys %w_groups;
-    @r_groups = map { $rs->find($_) } keys %r_groups;
-
-    $repo->set_w_groups(\@w_groups);
-    $repo->set_r_groups(\@r_groups);
+    my ($w_groups, $r_groups) =
+      $c->get_writable_readable('Groups', 'w_groups', 'r_groups');
+    $repo->set_w_groups($w_groups);
+    $repo->set_r_groups($r_groups);
   }else{
     #FIXME
     die "405 Method not allowed\n";

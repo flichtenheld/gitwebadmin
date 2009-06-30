@@ -63,14 +63,9 @@ sub set_groups {
   # only admins can set group memberships
   die "403 Not authorized\n" unless $c->is_admin;
 
-  my @groups = $c->query->param('groups');
-  my %groups = map { $_ => 1 } @groups;
-  delete $groups{none};
+  my $groups = $c->get_obj_list('Groups', 'groups');
 
-  my $rs = $c->param('db')->resultset('Groups');
-  @groups = map { $rs->find($_) } keys %groups;
-
-  $user->set_groups(\@groups);
+  $user->set_groups($groups);
 
   return $c->redirect($c->url('user/'.$user->uid));
 }
@@ -83,14 +78,8 @@ sub set_subscriptions {
   die "403 Not authorized\n"
     unless $c->is_admin or $user->uid eq $c->param('user');
 
-  my @subscr = $c->query->param('subscriptions');
-  my %subscr = map { $_ => 1 } @subscr;
-  delete $subscr{none};
-
-  my $rs = $c->param('db')->resultset('Repos');
-  my @repos = map { $rs->find($_) } keys %subscr;
-
-  $user->set_subscribed_repos(\@repos);
+  my $subscriptions = $c->get_obj_list('Repos', 'subscriptions');
+  $user->set_subscribed_repos($subscriptions);
 
   return $c->redirect($c->url('user/'.$user->uid));
 }
