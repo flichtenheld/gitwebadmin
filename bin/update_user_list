@@ -1,0 +1,61 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+use Net::LDAP;
+use Config::Auto;
+use Data::Dumper;
+
+use FindBin;
+use lib "$FindBin::Bin/../lib";
+
+use GitWebAdmin::Schema;
+
+my $config = Config::Auto::parse("$FindBin::Bin/../gitwebadmin.ini");
+$config = { %$config, %{Config::Auto::parse("$FindBin::Bin/../ldap.ini")} };
+
+my $db_cfg = $config->{database};
+my $schema = GitWebAdmin::Schema->connect(
+  "dbi:$db_cfg->{driver}:dbname=$db_cfg->{name}"
+);
+
+my $ldap_cfg = $config->{ldap};
+my $ldap = Net::LDAP->new( $ldap_cfg->{server}, scheme => $ldap_cfg->{scheme} )
+  or die "$@";
+
+my $mesg = $ldap->bind( $ldap_cfg->{bind_dn},
+                        password => $ldap_cfg->{password},
+  );
+
+print "Get group git_access\n";
+$mesg = $ldap->search(
+  base   => "OU=AstaroUserGroups,DC=intranet,DC=astaro,DC=de",
+  filter => "(CN=git_access)",
+  attrs  => [qw(member)],
+  );
+
+
+$mesg->code && die $mesg->error;
+die "Group not unique\n" if $mesg->entries > 1;
+
+my @members = map { s/^(CN=.*?),.*/$1/i; $_ } ($mesg->entries)[0]->get_value('member');
+print "\tmembers = @members\n";
+print "Get member data\n";
+$mesg = $ldap->search(
+  base   => "DC=intranet,DC=astaro,DC=de",
+  filter => "(&(ObjectClass=user)(|".join(' ', map { "($_)" } @members)."))",
+  attrs  => [qw(cn sAMAccountName mail)],
+  );
+
+$mesg->code && die $mesg->error;
+
+my $rs = $schema->resultset('Users');
+foreach my $entry ($mesg->entries){
+  print "\tmember ".$entry->get_value('cn')." (uid=".$entry->get_value('sAMAccountName').")\n";
+  $rs->update_or_create({ uid => $entry->get_value('sAMAccountName'),
+                          name => $entry->get_value('cn'),
+                          mail => $entry->get_value('mail') });
+}
+
+$ldap->unbind;
