@@ -1,6 +1,7 @@
+[% PROCESS methods.tmpl %]
 [% INCLUDE header.tmpl page_title="Group Page"
    navigation=[ { url => 'group/', name => 'Groups' },
-                { name => group.gid() },
+                { name => group.gid },
               ]
 %]
 
@@ -14,7 +15,37 @@
 </div> <!-- end actions -->
 [% END %]
 
-<h1>Group [% group.name() | html %]</h1>
+<h1>Group [% group.name | html %]</h1>
+
+[% IF c.is_admin %]
+<form action="[% c.url('group/' _ group.gid) %]" method="post">
+<table id="groupmeta">
+  <tbody>
+    <tr>
+      <th><label for="name">Name:</label></th>
+      <td><input type="text" name="name" size="80" value="[% group.name | html %]"></td>
+    </tr>
+  </tbody>
+</table>
+
+<table>
+  <tbody>
+    <tr>
+      <th><label for="members">Members:</label></th>
+      <th><label for="writable">Writable Repositories:</label></th>
+      <th><label for="readable">Readable Repositories:</label></th>
+    </tr>
+    <tr>
+      <td>[% INCLUDE user_chooser select_name="members" selected=DBIxRel(group.users) %]</td>
+      <td>[% INCLUDE repo_chooser select_name="writable" selected=DBIxRel(group.w_repos) %]</td>
+      <td>[% INCLUDE repo_chooser select_name="readable" selected=DBIxRel(group.r_repos) %]</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><input type="submit" value="Apply Changes"></p>
+
+[% ELSE %]
 
 [% FOREACH u IN DBIxRel(group.users).sort('name') %]
 [% '<p>The following users are members of this group:</p><ul>' IF loop.first() %]
@@ -32,6 +63,8 @@
 [% '<p>The group has read access to the following repositories:</p><ul>' IF loop.first() %]
 <li><a href="[% c.url('repo/' _ r.name()) %]">[% r.name() | html %]</a></li>
 [% '</ul>' IF loop.last() %]
+[% END %]
+
 [% END %]
 
 

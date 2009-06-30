@@ -81,6 +81,23 @@ sub do {
   my $group = $c->find_group;
   die "404 Group not found\n" unless $group;
 
+  if( $ENV{REQUEST_METHOD} eq 'POST' ){
+    die "403 Not authorized\n"
+      unless $c->is_admin;
+
+    $group->name($c->query->param('name'));
+    $group->descr($c->query->param('description'));
+    my $members = $c->get_obj_list('Users', 'members');
+    my ($w_repos, $r_repos) =
+      $c->get_writable_readable('Repos', 'writable', 'readable');
+
+    $group->set_users($members);
+    $group->set_w_repos($w_repos);
+    $group->set_r_repos($r_repos);
+
+    $group->update->discard_changes;
+  }
+
   return $c->tt_process({ group => $group });
 }
 
