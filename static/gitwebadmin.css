@@ -15,6 +15,7 @@ img {
 }
 
 #footer {
+    clear: both;
     margin-top: 1em;
     border-top: black 1px double;
     font-size: 90%;
@@ -60,6 +61,7 @@ img {
 
 #actions {
     margin-left: 1em;
+    margin-bottom: 1em;
     float: right;
     border: 1px black solid;
     padding: 1em .5em;
