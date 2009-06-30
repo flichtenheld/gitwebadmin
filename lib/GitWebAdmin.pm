@@ -6,6 +6,7 @@ use warnings;
 
 use URI::Escape;
 use List::MoreUtils qw(any);
+use FindBin;
 
 use CGI::Application::Plugin::TT;
 use CGI::Application::Plugin::ConfigAuto qw(cfg);
@@ -15,7 +16,7 @@ use GitWebAdmin::Schema;
 
 GitWebAdmin->tt_config(
   TEMPLATE_OPTIONS => {
-    INCLUDE_PATH => '/home/flichtenheld/git/git-web-admin/templates',
+    INCLUDE_PATH => "$FindBin::Bin/../templates",
     POST_CHOMP   => 1,
     VARIABLES => {
       DBIxRel => sub {my $res=shift or return []; return $res if ref $res eq 'ARRAY'; return [ $res ] },

@@ -4,6 +4,8 @@ use base 'CGI::Application::Dispatch';
 use strict;
 use warnings;
 
+use FindBin;
+
 #
 # Paths:
 # user/uid
@@ -17,7 +19,7 @@ sub dispatch_args {
     auto_rest_lc => 1,
     args_to_new => {
       PARAMS => {
-        cfg_file => [ '/home/flichtenheld/git/git-web-admin/gitwebadmin.ini' ],
+        cfg_file => [ "$FindBin::Bin/../gitwebadmin.ini" ],
       }
     },
     table   => [

@@ -3,7 +3,9 @@
 use strict;
 use warnings;
 
-use lib '/home/flichtenheld/git/git-web-admin/lib';
+use FindBin;
+
+use lib "$FindBin::Bin/../lib";
 
 use GitWebAdmin::Dispatch;
 GitWebAdmin::Dispatch->dispatch();
