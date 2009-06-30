@@ -31,3 +31,16 @@
 </select>
 [% END %]
 
+[% BLOCK repo_chooser %]
+<select name="[% select_name %]" size="10" multiple="multiple">
+<option value="none"[% ' selected="selected"' UNLESS selected.size %]>None</option>
+[% db = c.param('db');
+   srepos = {};
+   FOREACH rs IN selected;
+   SET srepos.${rs.id} = 1;
+   END;
+   FOREACH r IN db.resultset('Repos').search.sort('name'); %]
+  <option value="[% r.id %]"[% ' selected="selected"' IF srepos.${r.id} %]>[% r.name %]</option>
+  [% END %]
+</select>
+[% END %]

@@ -76,17 +76,23 @@ __PACKAGE__->has_many(
 );
 __PACKAGE__->belongs_to("owner", "GitWebAdmin::Schema::Users", { uid => "owner" });
 __PACKAGE__->has_many(
+  "subscriptions",
+  "GitWebAdmin::Schema::Subscriptions",
+  { "foreign.rid" => "self.id" },
+);
+__PACKAGE__->has_many(
   "writables",
   "GitWebAdmin::Schema::Writable",
   { "foreign.rid" => "self.id" },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-06-30 10:08:02
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:hJe+S5qpLjTVKV/NOiSvmg
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-06-30 10:38:44
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:UKqHtRIatnw8BH/SfPxEoA
 
 __PACKAGE__->many_to_many('w_groups' => 'writables', 'gid');
 __PACKAGE__->many_to_many('r_groups' => 'readables', 'gid');
+__PACKAGE__->many_to_many('subscribers' => 'subscriptions', 'uid');
 
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;

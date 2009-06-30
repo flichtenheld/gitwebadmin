@@ -7,7 +7,7 @@ use warnings;
 sub setup {
   my $c = shift;
 
-  $c->run_modes([qw(change_key delete_key set_groups)]);
+  $c->run_modes([qw(change_key delete_key set_groups set_subscriptions)]);
 }
 
 sub find_user {
@@ -71,6 +71,26 @@ sub set_groups {
   @groups = map { $rs->find($_) } keys %groups;
 
   $user->set_groups(\@groups);
+
+  return $c->redirect($c->url('user/'.$user->uid));
+}
+
+sub set_subscriptions {
+  my $c = shift;
+
+  my $user = $c->find_user;
+  die "404 User not found\n" unless $user;
+  die "403 Not authorized\n"
+    unless $c->is_admin or $user->uid eq $c->param('user');
+
+  my @subscr = $c->query->param('subscriptions');
+  my %subscr = map { $_ => 1 } @subscr;
+  delete $subscr{none};
+
+  my $rs = $c->param('db')->resultset('Repos');
+  my @repos = map { $rs->find($_) } keys %subscr;
+
+  $user->set_subscribed_repos(\@repos);
 
   return $c->redirect($c->url('user/'.$user->uid));
 }

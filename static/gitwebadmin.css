@@ -27,6 +27,7 @@ img {
 
 #repometa th, #usermeta th {
     text-align: left;
+    vertical-align: top;
 }
 
 .yes {

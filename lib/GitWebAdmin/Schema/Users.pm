@@ -56,12 +56,18 @@ __PACKAGE__->has_many(
   "GitWebAdmin::Schema::Repos",
   { "foreign.owner" => "self.uid" },
 );
+__PACKAGE__->has_many(
+  "subscriptions",
+  "GitWebAdmin::Schema::Subscriptions",
+  { "foreign.uid" => "self.uid" },
+);
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-06-30 10:08:02
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:hi8T6xkhWNgd+s2XTHSJpQ
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-06-30 10:38:44
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:PwwxCeuDWvHLNgJWhtCjAA
 
 __PACKAGE__->many_to_many('groups' => 'members', 'gid');
+__PACKAGE__->many_to_many('subscribed_repos' => 'subscriptions', 'rid');
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

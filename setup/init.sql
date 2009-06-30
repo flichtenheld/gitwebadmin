@@ -4,6 +4,7 @@ DROP TABLE repos  CASCADE;
 DROP TABLE writable CASCADE;
 DROP TABLE readable CASCADE;
 DROP TABLE members  CASCADE;
+DROP TABLE subscriptions CASCADE;
 DROP ROLE gwa_webaccess;
 
 BEGIN;
@@ -81,5 +82,13 @@ CREATE TABLE readable (
        UNIQUE (gid, rid)
 );
 GRANT ALL ON readable TO gwa_webaccess;
+
+CREATE TABLE subscriptions (
+       rid   INT NOT NULL REFERENCES repos(id) ON DELETE CASCADE,
+       uid   TEXT NOT NULL REFERENCES users(uid) ON DELETE CASCADE,
+
+       UNIQUE (rid, uid)
+);
+GRANT ALL ON subscriptions TO gwa_webaccess;
 
 COMMIT;

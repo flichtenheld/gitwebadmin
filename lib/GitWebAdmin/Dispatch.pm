@@ -33,6 +33,7 @@ sub dispatch_args {
       'user/:id/key[post]'   => { app => 'User', rm => 'change_key' },
       'user/:id/key[delete]' => { app => 'User', rm => 'delete_key' },
       'user/:id/groups[post]' => { app => 'User', rm => 'set_groups' },
+      'user/:id/subscriptions[post]' => { app => 'User', rm => 'set_subscriptions' },
       ':app/:id'  => { rm => 'do' },
       ':app/'     => { rm => 'list' },
       ],

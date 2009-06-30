@@ -3,7 +3,7 @@ TODO
 
 General
  * Improve layout of Homepage                               - DONE
- * Move actions to sidebar
+ * Move actions to sidebar                                  - DONE
 
 Repo
  * show private/public status                               - DONE
@@ -18,6 +18,8 @@ User
  * can edit permissions of private repositories             - DONE
  * can delete private repositories                          - DONE
  * can rename private repositories
+ * can subscribe to repositories                            - DONE
+ * can manage subscriptions
 
 Admin
  * can fork existing repositories into public repositories  - DONE
@@ -26,6 +28,7 @@ Admin
  * can edit permissions of all repositories                 - DONE
  * can delete repositories                                  - DONE
  * can rename all repositories
+ * can manage subscriptions for all users                   - DONE
 
 Comments:
 

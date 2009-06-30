@@ -48,6 +48,20 @@
 [% '</ul>' IF loop.last() %]
 [% END %]
 
+[% IF c.is_admin || (c.param('user') == user.uid) %]
+  <form action="[% c.url('user/' _ user.uid _ '/subscriptions') %]" method="post">
+    <p><label for="subscribtions">Subscribed to the following repositories:</label></p>
+    <p>[% PROCESS repo_chooser select_name='subscriptions' selected=DBIxRel(user.subscribed_repos) %]</p>
+    <p><input type="submit" value="Change Subscriptions"></p>
+  </form>
+[% ELSE %]
+  [% FOREACH r IN DBIxRel(user.subscribed_repos) %]
+  [% '<p>Subscribed to the following repositories:</p><ul>' IF loop.first %]
+    <li><a href="[% c.url('repo/' _ r.name) %]">[% r.name | html %]</a></li>
+    [% '</ul>' IF loop.last %]
+  [% END %]
+[% END %]
+
 [% IF c.param('user') == user.uid %]
 <p><label for="pubkey">Public Key for SSH access:</label></p>
 <form method="post" action="[% c.url('user/' _ user.uid _ '/key') %]">

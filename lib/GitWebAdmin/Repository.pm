@@ -33,6 +33,9 @@ sub repo_path_dispatch {
   if( $path =~ s;/permissions$;; ){
     $c->param('repo_path', $path);
     return 'permissions';
+  }elsif( $path =~ s;/subscription$;; ){
+    $c->param('repo_path', $path);
+    return 'subscription';
   }elsif( $path !~ /\.git$/ ){
     return 'list';
   }
@@ -93,13 +96,44 @@ sub permissions {
   return $c->redirect($c->url('repo/' . $repo->name, '', 'permissions'));
 }
 
+sub subscription {
+  my $c = shift;
+
+  if( my $d = $c->rest_dispatch({ delete => 'unsubscribe', put => 'subscribe' })){
+    return $c->$d();
+  }
+  my $repo = $c->find_repo;
+  die "404 Repository not found\n" unless $repo;
+  die "405 Method not allowed\n";
+}
+
+sub subscribe {
+  my $c = shift;
+
+  my $repo = $c->find_repo;
+  die "404 Repository not found\n" unless $repo;
+
+  $repo->add_to_subscribers($c->param('user_obj'));
+  return $c->redirect($c->url('repo/' . $repo->name));
+}
+
+sub unsubscribe {
+  my $c = shift;
+
+  my $repo = $c->find_repo;
+  die "404 Repository not found\n" unless $repo;
+
+  $repo->remove_from_subscribers($c->param('user_obj'));
+  return $c->redirect($c->url('repo/' . $repo->name));
+}
+
 sub do {
   my $c = shift;
 
-  if( my $d = $c->rest_dispatch({ delete => 'delete', put => 'create' })){
+  if( my $d = $c->repo_path_dispatch ){
     return $c->$d();
   }
-  if( my $d = $c->repo_path_dispatch ){
+  if( my $d = $c->rest_dispatch({ delete => 'delete', put => 'create' })){
     return $c->$d();
   }
   my $repo = $c->find_repo;
@@ -209,6 +243,14 @@ sub has_change {
   return 1 if $repo->owner->uid eq $user->uid;
 
   return 0;
+}
+
+sub is_subscribed {
+  my ($c, $repo) = @_;
+
+  my $user = $c->param('user_obj') or return 0;
+  my @res = $repo->subscriptions({ uid => $user->uid });
+  return scalar @res;
 }
 
 1;

@@ -40,6 +40,15 @@
 <input type="hidden" name="_method" value="delete"></p>
 </form>
 [% END %]
+<form action="[% c.url('repo/' _ repo.name _ '/subscription') %]" method="post">
+  [% IF c.is_subscribed(repo) %]
+    <p><input type="submit" value="Unsubscribe">
+    <input type="hidden" name="_method" value="delete"></p>
+  [% ELSE %]
+    <p><input type="submit" value="Subscribe">
+    <input type="hidden" name="_method" value="put"></p>
+  [% END %]
+</form>
 <h2>Links</h2>
 <a href="[% c.cfg('links').gitweb.replace('%name', repo.name) %]">gitweb</a>
 </div> <!-- end actions -->
