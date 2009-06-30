@@ -7,7 +7,7 @@ use warnings;
 sub setup {
   my $c = shift;
 
-  $c->run_modes([qw(create create_form delete)]);
+  $c->run_modes([qw(create_form)]);
 }
 
 sub find_repo {

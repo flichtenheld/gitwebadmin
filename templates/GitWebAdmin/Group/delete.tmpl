@@ -1,0 +1,10 @@
+[% INCLUDE header.tmpl page_title="Group Page"
+   navigation=[ { url => 'group/', name => 'Groups' },
+                { name => group.gid() },
+              ]
+%]
+
+<p class="no">Group [% group.name | html %] successfully deleted</p>
+
+
+[% INCLUDE footer.tmpl %]

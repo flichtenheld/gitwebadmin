@@ -33,7 +33,7 @@ CREATE TABLE groups (
        name  TEXT,
        descr  TEXT
 );
-GRANT SELECT, UPDATE ON groups TO gwa_webaccess;
+GRANT ALL ON groups TO gwa_webaccess;
 
 INSERT INTO groups VALUES
        ('gitosis-admin', 'Gitosis Adminstrators');

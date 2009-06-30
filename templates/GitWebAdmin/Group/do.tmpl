@@ -4,6 +4,16 @@
               ]
 %]
 
+[% IF c.is_admin %]
+<div id="actions">
+<h2>Actions</h2>
+<form action="[% c.url('group/' _ group.gid) %]" method="post">
+<p><input type="submit" value="Delete Group">
+<input type="hidden" name="_method" value="delete"></p>
+</form>
+</div> <!-- end actions -->
+[% END %]
+
 <h1>Group [% group.name() | html %]</h1>
 
 [% FOREACH u IN DBIxRel(group.users).sort('name') %]

@@ -34,7 +34,7 @@ sub cgiapp_prerun {
   $c->param('user', $ENV{REMOTE_USER}) if $ENV{REMOTE_USER};
   $c->param('user_obj', $schema->resultset('Users')->find($c->param('user')));
 
-  $c->run_modes([qw(do list start)]);
+  $c->run_modes([qw(do list start delete create)]);
   #fake run mode for easier error reporting
   $c->run_modes([qw(prerun_error)]);
   unless( $c->param('user_obj') ){

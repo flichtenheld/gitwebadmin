@@ -29,6 +29,7 @@ Admin
  * can delete repositories                                  - DONE
  * can rename all repositories
  * can manage subscriptions for all users                   - DONE
+ * can delete groups                                        - DONE
 
 Comments:
 
