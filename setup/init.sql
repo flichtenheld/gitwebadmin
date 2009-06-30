@@ -8,11 +8,15 @@ DROP TABLE subscriptions CASCADE;
 DROP TABLE logs_push CASCADE;
 DROP ROLE gwa_webaccess;
 DROP ROLE gwa_gitaccess;
+DROP ROLE gwa_admin;
 
 BEGIN;
 
 CREATE ROLE gwa_webaccess LOGIN PASSWORD 'foobar';
 CREATE ROLE gwa_gitaccess;
+CREATE ROLE gwa_admin;
+GRANT gwa_webaccess TO gwa_admin;
+GRANT gwa_gitaccess TO gwa_admin;
 
 CREATE TABLE users (
        uid   TEXT PRIMARY KEY,
@@ -24,6 +28,7 @@ CREATE TABLE users (
 CREATE INDEX users_name_idx ON users (name);
 GRANT SELECT, UPDATE ON users TO gwa_webaccess;
 GRANT SELECT ON users TO gwa_gitaccess;
+GRANT ALL ON users TO gwa_admin;
 
 INSERT INTO users VALUES
        ('gitadm', 'Git Administrator');
@@ -107,6 +112,7 @@ CREATE TABLE logs_push (
        notified BOOLEAN NOT NULL DEFAULT FALSE
 );
 GRANT SELECT, INSERT ON logs_push TO gwa_gitaccess;
+GRANT ALL ON logs_push TO gwa_admin;
 CREATE INDEX logs_push_uid_idx ON logs_push (uid);
 CREATE INDEX logs_push_ref_idx ON logs_push (ref);
 
