@@ -9,6 +9,8 @@ use List::MoreUtils qw(any);
 
 use CGI::Application::Plugin::TT;
 use CGI::Application::Plugin::ConfigAuto qw(cfg);
+use CGI::Application::Plugin::Redirect;
+
 use GitWebAdmin::Schema;
 
 GitWebAdmin->tt_config(

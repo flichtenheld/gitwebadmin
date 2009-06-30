@@ -1,15 +1,24 @@
+[% PROCESS methods.tmpl %]
 [% INCLUDE header.tmpl page_title="User Page"
    navigation=[ { url => 'user/', name => 'Users' },
-                { name => user.uid() }
+                { name => user.uid }
               ]
 %]
 
-<h1>User [% user.name() | html %]</h1>
+<h1>User [% user.name | html %]</h1>
 
-[% FOREACH g IN DBIxRel(user.groups).sort('name') %]
-[% '<p>Member of the following groups:</p><ul>' IF loop.first() %]
-<li><a href="[% c.url('group/' _ g.gid()) %]">[% g.name() | html %]</a></li>
-[% '</ul>' IF loop.last() %]
+[% IF c.is_admin %]
+  <form action="[% c.url('user/' _ user.uid _ '/groups') %]" method="post">
+  <p><label for="groups">Member of the following groups:</label></p>
+  <p>[% PROCESS group_chooser select_name='groups' selected=DBIxRel(user.groups) %]</p>
+  <p><input type="submit" value="Change Groups"></p>
+  </form>
+[% ELSE %]
+  [% FOREACH g IN DBIxRel(user.groups).sort('name') %]
+    [% '<p>Member of the following groups:</p><ul>' IF loop.first() %]
+    <li><a href="[% c.url('group/' _ g.gid()) %]">[% g.name() | html %]</a></li>
+    [% '</ul>' IF loop.last() %]
+  [% END %]
 [% END %]
 
 [% FOREACH r IN DBIxRel(user.repo).sort('name') %]

@@ -38,7 +38,7 @@ CREATE TABLE members (
 
        UNIQUE(uid,gid)
 );
-GRANT SELECT ON members TO gwa_webaccess;
+GRANT ALL ON members TO gwa_webaccess;
 
 INSERT INTO members VALUES
        ('gitadm', 'gitosis-admin');

@@ -32,6 +32,7 @@ sub dispatch_args {
       'repo/*[delete]'       => { app => 'Repository', rm => 'delete', '*' => 'repo_path' },
       'user/:id/key[post]'   => { app => 'User', rm => 'change_key' },
       'user/:id/key[delete]' => { app => 'User', rm => 'delete_key' },
+      'user/:id/groups[post]' => { app => 'User', rm => 'set_groups' },
       ':app/:id'  => { rm => 'do' },
       ':app/'     => { rm => 'list' },
       ],

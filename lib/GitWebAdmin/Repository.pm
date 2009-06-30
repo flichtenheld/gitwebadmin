@@ -4,8 +4,6 @@ use base 'GitWebAdmin';
 use strict;
 use warnings;
 
-use CGI::Application::Plugin::Redirect;
-
 sub setup {
   my $c = shift;
 
