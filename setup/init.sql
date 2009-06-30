@@ -1,4 +1,3 @@
-
 DROP TABLE users  CASCADE;
 DROP TABLE groups CASCADE;
 DROP TABLE repos  CASCADE;
@@ -14,9 +13,11 @@ CREATE ROLE gwa_webaccess LOGIN PASSWORD 'foobar';
 CREATE TABLE users (
        uid   TEXT PRIMARY KEY,
        name  TEXT,
+       mail  TEXT,
        key   TEXT,
        admin BOOLEAN NOT NULL DEFAULT FALSE
 );
+CREATE INDEX users_name_idx ON users (name);
 GRANT SELECT, UPDATE ON users TO gwa_webaccess;
 
 INSERT INTO users VALUES

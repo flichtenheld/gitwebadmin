@@ -25,7 +25,7 @@ img {
     margin-bottom: .1ex;
 }
 
-#repometa th {
+#repometa th, #usermeta th {
     text-align: left;
 }
 

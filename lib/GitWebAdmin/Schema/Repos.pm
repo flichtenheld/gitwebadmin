@@ -82,8 +82,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-06-24 14:22:49
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:azX4CW9a3+yf4x1sbljtAg
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-06-30 10:08:02
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:hJe+S5qpLjTVKV/NOiSvmg
 
 __PACKAGE__->many_to_many('w_groups' => 'writables', 'gid');
 __PACKAGE__->many_to_many('r_groups' => 'readables', 'gid');

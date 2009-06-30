@@ -4,8 +4,29 @@
                 { name => user.uid }
               ]
 %]
+[% BLOCK yes_no %]
+  [% IF switch %]
+  <span class="yes">yes</span>
+  [% ELSE %]
+  <span class="no">no</span>
+  [% END %]
+[% END %]
+
 
 <h1>User [% user.name | html %]</h1>
+
+<table id="usermeta">
+  <tbody>
+    <tr>
+      <th>Mail:</th>
+      <td><a href="mailto:[% user.mail %]">[% user.mail %]</a></td>
+    </tr>
+    <tr>
+      <th>Admin:</th>
+      <td>[% INCLUDE yes_no switch=user.admin %]</td>
+    </tr>
+  </tbody>
+</table>
 
 [% IF c.is_admin %]
   <form action="[% c.url('user/' _ user.uid _ '/groups') %]" method="post">

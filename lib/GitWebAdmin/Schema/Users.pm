@@ -22,6 +22,13 @@ __PACKAGE__->add_columns(
     is_nullable => 1,
     size => undef,
   },
+  "mail",
+  {
+    data_type => "text",
+    default_value => undef,
+    is_nullable => 1,
+    size => undef,
+  },
   "key",
   {
     data_type => "text",
@@ -51,8 +58,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-06-24 14:22:49
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:OzteEMBJSZfVZQIQ2pMzTQ
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-06-30 10:08:02
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:hi8T6xkhWNgd+s2XTHSJpQ
 
 __PACKAGE__->many_to_many('groups' => 'members', 'gid');
 
