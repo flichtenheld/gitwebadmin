@@ -69,7 +69,7 @@ sub url {
   my ($c, $url, $params, $anchor) = @_;
 
   my $home = $c->cfg('setup')->{homepage} || '';
-  $anchor //= '';
+  $anchor = '' unless defined $anchor;
   if( $anchor ){
     $anchor = '#'.uri_escape($anchor);
   }
