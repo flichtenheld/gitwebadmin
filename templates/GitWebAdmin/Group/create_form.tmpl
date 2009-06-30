@@ -1,0 +1,48 @@
+[% PROCESS methods.tmpl %]
+[% INCLUDE header.tmpl page_title="Create Group"
+   navigation=[ { url => 'group/', name => 'Groups' },
+                { name => 'Create' },
+              ]
+%]
+
+<h1>Create Group</h1>
+
+<form action="[% c.url('group/create') %]" method="post">
+<input type="hidden" name="_method" value="put">
+<table id="groupmeta">
+  <tbody>
+    <tr>
+      <th><label for="gid">ID:</label></th>
+      <td><input type="text" name="gid" size="20" value="">
+      </td>
+    </tr>
+    <tr>
+      <th><label for="name">Name:</label></th>
+      <td><input type="text" name="name" size="80" value=""></td>
+    </tr>
+  </tbody>
+</table>
+
+<table>
+  <tbody>
+    <tr>
+      <th><label for="members">Members:</label></th>
+      <th><label for="writable">Writable Repositories:</label></th>
+      <th><label for="readable">Readable Repositories:</label></th>
+    </tr>
+    <tr>
+      <td>[% INCLUDE user_chooser select_name="members" selected=[] %]</td>
+      <td>[% INCLUDE repo_chooser select_name="writable" selected=[] %]</td>
+      <td>[% INCLUDE repo_chooser select_name="readable" selected=[] %]</td>
+    </tr>
+  </tbody>
+</table>
+
+
+<p><input type="submit" value="Create Group"></p>
+</form>
+
+
+
+
+[% INCLUDE footer.tmpl %]

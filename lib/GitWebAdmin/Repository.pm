@@ -4,12 +4,6 @@ use base 'GitWebAdmin';
 use strict;
 use warnings;
 
-sub setup {
-  my $c = shift;
-
-  $c->run_modes([qw(create_form)]);
-}
-
 sub find_repo {
   my $c = shift;
 

@@ -31,6 +31,20 @@
 </select>
 [% END %]
 
+[% BLOCK user_chooser %]
+<select name="[% select_name %]" size="10" multiple="multiple">
+<option value="none"[% ' selected="selected"' UNLESS selected.size %]>None</option>
+[% db = c.param('db');
+   susers = {};
+   FOREACH us IN selected;
+   SET susers.${us.uid} = 1;
+   END;
+   FOREACH u IN db.resultset('Users').search.sort('name'); %]
+  <option value="[% u.uid %]"[% ' selected="selected"' IF susers.${u.uid} %]>[% u.name %]</option>
+  [% END %]
+</select>
+[% END %]
+
 [% BLOCK repo_chooser %]
 <select name="[% select_name %]" size="10" multiple="multiple">
 <option value="none"[% ' selected="selected"' UNLESS selected.size %]>None</option>
