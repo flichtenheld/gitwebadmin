@@ -48,8 +48,9 @@ sub list {
   my $db = $c->param('db');
   my $path = $c->param('repo_path') || '';
   my @repos;
-  my $show_private = $c->query->param('show_private') //
-    ($path =~ m;^user/; ? 1 : 0);
+  my $show_private = $c->query->param('show_private');
+  $show_private = ($path =~ m;^user/; ? 1 : 0)
+    unless defined $show_private;
   my $rs = $db->resultset('Repos')->search(
     { private => $show_private },{ order_by => 'name' });
   if( $path ){
