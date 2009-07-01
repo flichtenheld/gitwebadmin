@@ -1,7 +1,7 @@
 [% BLOCK user_dropdown %]
 <select name="[% select_name %]">
 [% db = c.param('db');
-   FOREACH u IN db.resultset('Users').search.sort('uid'); %]
+   FOREACH u IN DBIxRel(db.resultset('Users').search).sort('uid'); %]
   <option value="[% u.uid %]"[% ' selected="selected"' IF selected == u.uid %]>[% u.name %]</option>
 [% END %]
 </select>
@@ -11,7 +11,7 @@
 <select name="[% select_name %]">
 <option value="">None</option>
 [% db = c.param('db');
-   FOREACH r IN db.resultset('Repos').search({ private => 0 }).sort('name'); %]
+   FOREACH r IN DBIxRel(db.resultset('Repos').search({ private => 0 })).sort('name'); %]
   <option value="[% r.id %]"[% ' selected="selected"' IF selected == r.name %]>[% r.name %]</option>
 [% END %]
 </select>
@@ -25,7 +25,7 @@
    FOREACH gs IN selected;
    SET sgroups.${gs.gid} = 1;
    END;
-   FOREACH g IN db.resultset('Groups').search.sort('name'); %]
+   FOREACH g IN DBIxRel(db.resultset('Groups').search).sort('name'); %]
   <option value="[% g.gid %]"[% ' selected="selected"' IF sgroups.${g.gid} %]>[% g.name %]</option>
   [% END %]
 </select>
@@ -39,7 +39,7 @@
    FOREACH us IN selected;
    SET susers.${us.uid} = 1;
    END;
-   FOREACH u IN db.resultset('Users').search.sort('name'); %]
+   FOREACH u IN DBIxRel(db.resultset('Users').search).sort('name'); %]
   <option value="[% u.uid %]"[% ' selected="selected"' IF susers.${u.uid} %]>[% u.name %]</option>
   [% END %]
 </select>
@@ -53,7 +53,7 @@
    FOREACH rs IN selected;
    SET srepos.${rs.id} = 1;
    END;
-   FOREACH r IN db.resultset('Repos').search.sort('name'); %]
+   FOREACH r IN DBIxRel(db.resultset('Repos').search).sort('name'); %]
   <option value="[% r.id %]"[% ' selected="selected"' IF srepos.${r.id} %]>[% r.name %]</option>
   [% END %]
 </select>
