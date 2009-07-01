@@ -73,6 +73,7 @@ sub url {
   if( $anchor ){
     $anchor = '#'.uri_escape($anchor);
   }
+  $url = uri_escape($url, "^A-Za-z0-9\-_.!~*'()/");
   my @params;
   if( $params and ref $params eq 'HASH' ){
     foreach my $key (keys %$params){
