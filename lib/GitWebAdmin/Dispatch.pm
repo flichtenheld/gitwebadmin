@@ -14,9 +14,8 @@ use FindBin;
 
 sub dispatch_args {
   return {
-    debug => 1,
+    debug => 0,
     prefix  => 'GitWebAdmin',
-    auto_rest_lc => 1,
     args_to_new => {
       PARAMS => {
         cfg_file => [ "$FindBin::Bin/../gitwebadmin.ini" ],
