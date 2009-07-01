@@ -67,3 +67,8 @@ img {
     padding: 1em .5em;
     width: auto;
 }
+
+#actions ul {
+    list-style-type: none;
+    padding: 0;
+}

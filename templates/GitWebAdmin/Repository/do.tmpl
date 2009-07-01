@@ -50,7 +50,10 @@
   [% END %]
 </form>
 <h2>Links</h2>
-<a href="[% c.cfg('links').gitweb.replace('%name', repo.name) %]">gitweb</a>
+<ul>
+<li><a href="[% c.cfg('links').gitweb.replace('%name', repo.name) %]">gitweb</a></li>
+</ul>
+[% INCLUDE admin_actions %]
 </div> <!-- end actions -->
 
 <h1>Repository [% repo.name() | html %]</h1>

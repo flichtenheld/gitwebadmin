@@ -12,6 +12,11 @@
   [% END %]
 [% END %]
 
+[% IF c.is_admin %]
+<div id="actions">
+[% INCLUDE admin_actions %]
+</div> <!-- end actions -->
+[% END %]
 
 <h1>User [% user.name | html %]</h1>
 
