@@ -49,8 +49,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-07-01 11:07:16
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:5MlOSyvUsAGUEl61tTN0IQ
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-07-01 18:26:16
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:O6VJjczBRPS7GEAHwnxgng
 
 __PACKAGE__->many_to_many('users' => 'members', 'uid');
 __PACKAGE__->many_to_many('w_repos' => 'writables', 'rid');

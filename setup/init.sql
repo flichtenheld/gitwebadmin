@@ -103,6 +103,7 @@ GRANT ALL ON subscriptions TO gwa_webaccess;
 GRANT SELECT ON subscriptions TO gwa_gitaccess;
 
 CREATE TABLE logs_push (
+       logid BIGSERIAL PRIMARY KEY,
        rid   INT NOT NULL REFERENCES repos(id) ON DELETE RESTRICT,
        uid   TEXT NOT NULL REFERENCES users(uid) ON DELETE RESTRICT,
        date  TIMESTAMP NOT NULL DEFAULT now(),

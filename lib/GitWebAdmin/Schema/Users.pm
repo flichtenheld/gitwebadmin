@@ -68,8 +68,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-07-01 11:07:16
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:heuTGlJ80MTkoG2tTIMxDg
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-07-01 18:26:16
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:wSFhJwx3s926XXwUM5+R7w
 
 __PACKAGE__->many_to_many('groups' => 'members', 'gid');
 __PACKAGE__->many_to_many('subscribed_repos' => 'subscriptions', 'rid');
