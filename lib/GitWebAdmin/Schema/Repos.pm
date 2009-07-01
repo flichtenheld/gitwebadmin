@@ -64,6 +64,11 @@ __PACKAGE__->set_primary_key("id");
 __PACKAGE__->add_unique_constraint("repos_pkey", ["id"]);
 __PACKAGE__->add_unique_constraint("repos_name_key", ["name"]);
 __PACKAGE__->has_many(
+  "logs_pushes",
+  "GitWebAdmin::Schema::LogsPush",
+  { "foreign.rid" => "self.id" },
+);
+__PACKAGE__->has_many(
   "readables",
   "GitWebAdmin::Schema::Readable",
   { "foreign.rid" => "self.id" },
@@ -87,8 +92,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-06-30 10:38:44
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:UKqHtRIatnw8BH/SfPxEoA
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-07-01 11:07:16
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:mHbDNqgcqImRjIYTupDMEA
 
 __PACKAGE__->many_to_many('w_groups' => 'writables', 'gid');
 __PACKAGE__->many_to_many('r_groups' => 'readables', 'gid');

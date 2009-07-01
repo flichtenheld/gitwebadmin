@@ -47,6 +47,11 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key("uid");
 __PACKAGE__->add_unique_constraint("users_pkey", ["uid"]);
 __PACKAGE__->has_many(
+  "logs_pushes",
+  "GitWebAdmin::Schema::LogsPush",
+  { "foreign.uid" => "self.uid" },
+);
+__PACKAGE__->has_many(
   "members",
   "GitWebAdmin::Schema::Members",
   { "foreign.uid" => "self.uid" },
@@ -63,8 +68,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-06-30 10:38:44
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:PwwxCeuDWvHLNgJWhtCjAA
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-07-01 11:07:16
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:heuTGlJ80MTkoG2tTIMxDg
 
 __PACKAGE__->many_to_many('groups' => 'members', 'gid');
 __PACKAGE__->many_to_many('subscribed_repos' => 'subscriptions', 'rid');
