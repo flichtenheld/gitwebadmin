@@ -1,0 +1,68 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+use autodie;
+use File::Spec::Functions;
+
+use lib "/srv/git/gitwebadmin/lib";
+
+use Dutil;
+use GitWebAdmin::Schema;
+
+my $GIT      = "/srv/git";
+my $LOG      = "$GIT/notifications.log";
+my $LOCK     = "$GIT/notifications.lock";
+
+Dutil::singularize( $LOCK );
+Dutil::daemonize;
+Dutil::redirect( $LOG );
+Dutil::install_handlers;
+
+Dutil::log("initialized");
+
+my $schema = GitWebAdmin::Schema->connect("dbi:Pg:dbname=gitwebadmin");
+
+my $started = time();
+while( 1 ){
+
+    my $time = time();
+    if( ($time - $started) > (7 * 86_400) ){
+	Dutil::log("weekly restart");
+	exit 0;
+    }
+
+    my $rs = $schema->resultset('LogsPush')->search({notified => 0});
+
+    while( my $row = $rs->next ){
+	my $repo = $row->rid;
+	my $path = catfile('/srv/git/repositories', $repo->name);
+
+	$ENV{GIT_DIR} = $path;
+
+	CORE::open my $fh, '-|', ('/srv/git/hooks/post-receive-email',
+				  $row->ref, $row->old_id, $row->new_id)
+	    or die "post-receive-email failed: $!\n";
+
+	my $mail = join('', <$fh>);
+	close $fh
+	    or die "post-receive-email failed: $!\n";
+	my @recipients = map { $_->mail } $repo->subscribers;
+
+	CORE::open my $out, '|-', (qw(/usr/sbin/sendmail -i -f),
+				   $row->uid->uid.'@git.intranet.astaro.de', @recipients)
+	    or die "sendmail failed: $!\n";
+	print $out $mail;
+	close $out
+	    or die "sendmail failed: $!\n";
+
+	Dutil::log($repo->name.": Sent mail about ".$row->ref." (".$row->old_id."->".$row->new_id.")");
+	Dutil::log("Recipients: @recipients");
+
+	$row->notified(1);
+	$row->update;
+    }
+
+    sleep 10;
+}
