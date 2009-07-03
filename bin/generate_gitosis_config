@@ -71,6 +71,7 @@ while( my $repo = $repos->next ){
     owner => $repo->owner->name,
     gitweb => $repo->gitweb ? 'yes' : 'no',
     daemon => $repo->daemon ? 'yes' : 'no',
+    forkof => $repo->forkof ? strip_git($repo->forkof->name) : '',
   };
 }
 
