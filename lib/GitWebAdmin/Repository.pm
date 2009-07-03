@@ -42,11 +42,20 @@ sub list {
   my $db = $c->param('db');
   my $path = $c->param('repo_path') || '';
   my @repos;
+
   my $show_private = $c->query->param('show_private');
-  $show_private = ($path =~ m;^user(?:/|$); ? 1 : 0)
+  $show_private = ($path =~ m;^user(?:/|$); ? 'yes' : 'no')
     unless defined $show_private;
+  $show_private = lc $show_private;
+  my @private = ();
+  if( $show_private eq 'only' ){
+    @private = ( private => 1 );
+  }elsif( $show_private eq 'no' ){
+    @private = ( private => 0 );
+  }
+
   my $rs = $db->resultset('Repos')->search(
-    { private => $show_private },{ order_by => 'name' });
+    { @private },{ order_by => 'name' });
   if( $path ){
     @repos = $rs->search({name => { 'like', "$path/%" }});
   }else{
