@@ -95,7 +95,7 @@ while( my $usr = $users->next ){
   my $key_file = catfile($gitdir, "keydir", $usr->uid.".pub");
   delete $old_keys{$key_file};
   print "\twrite $key_file\n" unless $quiet;
-  write_file($key_file, $usr->key)
+  write_file($key_file, $usr->key."\n")
     or die "write_file failed: $!\n";
   $git->command_noisy('add', catfile("keydir", $usr->uid.".pub"));
 }
