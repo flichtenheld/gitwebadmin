@@ -19,7 +19,7 @@
 
 [% FOREACH r IN repos.sort('name') %]
 [% '<ul>' IF loop.first() %]
-<li><a href="[% c.url('repo/' _ r.name()) %]">[% r.name().remove("^$path/") | html %]</a>[% IF r.private %] (private)[% END %]</li>
+<li><a href="[% c.url('repo/' _ r.name()) %]" title="[% r.descr | html %]">[% r.name().remove("^$path/") | html %]</a>[% IF r.private %] (private)[% END %]</li>
 [% '</ul>' IF loop.last() %]
 [% END %]
 
