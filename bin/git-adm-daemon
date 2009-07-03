@@ -1,0 +1,137 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+use autodie;
+use Config::Auto;
+use Template;
+use Data::Dumper;
+use File::Spec::Functions qw(:ALL);
+use File::Slurp;
+use Git;
+
+use lib "/srv/git/gitwebadmin/lib";
+
+use Dutil;
+use GitWebAdmin::Schema;
+
+my $GWA      = "/srv/git/gitwebadmin";
+my $LOG      = "$GWA/update.log";
+my $LOCK     = "$GWA/update.lock";
+
+Dutil::singularize( $LOCK );
+Dutil::daemonize;
+Dutil::redirect( $LOG );
+Dutil::install_handlers;
+
+Dutil::log("initialized");
+
+my $tmpl = Template->new(
+    {
+	INCLUDE_PATH => "$GWA/templates",
+    });
+
+my $config = Config::Auto::parse("$GWA/gitwebadmin.ini");
+
+my $db_cfg = $config->{database};
+my $schema = GitWebAdmin::Schema->connect(
+    "dbi:$db_cfg->{driver}:dbname=$db_cfg->{name}",
+    $db_cfg->{username}, $db_cfg->{password});
+
+my $groups = $schema->resultset("Groups");
+my $owners = $schema->resultset("Users");
+my $repos = $schema->resultset("Repos");
+
+my $gitdir = rel2abs($config->{gitosis}{repository}, $GWA);
+my $git = Git->repository($gitdir);
+
+my $started = time();
+while( 1 ){
+
+    my $time = time();
+    if( ($time - $started) > 86_400 ){
+	Dutil::log("daily restart");
+	exit 0;
+    }
+
+    my %out_cfg = ();
+    $out_cfg{gitosis} = $config->{gitosis};
+
+#    print "Reading Groups:\n" unless $quiet;
+    while( my $grp = $groups->next ){
+#	print "\t".$grp->gid."\n" unless $quiet;
+	$out_cfg{groups}{$grp->gid} = {
+	    members => [ map { $_->uid } $grp->users ],
+	    writable => [ map { strip_git($_->name) } $grp->w_repos ],
+	    readable => [ map { strip_git($_->name) } $grp->r_repos ],
+	};
+    }
+    $groups->reset;
+
+#    print "Creating Owner-Groups:\n" unless $quiet;
+    while( my $owner = $owners->next ){
+	next unless $owner->repo->count;
+#	print "\t".$owner->uid."\n" unless $quiet;
+	$out_cfg{groups}{$owner->uid."-owner"} = {
+	    members => [ $owner->uid ],
+	    writable => [ map { strip_git($_->name) } $owner->repo ],
+	};
+    }
+    $owners->reset;
+
+#    print "Reading Repositories:\n" unless $quiet;
+    while( my $repo = $repos->next ){
+#	print "\t".$repo->name."\n" unless $quiet;
+	$out_cfg{repos}{strip_git($repo->name)} = {
+	    description => $repo->descr,
+	    owner => $repo->owner->name,
+	    gitweb => $repo->gitweb ? 'yes' : 'no',
+	    daemon => $repo->daemon ? 'yes' : 'no',
+	    forkof => $repo->forkof ? strip_git($repo->forkof->name) : '',
+	};
+    }
+    $repos->reset;
+
+
+    my $cfg_file = catfile($gitdir, "gitosis.conf");
+#    print "Write out configuration to $cfg_file\n" unless $quiet;
+#    print Dumper(\%out_cfg);
+    $tmpl->process('gitosis/gitosis.conf.tmpl', \%out_cfg, $cfg_file)
+	or die $tmpl->error;
+    $git->command_noisy('add', "gitosis.conf");
+
+#    print "Write out public keys\n" unless $quiet;
+    my @old_keys = glob(catfile($gitdir, "keydir", "*.pub"));
+#    print "\told_keys = @old_keys\n";
+    my %old_keys = map { $_ => 1 } @old_keys;
+    while( my $usr = $owners->next ){
+	next unless $usr->key;
+	my $key_file = catfile($gitdir, "keydir", $usr->uid.".pub");
+	delete $old_keys{$key_file};
+#	print "\twrite $key_file\n" unless $quiet;
+	write_file($key_file, $usr->key."\n")
+	    or die "write_file failed: $!\n";
+	$git->command_noisy('add', catfile("keydir", $usr->uid.".pub"));
+    }
+    $owners->reset;
+
+    foreach my $old_file (keys %old_keys){
+#	print "\tdelete $old_file\n" unless $quiet;
+	unlink $old_file
+	    or die "unlink failed: $!\n";
+	$git->command_noisy('rm', $old_file);
+    }
+
+    eval { $git->command(qw(commit -m), '[GitWebAdmin] Update config from database') };
+
+    $git->command(qw(push origin master));
+
+    sleep 10;
+}
+
+sub strip_git {
+  my $name = shift;
+  $name =~ s/\.git$//;
+  return $name;
+}
