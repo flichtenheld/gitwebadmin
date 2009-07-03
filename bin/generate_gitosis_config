@@ -34,14 +34,20 @@ my $schema = GitWebAdmin::Schema->connect(
 my %out_cfg = ();
 $out_cfg{gitosis} = $config->{gitosis};
 
+sub strip_git {
+  my $name = shift;
+  $name =~ s/\.git$//;
+  return $name;
+}
+
 my $groups = $schema->resultset("Groups");
 print "Reading Groups:\n" unless $quiet;
 while( my $grp = $groups->next ){
   print "\t".$grp->gid."\n" unless $quiet;
   $out_cfg{groups}{$grp->gid} = {
     members => [ map { $_->uid } $grp->users ],
-    writable => [ map { $_->name } $grp->w_repos ],
-    readable => [ map { $_->name } $grp->r_repos ],
+    writable => [ map { strip_git($_->name) } $grp->w_repos ],
+    readable => [ map { strip_git($_->name) } $grp->r_repos ],
   };
 }
 
@@ -52,7 +58,7 @@ while( my $owner = $owners->next ){
   print "\t".$owner->uid."\n" unless $quiet;
   $out_cfg{groups}{$owner->uid."-owner"} = {
     members => [ $owner->uid ],
-    writable => [ map { $_->name } $owner->repo ],
+    writable => [ map { strip_git($_->name) } $owner->repo ],
   };
 }
 
@@ -60,7 +66,7 @@ my $repos = $schema->resultset("Repos");
 print "Reading Repositories:\n" unless $quiet;
 while( my $repo = $repos->next ){
   print "\t".$repo->name."\n" unless $quiet;
-  $out_cfg{repos}{$repo->name} = {
+  $out_cfg{repos}{strip_git($repo->name)} = {
     description => $repo->descr,
     owner => $repo->owner->name,
     gitweb => $repo->gitweb ? 'yes' : 'no',
