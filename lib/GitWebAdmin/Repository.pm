@@ -238,6 +238,32 @@ sub has_change {
   return 0;
 }
 
+sub has_writable {
+  my ($c, $repo) = @_;
+
+  my $user = $c->param('user_obj') or return 0;
+  return 1 if $repo->owner->uid eq $user->uid;
+  foreach my $w ($repo->w_groups){
+    foreach my $u ($w->users){
+      return 1 if $user->uid eq $u->uid;
+    }
+  }
+  return 0;
+}
+
+sub has_readable {
+  my ($c, $repo) = @_;
+
+  my $user = $c->param('user_obj') or return 0;
+  return 1 if $c->has_writable($repo);
+  foreach my $r ($repo->r_groups){
+    foreach my $u ($r->users){
+      return 1 if $user->uid eq $u->uid;
+    }
+  }
+  return 0;
+}
+
 sub is_subscribed {
   my ($c, $repo) = @_;
 
