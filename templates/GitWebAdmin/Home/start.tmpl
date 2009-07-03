@@ -6,9 +6,16 @@
 <a href="http://git-scm.org/">Git</a> repositories of
 [% c.cfg('branding').organisation %].</p>
 
-<h2>Repositories</h2>
+<h2>Your User Page</h2>
 
-<p>The following repositories are available:</p>
+<p>You can administrate your private repositories and your subscriptions
+from your <a href="[% c.url('user/' _ c.param('user')) %]">User Page</a>.
+</p>
+
+<h2><a href="[% c.url('repo/') %]">Repositories</a></h2>
+
+<p>The following repositories are available (excluding private
+repositories):</p>
 <table id="repolist">
   <thead>
     <tr>
@@ -18,14 +25,29 @@
     </tr>
   </thead>
   <tbody>
-  [% FOREACH r IN repos.all %]
+  [% FOREACH r IN DBIxRel(repos.all) %]
   <tr>
-    <td><a href="[% c.url('repo/' _ r.name()) %]">[% r.name() %]</a></td>
-    <td><a href="[% c.url('user/' _ r.owner().uid()) %]">[% r.owner().name() %]</td>
+    <td><a href="[% c.url('repo/' _ r.name()) | html %]">[% r.name() | html %]</a></td>
+    <td><a href="[% c.url('user/' _ r.owner().uid()) %]">[% r.owner().name() | html %]</td>
     <td>[% r.descr() | html %]</td>
   </tr>
   [% END %]
   </tbody>
 </table>
+
+<h2><a href="[% c.url('group/') %]">Groups</a>
+  and <a href="[% c.url('user/') %]">Users</a></h2>
+
+[% FOREACH g IN DBIxRel(groups.all).sort('name') %]
+[% '<p>The following groups are defined:</p><ul>' IF loop.first() %]
+  <li><a href="[% c.url('group/' _ g.gid()) %]">[% g.name() | html %]</a></li>
+[% '</ul>' IF loop.last() %]
+[% END %]
+
+[% FOREACH u IN DBIxRel(users.all).sort('name') %]
+[% '<p>The following users are known:</p><ul>' IF loop.first() %]
+  <li><a href="[% c.url('user/' _ u.uid()) %]">[% u.name() | html %]</a></li>
+[% '</ul>' IF loop.last() %]
+[% END %]
 
 [% INCLUDE footer.tmpl %]
