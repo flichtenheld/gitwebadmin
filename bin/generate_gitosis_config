@@ -78,10 +78,11 @@ while( my $repo = $repos->next ){
 my $git = Git->repository(rel2abs($config->{gitosis}{repository}));
 
 my $cfg_file = catfile($config->{gitosis}{repository}, "gitosis.conf");
-$git->command_noisy('add', "gitosis.conf");
 print "Write out configuration to $cfg_file\n" unless $quiet;
 #print Dumper(\%out_cfg);
-$tmpl->process('gitosis/gitosis.conf.tmpl', \%out_cfg, $cfg_file);
+$tmpl->process('gitosis/gitosis.conf.tmpl', \%out_cfg, $cfg_file)
+    or die $tmpl->error;
+$git->command_noisy('add', "gitosis.conf");
 
 print "Write out public keys\n" unless $quiet;
 my @old_keys = glob(catfile($config->{gitosis}{repository}, "keydir", "*.pub"));
