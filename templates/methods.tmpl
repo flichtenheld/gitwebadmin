@@ -2,7 +2,7 @@
 <select name="[% select_name %]">
 [% db = c.param('db');
    FOREACH u IN DBIxRel(db.resultset('Users').search).sort('uid'); %]
-  <option value="[% u.uid %]"[% ' selected="selected"' IF selected == u.uid %]>[% u.name %]</option>
+  <option value="[% u.uid %]"[% ' selected="selected"' IF selected == u.uid %]>[% u.name | html %]</option>
 [% END %]
 </select>
 [% END %]
@@ -12,7 +12,7 @@
 <option value="">None</option>
 [% db = c.param('db');
    FOREACH r IN DBIxRel(db.resultset('Repos').search({ private => 0 })).sort('name'); %]
-  <option value="[% r.id %]"[% ' selected="selected"' IF selected == r.name %]>[% r.name %]</option>
+  <option value="[% r.id %]"[% ' selected="selected"' IF selected == r.name %]>[% r.name | html %]</option>
 [% END %]
 </select>
 [% END %]
@@ -26,7 +26,7 @@
    SET sgroups.${gs.gid} = 1;
    END;
    FOREACH g IN DBIxRel(db.resultset('Groups').search).sort('name'); %]
-  <option value="[% g.gid %]"[% ' selected="selected"' IF sgroups.${g.gid} %]>[% g.name %]</option>
+  <option value="[% g.gid %]"[% ' selected="selected"' IF sgroups.${g.gid} %]>[% g.name | html %]</option>
   [% END %]
 </select>
 [% END %]
@@ -40,7 +40,7 @@
    SET susers.${us.uid} = 1;
    END;
    FOREACH u IN DBIxRel(db.resultset('Users').search).sort('name'); %]
-  <option value="[% u.uid %]"[% ' selected="selected"' IF susers.${u.uid} %]>[% u.name %]</option>
+  <option value="[% u.uid %]"[% ' selected="selected"' IF susers.${u.uid} %]>[% u.name | html %]</option>
   [% END %]
 </select>
 [% END %]
@@ -54,7 +54,7 @@
    SET srepos.${rs.id} = 1;
    END;
    FOREACH r IN DBIxRel(db.resultset('Repos').search).sort('name'); %]
-  <option value="[% r.id %]"[% ' selected="selected"' IF srepos.${r.id} %]>[% r.name %]</option>
+  <option value="[% r.id %]"[% ' selected="selected"' IF srepos.${r.id} %]>[% r.name | html %]</option>
   [% END %]
 </select>
 [% END %]
