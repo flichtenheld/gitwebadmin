@@ -11,12 +11,14 @@ use File::Spec::Functions qw(:ALL);
 use File::Slurp;
 use Git;
 
-use lib "/srv/git/gitwebadmin/lib";
+use FindBin;
+use Cwd qw(realpath);
+use lib "$FindBin::Bin/../lib";
 
 use Dutil;
 use GitWebAdmin::Schema;
 
-my $GWA      = "/srv/git/gitwebadmin";
+my $GWA      = realpath("$FindBin::Bin/../");
 my $LOG      = "$GWA/update.log";
 my $LOCK     = "$GWA/update.lock";
 
@@ -40,7 +42,7 @@ my $schema = GitWebAdmin::Schema->connect(
     $db_cfg->{username}, $db_cfg->{password});
 
 my $groups = $schema->resultset("Groups");
-my $owners = $schema->resultset("Users");
+my $owners = $schema->resultset("Users")->search({ active => 1 });
 my $repos = $schema->resultset("Repos");
 
 my $gitdir = rel2abs($config->{gitosis}{repository}, $GWA);
@@ -63,19 +65,19 @@ while( 1 ){
 #	print "\t".$grp->gid."\n" unless $quiet;
 	$out_cfg{groups}{$grp->gid} = {
 	    members => [ map { $_->uid } $grp->users ],
-	    writable => [ map { strip_git($_->name) } $grp->w_repos ],
-	    readable => [ map { strip_git($_->name) } $grp->r_repos ],
+	    writable => [ map { strip_git($_->name) } $grp->w_repos({ deleted => 0 }) ],
+	    readable => [ map { strip_git($_->name) } $grp->r_repos({ deleted => 0 }) ],
 	};
     }
     $groups->reset;
 
 #    print "Creating Owner-Groups:\n" unless $quiet;
     while( my $owner = $owners->next ){
-	next unless $owner->repo->count;
+	next unless $owner->repo({ deleted => 0 })->count;
 #	print "\t".$owner->uid."\n" unless $quiet;
 	$out_cfg{groups}{$owner->uid."-owner"} = {
 	    members => [ $owner->uid ],
-	    writable => [ map { strip_git($_->name) } $owner->repo ],
+	    writable => [ map { strip_git($_->name) } $owner->repo({ deleted => 0 }) ],
 	};
     }
     $owners->reset;
