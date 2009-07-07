@@ -5,7 +5,6 @@
 #
 ##############################################################################
 package Dutil;
-use 5.010;
 use strict;
 use warnings;
 
@@ -102,7 +101,7 @@ sub log {
     my $msg = shift;
 
     my $ts = strftime($timestamp, localtime);
-    say "$ts $0\[$$\]: $msg";
+    print "$ts $0\[$$\]: $msg\n";
 }
 
 1;
