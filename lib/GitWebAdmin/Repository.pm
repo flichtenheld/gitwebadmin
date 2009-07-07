@@ -4,6 +4,9 @@ use base 'GitWebAdmin';
 use strict;
 use warnings;
 
+use File::Spec::Functions qw(rel2abs);
+use Cwd qw(realpath);
+
 sub find_repo {
   my $c = shift;
 
@@ -188,7 +191,17 @@ sub create {
 
   # Validity and Authorization checks
   unless( $opts{name} =~ m/\.git$/ ){
-    die "400 Invalid repository path\n";
+    die "400 Repository path does not end in .git\n";
+  }
+  if( $opts{name} =~ m;^/; ){
+    die "403 Repository path can't be absolute\n";
+  }
+  my $base_dir = $c->cfg('gitosis')->{repositories}
+    or die "500 Config error\n";
+  my $abs = rel2abs($opts{name}, $base_dir);
+  $abs = realpath($abs);
+  unless( $abs =~ m;^\Q$base_dir\E/; ){
+    die "403 Repository path can't traverse outside base directory\n";
   }
   unless( $c->is_admin ){
     my $username = $c->param('user');
