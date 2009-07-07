@@ -124,7 +124,8 @@ CREATE TABLE logs_push (
        ref   TEXT NOT NULL,
        notified BOOLEAN NOT NULL DEFAULT FALSE
 );
-GRANT SELECT, INSERT ON logs_push TO gwa_gitaccess;
+GRANT SELECT, INSERT, UPDATE ON logs_push TO gwa_gitaccess;
+GRANT ALL ON logs_push_logid_seq TO gwa_gitaccess;
 GRANT ALL ON logs_push TO gwa_admin;
 CREATE INDEX logs_push_uid_idx ON logs_push (uid);
 CREATE INDEX logs_push_ref_idx ON logs_push (ref);

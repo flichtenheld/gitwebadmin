@@ -8,6 +8,13 @@ use base 'DBIx::Class';
 __PACKAGE__->load_components("Core");
 __PACKAGE__->table("logs_push");
 __PACKAGE__->add_columns(
+  "logid",
+  {
+    data_type => "bigint",
+    default_value => "nextval('logs_push_logid_seq'::regclass)",
+    is_nullable => 0,
+    size => 8,
+  },
   "rid",
   { data_type => "integer", default_value => undef, is_nullable => 0, size => 4 },
   "uid",
@@ -51,13 +58,6 @@ __PACKAGE__->add_columns(
     default_value => "false",
     is_nullable => 0,
     size => 1,
-  },
-  "logid",
-  {
-    data_type => "bigint",
-    default_value => "nextval('logs_push_logid_seq'::regclass)",
-    is_nullable => 0,
-    size => 8,
   },
 );
 __PACKAGE__->set_primary_key("logid");
