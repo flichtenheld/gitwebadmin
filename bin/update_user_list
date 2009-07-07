@@ -51,11 +51,25 @@ $mesg = $ldap->search(
 $mesg->code && die $mesg->error;
 
 my $rs = $schema->resultset('Users');
+my %uids = ();
 foreach my $entry ($mesg->entries){
-  print "\tmember ".$entry->get_value('cn')." (uid=".$entry->get_value('sAMAccountName').")\n";
-  $rs->update_or_create({ uid => $entry->get_value('sAMAccountName'),
+  my $uid = $entry->get_value('sAMAccountName');
+  print "\tmember ".$entry->get_value('cn')." (uid=$uid)\n";
+  $rs->update_or_create({ uid => $uid,
                           name => $entry->get_value('cn'),
-                          mail => $entry->get_value('mail') });
+                          mail => $entry->get_value('mail'),
+                          active => 1 });
+  $uids{$uid}++;
+}
+$uids{gitadm}++;
+my $actives = $rs->search({ active => 1 });
+while( my $user = $actives->next ){
+  unless( $uids{$user->uid} ){
+    $user->active(0);
+    $user->admin(0);
+    print "\tdisable account ".$user->uid."\n";
+    $user->update;
+  }
 }
 
 $ldap->unbind;

@@ -23,7 +23,11 @@ CREATE TABLE users (
        name  TEXT,
        mail  TEXT,
        key   TEXT,
-       admin BOOLEAN NOT NULL DEFAULT FALSE
+       admin BOOLEAN NOT NULL DEFAULT FALSE,
+       active BOOLEAN NOT NULL DEFAULT TRUE,
+
+       CONSTRAINT users_admin_active CHECK (NOT (admin AND NOT active)),
+       CONSTRAINT users_gitadm_active CHECK (NOT (uid='gitadm' AND NOT active))
 );
 CREATE INDEX users_name_idx ON users (name);
 GRANT SELECT, UPDATE ON users TO gwa_webaccess;

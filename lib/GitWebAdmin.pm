@@ -37,9 +37,12 @@ sub cgiapp_prerun {
   $c->run_modes([qw(do list start delete create create_form)]);
   #fake run mode for easier error reporting
   $c->run_modes([qw(prerun_error)]);
-  unless( $c->param('user_obj') ){
+  if( not $c->param('user_obj') ){
     $c->prerun_mode('prerun_error');
     $c->param('prerun_error_str', '500 Login user does not exist in database');
+  }elsif( not $c->param('user_obj')->active ){
+    $c->prerun_mode('prerun_error');
+    $c->param('prerun_error_str', '403 Account deactivated');
   }
   $c->error_mode('handle_error');
 }
@@ -125,6 +128,7 @@ sub get_writable_readable {
 sub is_admin {
   my $c = shift;
 
+  return if not $c->param('user_obj')->active;
   return $c->param('user_obj')->admin;
 }
 
