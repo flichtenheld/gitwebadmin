@@ -66,12 +66,20 @@ CREATE TABLE repos (
        daemon   BOOLEAN NOT NULL DEFAULT FALSE,
        gitweb   BOOLEAN NOT NULL DEFAULT FALSE,
        owner    TEXT NOT NULL REFERENCES users(uid) ON DELETE RESTRICT,
-       forkof   INT REFERENCES repos(id) ON DELETE SET NULL
+       forkof   INT REFERENCES repos(id) ON DELETE RESTRICT,
+       deleted  BOOLEAN NOT NULL DEFAULT FALSE,
+
+       CHECK (NOT (deleted AND (gitweb OR daemon)))
 );
 CREATE INDEX repos_name_idx ON repos (name);
-GRANT ALL ON repos TO gwa_webaccess;
+GRANT SELECT, INSERT, UPDATE ON repos TO gwa_webaccess;
 GRANT ALL ON SEQUENCE repos_id_seq TO gwa_webaccess;
 GRANT SELECT ON repos TO gwa_gitaccess;
+
+CREATE VIEW active_repos AS
+       SELECT * FROM repos WHERE NOT deleted;
+GRANT SELECT ON active_repos TO gwa_webaccess;
+GRANT SELECT ON active_repos TO gwa_gitaccess;
 
 CREATE OR REPLACE FUNCTION repo_id (text) RETURNS int AS $$
        SELECT id FROM repos r WHERE r.name = $1

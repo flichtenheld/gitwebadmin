@@ -50,7 +50,7 @@
   [% END %]
 [% END %]
 
-[% FOREACH r IN DBIxRel(user.repo).sort('name') %]
+[% FOREACH r IN DBIxRel(user.repo({ deleted => 0 })).sort('name') %]
 [% '<p>Owner of the following repositories:</p><ul>' IF loop.first() %]
 <li><a href="[% c.url('repo/' _ r.name()) %]" title="[% r.descr | html %]">[% r.name() | html %]</a>[% IF r.private %] (private)[% END %]</li>
 [% '</ul>' IF loop.last() %]

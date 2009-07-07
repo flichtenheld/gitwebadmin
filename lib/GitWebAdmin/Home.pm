@@ -8,7 +8,7 @@ sub start {
   my $c = shift;
 
   my $db = $c->param('db');
-  my $repos = $db->resultset('Repos')->search(
+  my $repos = $db->resultset('ActiveRepos')->search(
     { private => 0 }, { order_by => $c->query->param('sort_by') || 'name' });
   my $groups = $db->resultset('Groups');
   my $users = $db->resultset('Users');

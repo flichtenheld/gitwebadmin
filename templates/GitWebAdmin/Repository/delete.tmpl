@@ -1,5 +1,5 @@
 [% SET nav = [ { url => 'repo/', name => 'Repositories' } ];
-   FOREACH p IN repo.name().split('/');
+   FOREACH p IN repo.name.remove('^Attic/\d+/').split('/');
      SET path = path _ p _ '/';
      IF loop.last();
        nav.push({ name => p });
@@ -11,6 +11,6 @@
    navigation = nav
 %]
 
-<p class="no">Repository [% repo.name | html %] successfully deleted</p>
+<p class="no">Repository [% repo.name.remove('^Attic/\d+/') | html %] successfully deleted</p>
 
 [% INCLUDE footer.tmpl %]

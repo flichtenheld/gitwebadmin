@@ -54,7 +54,7 @@ sub list {
     @private = ( private => 0 );
   }
 
-  my $rs = $db->resultset('Repos')->search(
+  my $rs = $db->resultset('ActiveRepos')->search(
     { @private },{ order_by => 'name' });
   if( $path ){
     @repos = $rs->search({name => { 'like', "$path/%" }});
@@ -211,8 +211,16 @@ sub delete {
   my $repo = $c->find_repo;
   die "404 Repository not found\n" unless $repo;
   die "403 Not authorized\n" unless $c->has_admin($repo);
+  die "404 Repository already deleted\n" if $repo->deleted;
+  die "409 Repository has forks\n" if $repo->repo->count;
 
-  $repo->delete;
+  $repo->deleted(1);
+  $repo->name("Attic/".time."/".$repo->name);
+  $repo->gitweb(0);
+  $repo->daemon(0);
+  $repo->set_w_groups([]);
+  $repo->set_r_groups([]);
+  $repo->update->discard_changes;
 
   return $c->tt_process({ repo => $repo });
 }
