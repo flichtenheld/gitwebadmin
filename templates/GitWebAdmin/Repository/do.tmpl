@@ -81,13 +81,8 @@
       <td><code>[% c.cfg('links').daemon.replace('%name', repo.name) | html %]</code></td>
     </tr>
     [% END %]
-    [% IF c.has_admin(repo) %]
-    <tr>
-      <th><label for="path">Name:</label></th>
-      <td><input type="text" name="path" size="80" value="[% repo.name | html %]"></td>
-    </tr>
-    [% END %]
     [% IF repo.mirrorof %]
+    <tr>
       [% IF c.has_admin(repo) %]
       <th><label for="mirrorof">Mirror of:</label></th>
       <td><input type="text" name="description" size="80" value="[% repo.mirrorof | html %]"></td>
