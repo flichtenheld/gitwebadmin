@@ -1,3 +1,10 @@
+#
+#  Copyright (C) 2009 Astaro AG  www.astaro.com
+#  All rights reserved.
+#
+#  Author: Frank Lichtenheld <flichtenheld@astaro.com> 07.07.2009
+#
+##############################################################################
 package GitWebAdmin::Group;
 use base 'GitWebAdmin';
 
