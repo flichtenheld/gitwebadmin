@@ -5,7 +5,6 @@ use strict;
 use warnings;
 
 use File::Spec::Functions qw(rel2abs);
-use Cwd qw(realpath);
 
 sub find_repo {
   my $c = shift;
@@ -200,6 +199,8 @@ sub create {
     }
   }
 
+  $opts{name} =~ s/^\s+//;
+  $opts{name} =~ s/\s+$//;
   unless( $opts{name} =~ m/\.git$/ ){
     die "400 Repository path does not end in .git\n";
   }
@@ -209,9 +210,11 @@ sub create {
   my $base_dir = $c->cfg('gitosis')->{repositories}
     or die "500 Config error\n";
   my $abs = rel2abs($opts{name}, $base_dir);
-  $abs = realpath($abs);
   unless( $abs =~ m;^\Q$base_dir\E/; ){
-    die "403 Repository path can't traverse outside base directory\n";
+    die "403 Repository path $abs can't traverse outside base directory\n";
+  }
+  if( $abs =~ m;(/|^)..(/|$); ){
+    die "400 Malformed path\n";
   }
   unless( $c->is_admin ){
     my $username = $c->param('user');
