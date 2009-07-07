@@ -87,6 +87,16 @@
       <td><input type="text" name="path" size="80" value="[% repo.name | html %]"></td>
     </tr>
     [% END %]
+    [% IF repo.mirrorof %]
+      [% IF c.has_admin(repo) %]
+      <th><label for="mirrorof">Mirror of:</label></th>
+      <td><input type="text" name="description" size="80" value="[% repo.mirrorof | html %]"></td>
+      [% ELSE %]
+      <th>Mirror of:</th>
+      <td><code>[% repo.mirrorof | html %]</code></td>
+      [% END %]
+    </tr>
+    [% END %]
     [% IF repo.descr || c.has_change(repo) %]
     <tr>
       [% IF c.has_change(repo) %]

@@ -23,8 +23,8 @@ __PACKAGE__->belongs_to("rid", "GitWebAdmin::Schema::Repos", { id => "rid" });
 __PACKAGE__->belongs_to("gid", "GitWebAdmin::Schema::Groups", { gid => "gid" });
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-07-01 18:26:16
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:/WnnrspmDkTpwXA+Zo4ybg
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-07-07 13:50:22
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:2wagpkvFzKUkiZqjSsMweQ
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

@@ -35,8 +35,12 @@
       <td><input type="text" name="description" size="80" value=""></td>
     </tr>
     <tr>
-      <th><label for="forkof">Fork off existing Repository:</label></th>
+      <th><label for="forkof">Fork off existing repository:</label></th>
       <td>[% INCLUDE repo_dropdown select_name='forkof' selected='' %]</td>
+    </tr>
+    <tr>
+      <th><label for="mirrorof">Create a mirror of a remote repository:</label></th>
+      <td><input type="text" name="mirrorof" size="80" value=""></td>
     </tr>
     [% IF c.is_admin %]
     <tr>

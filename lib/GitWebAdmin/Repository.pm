@@ -188,8 +188,18 @@ sub create {
   }
   $opts{forkof} = $c->query->param('forkof')
     if $c->query->param('forkof');
+  $opts{mirrorof} = $c->query->param('mirrorof')
+    if $c->query->param('mirrorof');
 
   # Validity and Authorization checks
+  if( $opts{mirrorof} ){
+    $opts{mirrorof} =~ s/^\s+//;
+    $opts{mirrorof} =~ s/\s+$//;
+    unless( $opts{mirrorof} =~ m;^(git|https?|ssh)://;i ){
+      die "400 Invalid mirror URI\n";
+    }
+  }
+
   unless( $opts{name} =~ m/\.git$/ ){
     die "400 Repository path does not end in .git\n";
   }

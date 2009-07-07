@@ -39,13 +39,20 @@ __PACKAGE__->add_columns(
   },
   "forkof",
   { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
+  "mirrorof",
+  {
+    data_type => "text",
+    default_value => undef,
+    is_nullable => 1,
+    size => undef,
+  },
   "deleted",
   { data_type => "boolean", default_value => undef, is_nullable => 1, size => 1 },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-07-07 11:12:52
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:xDCEgLBOiu1vm9IFxu6pCA
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-07-07 13:50:22
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:GML4L9uQu1hBAsPVJFRImw
 
 __PACKAGE__->has_many(
   "logs_pushes",
