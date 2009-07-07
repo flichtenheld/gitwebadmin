@@ -85,7 +85,7 @@
     <tr>
       [% IF c.has_admin(repo) %]
       <th><label for="mirrorof">Mirror of:</label></th>
-      <td><input type="text" name="description" size="80" value="[% repo.mirrorof | html %]"></td>
+      <td><input type="text" name="mirrorof" size="80" value="[% repo.mirrorof | html %]"></td>
       [% ELSE %]
       <th>Mirror of:</th>
       <td><code>[% repo.mirrorof | html %]</code></td>

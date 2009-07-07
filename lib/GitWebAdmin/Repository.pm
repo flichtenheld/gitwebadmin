@@ -141,6 +141,16 @@ sub do {
       unless $c->has_change($repo);
 
     $repo->descr($c->query->param('description'));
+
+    if( $c->query->param('mirrorof') ){
+      my $mirrorof = $c->query->param('mirrorof');
+      $mirrorof =~ s/^\s+//;
+      $mirrorof =~ s/\s+$//;
+      unless( $mirrorof =~ m;^(git|https?|ssh)://;i ){
+        die "400 Invalid mirror URI\n";
+      }
+      $repo->mirrorof($mirrorof);
+    }
     foreach my $opt (qw(gitweb daemon)){
       $repo->set_column(
         $opt,
