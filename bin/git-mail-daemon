@@ -50,15 +50,20 @@ while( 1 ){
 	    or die "post-receive-email failed: $!\n";
 	my @recipients = map { $_->mail } $repo->subscribers;
 
-	CORE::open my $out, '|-', (qw(/usr/sbin/sendmail -i -f),
-				   $row->uid->uid.'@git.intranet.astaro.de', @recipients)
-	    or die "sendmail failed: $!\n";
-	print $out $mail;
-	close $out
-	    or die "sendmail failed: $!\n";
+	if( @recipients ){
+	    CORE::open my $out, '|-', (qw(/usr/sbin/sendmail -i -f),
+				       $row->uid->uid.'@git.intranet.astaro.de', @recipients)
+		or die "sendmail failed: $!\n";
+	    print $out $mail;
+	    close $out
+		or die "sendmail failed: $!\n";
 
-	Dutil::log($repo->name.": Sent mail about ".$row->ref." (".$row->old_id."->".$row->new_id.")");
-	Dutil::log("Recipients: @recipients");
+	    Dutil::log($repo->name.": Sent mail about ".$row->ref." (".$row->old_id."->".$row->new_id.")");
+	    Dutil::log("Recipients: @recipients");
+	}else{
+	    Dutil::log($repo->name.": No mail sent about ".$row->ref." (".$row->old_id."->".$row->new_id.")");
+	    Dutil::log("No Recipients");
+	}
 
 	$row->notified(1);
 	$row->update;
