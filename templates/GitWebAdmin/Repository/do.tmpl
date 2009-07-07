@@ -143,6 +143,7 @@
 </form>
 [% END %]
 
+[% IF !repo.mirrorof %]
 <div id="permissions">
 [% IF c.has_admin(repo) %]
   <form action="[% c.url('repo/' _ repo.name _ '/permissions') %]" method="post">
@@ -168,5 +169,6 @@
   [% END %]
 [% END %]
 </div>
+[% END %]
 
 [% INCLUDE footer.tmpl %]
