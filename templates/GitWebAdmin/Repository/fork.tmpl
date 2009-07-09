@@ -24,9 +24,12 @@
 <h1>Fork Repository [% repo.name() | html %]</h1>
 <form action="[% c.url('repo/create') %]" method="post">
 <input type="hidden" name="_method" value="put">
-<input type="hidden" name="forkof" value="[% repo.id %]">
 <table id="repometa">
   <tbody>
+    <tr>
+      <th><label for="forkof">Fork off existing repository:</label></th>
+      <td>[% INCLUDE repo_dropdown select_name='forkof' selected=repo.name  %]</td>
+    </tr>
     <tr>
       <th><label for="path">Name:</label></th>
       <td><input type="text" name="path" size="80"
