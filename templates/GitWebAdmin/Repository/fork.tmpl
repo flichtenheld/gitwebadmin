@@ -37,6 +37,10 @@
       <th><label for="description">Description:</label></th>
       <td><input type="text" name="description" size="80" value="[% repo.descr | html %] (Fork)"></td>
     </tr>
+    <tr>
+      <th><label for="branch">Default Branch:</label></th>
+      <td><input type="text" name="branch" size="40" value="[% repo.branch %]"></td>
+    </tr>
     [% IF c.is_admin %]
     <tr>
       <th><label for="owner">Owner:</label></th>

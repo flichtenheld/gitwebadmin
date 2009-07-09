@@ -151,6 +151,7 @@ sub do {
       unless $c->has_change($repo);
 
     $repo->descr($c->query->param('description'));
+    $repo->branch($c->query->param('branch'));
 
     if( $c->query->param('mirrorof') ){
       my $mirrorof = $c->query->param('mirrorof');
