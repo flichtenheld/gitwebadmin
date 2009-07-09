@@ -103,6 +103,15 @@
       [% END %]
     </tr>
     [% END %]
+    <tr>
+      [% IF c.has_admin(repo) %]
+      <th><label for="branch">Default Branch:</label></th>
+      <td><input type="text" name="branch" size="40" value="[% repo.branch | html %]"></td>
+      [% ELSE %]
+      <th>Default Branch:</th>
+      <td><code>[% repo.branch | html %]</code></td>
+      [% END %]
+    </tr>
     [% IF c.is_admin %]
     <tr>
       <th><label for="owner">Owner:</label></th>

@@ -68,6 +68,7 @@ CREATE TABLE repos (
        id    SERIAL PRIMARY KEY,
        name  TEXT NOT NULL UNIQUE,
        descr  TEXT,
+       branch TEXT NOT NULL DEFAULT 'master',
        private  BOOLEAN NOT NULL DEFAULT FALSE,
        daemon   BOOLEAN NOT NULL DEFAULT FALSE,
        gitweb   BOOLEAN NOT NULL DEFAULT FALSE,

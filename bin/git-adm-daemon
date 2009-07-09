@@ -103,6 +103,7 @@ while( 1 ){
 	    gitweb => $repo->gitweb ? 'yes' : 'no',
 	    daemon => $repo->daemon ? 'yes' : 'no',
 	    forkof => $repo->forkof ? strip_git($repo->forkof->name) : '',
+            branch => $repo->branch,
 	};
     }
     $repos->reset;

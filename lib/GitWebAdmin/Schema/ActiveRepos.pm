@@ -24,6 +24,13 @@ __PACKAGE__->add_columns(
     is_nullable => 1,
     size => undef,
   },
+  "branch",
+  {
+    data_type => "text",
+    default_value => undef,
+    is_nullable => 1,
+    size => undef,
+  },
   "private",
   { data_type => "boolean", default_value => undef, is_nullable => 1, size => 1 },
   "daemon",
@@ -51,8 +58,8 @@ __PACKAGE__->add_columns(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-07-07 13:50:22
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:GML4L9uQu1hBAsPVJFRImw
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-07-08 15:04:56
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:F9WCMr7V3lNv5VmayfLg+w
 
 __PACKAGE__->has_many(
   "logs_pushes",

@@ -197,7 +197,10 @@ sub create_form {
 sub _create_params {
   return {
     required => [qw(path owner)],
-    optional => [qw(description options forkof mirrorof)],
+    optional => [qw(description branch options forkof mirrorof)],
+    defaults => {
+      branch => 'master',
+    },
     constraint_methods => {
       mirrorof => [
         {
@@ -245,7 +248,7 @@ sub create {
   foreach my $opt (qw(private daemon gitweb)){
     $opts{$opt} = $c->get_checkbox_opt($opt);
   }
-  foreach my $opt (qw(forkof mirrorof)){
+  foreach my $opt (qw(forkof mirrorof branch)){
     $opts{$opt} = $params->valid($opt)
       if $params->valid($opt);
   }
