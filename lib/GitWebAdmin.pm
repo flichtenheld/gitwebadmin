@@ -47,6 +47,27 @@ sub cgiapp_prerun {
   $c->error_mode('handle_error');
 }
 
+sub cgiapp_init {
+  my $c = shift;
+
+  # Set some defaults for DFV unless they already exist.
+  $c->param('dfv_defaults') or
+    $c->param('dfv_defaults', {
+      missing_optional_valid => 1,
+      filters => 'trim',
+      msgs => {
+        any_errors => 'err_params',
+        prefix     => 'err_',
+        invalid    => 'Invalid',
+        missing    => 'Missing',
+        invalid_separator => ' <br> ',
+        format => '<span class="dfv-errors">%s</span>',
+      },
+   });
+
+}
+
+
 sub handle_error {
   my ($c, $error) = @_;
 

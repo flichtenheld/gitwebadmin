@@ -13,6 +13,9 @@ use warnings;
 
 use File::Spec::Functions qw(rel2abs);
 
+use CGI::Application::Plugin::ValidateRM qw(check_rm check_rm_error_page);
+use Data::FormValidator::Constraints qw(:closures);
+
 sub find_repo {
   my $c = shift;
 
@@ -185,7 +188,44 @@ sub do {
 }
 
 sub create_form {
-  return shift->tt_process();
+  my $c = shift;
+  my $errs = shift;
+
+  return $c->tt_process($errs);
+}
+
+sub _create_params {
+  return {
+    required => [qw(path owner)],
+    optional => [qw(description options forkof mirrorof)],
+    constraint_methods => {
+      mirrorof => [
+        {
+          name => 'URI_type',
+          constraint_method => qr{^(git|https?|ssh)://}i,
+        },{
+          name => 'URI_chars',
+          constraint_method => qr{^\S+$},
+        }],
+      path => [
+        {
+          name => 'path_abs',
+          constraint_method => qr{^[^/]},
+        },{
+          name => 'path_git',
+          constraint_method => qr{(?<=\.git)$},
+        }],
+      description => FV_max_length(200),
+    },
+    msgs => {
+      constraints => {
+        URI_type => 'unsupported URI type (supported: git/http/ssh)',
+        URI_chars => 'contains characters not allowed in URIs',
+        path_abs => "repository path can't be absolute",
+        path_git => "repository path has to end in .git",
+      }
+    }
+  };
 }
 
 sub create {
@@ -194,36 +234,22 @@ sub create {
   my $repo = $c->find_repo;
   die "409 Repository already exists\n" if $repo;
 
+  my $params = $c->check_rm('create_form', '_create_params')
+    or return $c->check_rm_error_page;
+
   my %opts = (
-    name => $c->query->param('path') || '',
-    owner => $c->query->param('owner') || '',
-    descr => $c->query->param('description') || '',
+    name => $params->valid('path'),
+    owner => $params->valid('owner'),
+    descr => $params->valid('description') || '',
     );
   foreach my $opt (qw(private daemon gitweb)){
     $opts{$opt} = $c->get_checkbox_opt($opt);
   }
-  $opts{forkof} = $c->query->param('forkof')
-    if $c->query->param('forkof');
-  $opts{mirrorof} = $c->query->param('mirrorof')
-    if $c->query->param('mirrorof');
-
-  # Validity and Authorization checks
-  if( $opts{mirrorof} ){
-    $opts{mirrorof} =~ s/^\s+//;
-    $opts{mirrorof} =~ s/\s+$//;
-    unless( $opts{mirrorof} =~ m;^(git|https?|ssh)://;i ){
-      die "400 Invalid mirror URI\n";
-    }
+  foreach my $opt (qw(forkof mirrorof)){
+    $opts{$opt} = $params->valid($opt)
+      if $params->valid($opt);
   }
 
-  $opts{name} =~ s/^\s+//;
-  $opts{name} =~ s/\s+$//;
-  unless( $opts{name} =~ m/\.git$/ ){
-    die "400 Repository path does not end in .git\n";
-  }
-  if( $opts{name} =~ m;^/; ){
-    die "403 Repository path can't be absolute\n";
-  }
   my $base_dir = $c->cfg('gitosis')->{repositories}
     or die "500 Config error\n";
   my $abs = rel2abs($opts{name}, $base_dir);

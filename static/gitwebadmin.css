@@ -46,6 +46,10 @@ img {
     color: #d00;
 }
 
+.dfv-errors {
+    color: #d00;
+}
+
 #userlogin {
     font-size: 90%;
     text-align: right;

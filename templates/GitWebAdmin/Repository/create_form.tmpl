@@ -18,6 +18,9 @@
 [% END %]
 
 <h1>Create Repository</h1>
+[% IF err_params %]
+<p class="dfv-errors">Some fields were missing or invalid</p>
+[% END %]
 <form action="[% c.url('repo/create') %]" method="post">
 <input type="hidden" name="_method" value="put">
 <table id="repometa">
@@ -29,10 +32,12 @@
       <td><input type="text" name="path" size="80"
                  value="[% path_init _ '<something>.git' | html %]">
       </td>
+      <td>[% err_path %]</td>
     </tr>
     <tr>
       <th><label for="description">Description:</label></th>
       <td><input type="text" name="description" size="80" value=""></td>
+      <td>[% err_description %]</td>
     </tr>
     <tr>
       <th><label for="forkof">Fork off existing repository:</label></th>
@@ -41,6 +46,7 @@
     <tr>
       <th><label for="mirrorof">Create a mirror of a remote repository:</label></th>
       <td><input type="text" name="mirrorof" size="80" value=""></td>
+      <td>[% err_mirrorof %]</td>
     </tr>
     [% IF c.is_admin %]
     <tr>
