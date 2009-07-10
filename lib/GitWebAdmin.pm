@@ -176,6 +176,19 @@ sub has_change {
   return 0;
 }
 
+sub can_subscribe {
+  my ($c, $repo) = @_;
+
+  my $user = $c->param('user_obj') or return 0;
+  return 0 unless $user->active;
+
+  return 1 if $c->has_readable($repo);
+  # world-readable anyway
+  return 1 if $repo->gitweb or $repo->daemon;
+
+  return 0;
+}
+
 sub has_writable {
   my ($c, $repo) = @_;
 

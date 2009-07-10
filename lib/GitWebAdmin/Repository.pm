@@ -118,6 +118,7 @@ sub subscribe {
 
   my $repo = $c->find_repo;
   die "404 Repository not found\n" unless $repo;
+  die "403 Not authorized for subscribing\n" unless $c->can_subscribe;
 
   $repo->add_to_subscribers($c->param('user_obj'));
   return $c->redirect($c->url('repo/' . $repo->name));

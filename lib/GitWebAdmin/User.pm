@@ -86,6 +86,7 @@ sub set_subscriptions {
     unless $c->is_admin or $user->uid eq $c->param('user');
 
   my $subscriptions = $c->get_obj_list('Repos', 'subscriptions');
+  $subscriptions = [grep { $c->can_subscribe($_) } @$subscriptions];
   $user->set_subscribed_repos($subscriptions);
 
   return $c->redirect($c->url('user/'.$user->uid));
