@@ -17,7 +17,7 @@
 <select name="[% select_name %]">
 <option value="">None</option>
 [% db = c.param('db');
-   FOREACH r IN DBIxRel(db.resultset('ActiveRepos').search({ private => 0 })).sort('name'); %]
+   FOREACH r IN DBIxRel(db.resultset('ActiveRepos').search).sort('name'); %]
   <option value="[% r.id %]"[% ' selected="selected"' IF selected == r.name %]>[% r.name | html %]</option>
 [% END %]
 </select>
