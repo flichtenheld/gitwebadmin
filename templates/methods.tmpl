@@ -65,11 +65,12 @@
 </select>
 [% END %]
 
-[% BLOCK admin_actions;
-   IF c.is_admin %]
+[% BLOCK admin_actions  %]
 <h2>Admin</h2>
 <ul>
 <li><a href="[% c.url('repo/create') %]">Create New Repository</a></li>
+[% IF c.is_admin %]
 <li><a href="[% c.url('group/create') %]">Create New Group</a></li>
+[% END %]
 </ul>
-[% END; END %]
+[% END %]

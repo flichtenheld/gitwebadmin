@@ -18,9 +18,10 @@ use Data::FormValidator::Constraints qw(:closures);
 
 sub find_repo {
   my $c = shift;
+  my $path = shift;
 
   my $db = $c->param('db');
-  my $path = $c->param('repo_path');
+  $path ||= $c->param('repo_path');
   return unless $path;
   my $repo;
   if( $path =~ /^\d+$/ ){
@@ -150,25 +151,32 @@ sub do {
     die "403 Not authorized\n"
       unless $c->has_change($repo);
 
+    # owner can always change description
     $repo->descr($c->query->param('description'));
-    $repo->branch($c->query->param('branch'));
 
-    if( $c->query->param('mirrorof') ){
-      my $mirrorof = $c->query->param('mirrorof');
-      $mirrorof =~ s/^\s+//;
-      $mirrorof =~ s/\s+$//;
-      unless( $mirrorof =~ m;^(git|https?|ssh)://;i ){
-        die "400 Invalid mirror URI\n";
+    if( $c->has_admin($repo) ) {
+      # the following things can only be changed
+      # by admins and owners in private repositories
+      $repo->branch($c->query->param('branch'));
+
+      if( $c->query->param('mirrorof') ){
+        my $mirrorof = $c->query->param('mirrorof');
+        $mirrorof =~ s/^\s+//;
+        $mirrorof =~ s/\s+$//;
+        unless( $mirrorof =~ m;^(git|https?|ssh)://;i ){
+          die "400 Invalid mirror URI\n";
+        }
+        $repo->mirrorof($mirrorof);
       }
-      $repo->mirrorof($mirrorof);
-    }
-    foreach my $opt (qw(gitweb daemon)){
-      $repo->set_column(
-        $opt,
-        $c->get_checkbox_opt($opt)
-      );
+      foreach my $opt (qw(gitweb daemon)){
+        $repo->set_column(
+          $opt,
+          $c->get_checkbox_opt($opt)
+          );
+      }
     }
     if( $c->is_admin ){
+      # owner and private can only be changed by real admins
       $repo->owner($c->query->param('owner'));
       $repo->private($c->get_checkbox_opt('private'));
     }
@@ -197,8 +205,8 @@ sub create_form {
 
 sub _create_params {
   return {
-    required => [qw(path owner)],
-    optional => [qw(description branch options forkof mirrorof)],
+    required => [qw(path)],
+    optional => [qw(owner description branch options forkof mirrorof)],
     defaults => {
       branch => 'master',
     },
@@ -235,15 +243,16 @@ sub _create_params {
 sub create {
   my $c = shift;
 
-  my $repo = $c->find_repo;
-  die "409 Repository already exists\n" if $repo;
-
   my $params = $c->check_rm('create_form', '_create_params')
     or return $c->check_rm_error_page;
 
+  my $path = $params->valid('path');
+  my $repo = $c->find_repo($path);
+  die "409 Repository $path already exists\n" if $repo;
+
   my %opts = (
-    name => $params->valid('path'),
-    owner => $params->valid('owner'),
+    name => $path,
+    owner => $params->valid('owner') || '',
     descr => $params->valid('description') || '',
     );
   foreach my $opt (qw(private daemon gitweb)){
