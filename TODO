@@ -6,6 +6,8 @@ General
  * Move actions to sidebar                                  - DONE
  * Unify form validation by using Data::FormValidator or
    FormValidator::Simple (via DBIx::Class::Validate)
+ * Layout in Opera                                          - DONE
+ * Email notifications
 
 Repo
  * show private/public status                               - DONE
