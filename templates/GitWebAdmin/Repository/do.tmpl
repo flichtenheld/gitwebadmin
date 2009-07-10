@@ -15,13 +15,13 @@
 [% BLOCK yes_no %]
   [% IF switch %]
   <span class="yes">yes</span>
-    [% IF c.has_change(repo) %]
+    [% IF c.has_admin(repo) %]
     <input type="checkbox" name="options" value="[% switch_name %]"
      [% switch ? 'checked="checked"' : '' %]>
     [% END %]
   [% ELSE %]
   <span class="no">no</span>
-    [% IF c.has_change(repo) %]
+    [% IF c.has_admin(repo) %]
     <input type="checkbox" name="options" value="[% switch_name %]"
      [% switch ? 'checked="checked"' : '' %]>
     [% END %]
