@@ -49,10 +49,12 @@
     <input type="hidden" name="_method" value="put"></p>
   [% END %]
 </form>
+[% IF repo.gitweb %]
 <h2>Links</h2>
 <ul>
 <li><a href="[% c.cfg('links').gitweb.replace('%name', repo.name) | url %]">gitweb</a></li>
 </ul>
+[% END %]
 [% INCLUDE admin_actions %]
 </div> <!-- end actions -->
 
