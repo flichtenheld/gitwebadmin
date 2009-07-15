@@ -71,16 +71,16 @@
 [% END %]
 <table id="repometa">
   <tbody>
-    [% IF c.has_readable(repo) %]
-    <tr>
-      <th>SSH Access:</th>
-      <td><code>[% c.cfg('links').ssh.replace('%name', repo.name) | html %]</code></td>
-    </tr>
-    [% END %]
     [% IF repo.daemon %]
     <tr>
       <th>git-daemon Access:</th>
       <td><code>[% c.cfg('links').daemon.replace('%name', repo.name) | html %]</code></td>
+    </tr>
+    [% END %]
+    [% IF c.has_readable(repo) %]
+    <tr>
+      <th>SSH Access:</th>
+      <td><code>[% c.cfg('links').ssh.replace('%name', repo.name) | html %]</code></td>
     </tr>
     [% END %]
     [% IF repo.mirrorof %]
