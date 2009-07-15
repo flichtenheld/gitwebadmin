@@ -70,16 +70,24 @@ while( 1 ){
     my %out_cfg = ();
     $out_cfg{gitosis} = $config->{gitosis};
 
+    # Allow read access per ssh to all repositories that allow
+    # read access per git-daemon
+    $out_cfg{groups}{PUBLIC} = {
+      members => [ map { $_->uid } $owners->all ],
+      writable => [],
+      readable => [ map { strip_git($_->name) }
+                        $repos->search({ daemon => 1 }) ],
+    };
 #    print "Reading Groups:\n" unless $quiet;
     while( my $grp = $groups->next ){
 #	print "\t".$grp->gid."\n" unless $quiet;
-	$out_cfg{groups}{$grp->gid} = {
-	    members => [ map { $_->uid } $grp->users ],
-	    writable => [ map { strip_git($_->name) }
+      $out_cfg{groups}{$grp->gid} = {
+        members => [ map { $_->uid } $grp->users ],
+        writable => [ map { strip_git($_->name) }
                           $grp->w_repos($repo_filter) ],
-	    readable => [ map { strip_git($_->name) }
+        readable => [ map { strip_git($_->name) }
                           $grp->r_repos($repo_filter) ],
-	};
+      };
     }
     $groups->reset;
 
