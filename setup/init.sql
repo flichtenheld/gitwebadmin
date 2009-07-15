@@ -12,6 +12,9 @@ DROP TABLE readable CASCADE;
 DROP TABLE members  CASCADE;
 DROP TABLE subscriptions CASCADE;
 DROP TABLE logs_push CASCADE;
+DROP TABLE commit_to_branch CASCADE;
+DROP TABLE commits CASCADE;
+DROP TABLE branches CASCADE;
 DROP ROLE gwa_webaccess;
 DROP ROLE gwa_gitaccess;
 DROP ROLE gwa_admin;
@@ -97,6 +100,58 @@ CREATE OR REPLACE FUNCTION repo_id (text) RETURNS int AS $$
 $$ LANGUAGE SQL STABLE STRICT;
 INSERT INTO repos (name, owner) VALUES
        ('gitosis-admin.git', 'gitadm');
+
+--
+-- ### BEGIN MANTIS INTEGRATION ###
+--
+
+--
+-- Save a list of branches for each repository
+--
+CREATE TABLE branches (
+       id   SERIAL PRIMARY KEY,
+       rid   INT NOT NULL REFERENCES repos(id) ON DELETE CASCADE,
+       branch TEXT NOT NULL,
+       commit TEXT NOT NULL CHECK (char_length(commit) = 40),
+
+       UNIQUE (rid, branch)
+);
+GRANT ALL ON branches TO gwa_gitaccess;
+
+--
+-- Save a list of commits in each repository
+-- (we will probably only save commits with a mantis reference for now)
+--
+CREATE TABLE commits (
+       id BIGSERIAL PRIMARY KEY,
+       rid   INT NOT NULL REFERENCES repos(id) ON DELETE CASCADE,
+       commit TEXT NOT NULL CHECK (char_length(commit) = 40),
+
+       UNIQUE (rid, commit)
+);
+GRANT ALL ON commits TO gwa_gitaccess;
+
+--
+-- Map commits to branches (n<-->n)
+--
+CREATE TABLE commit_to_branch (
+       cid BIGINT NOT NULL REFERENCES commits(id) ON DELETE CASCADE,
+       bid BIGINT NOT NULL REFERENCES branches(id) ON DELETE CASCADE,
+
+       UNIQUE (cid, bid)
+);
+GRANT ALL ON commit_to_branch TO gwa_gitaccess;
+
+CREATE VIEW mantis_repos AS
+       SELECT r.id, r.name, r.descr,
+              array_to_string(ARRAY(SELECT branch FROM branches AS b WHERE b.rid = r.id), ',') AS branches
+       FROM repos AS r
+       WHERE r.mantis IS TRUE;
+GRANT SELECT ON mantis_repos TO gwa_gitaccess;
+
+--
+-- ### END MANTIS INTEGRATION ###
+--
 
 CREATE TABLE writable (
        gid   TEXT NOT NULL REFERENCES groups(gid) ON DELETE CASCADE,
