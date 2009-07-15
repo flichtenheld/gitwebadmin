@@ -45,8 +45,7 @@ my $config = Config::Auto::parse("$GWA/gitwebadmin.ini");
 
 my $db_cfg = $config->{database};
 my $schema = GitWebAdmin::Schema->connect(
-    "dbi:$db_cfg->{driver}:dbname=$db_cfg->{name}",
-    $db_cfg->{username}, $db_cfg->{password});
+  "dbi:$db_cfg->{driver}:dbname=$db_cfg->{name}");
 
 my $groups = $schema->resultset("Groups");
 my $owners = $schema->resultset("Users")->search({ active => 1 });
