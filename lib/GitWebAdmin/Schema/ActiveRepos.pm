@@ -37,6 +37,8 @@ __PACKAGE__->add_columns(
   { data_type => "boolean", default_value => undef, is_nullable => 1, size => 1 },
   "gitweb",
   { data_type => "boolean", default_value => undef, is_nullable => 1, size => 1 },
+  "mantis",
+  { data_type => "boolean", default_value => undef, is_nullable => 1, size => 1 },
   "owner",
   {
     data_type => "text",
@@ -58,8 +60,8 @@ __PACKAGE__->add_columns(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-07-08 15:04:56
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:F9WCMr7V3lNv5VmayfLg+w
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-07-15 14:32:48
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:YQ2lk3y2d/waYei8xzME4g
 
 __PACKAGE__->has_many(
   "logs_pushes",

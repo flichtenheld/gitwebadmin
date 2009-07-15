@@ -72,13 +72,15 @@ CREATE TABLE repos (
        private  BOOLEAN NOT NULL DEFAULT FALSE,
        daemon   BOOLEAN NOT NULL DEFAULT FALSE,
        gitweb   BOOLEAN NOT NULL DEFAULT FALSE,
+       mantis   BOOLEAN NOT NULL DEFAULT FALSE,
        owner    TEXT NOT NULL REFERENCES users(uid) ON DELETE RESTRICT,
        forkof   INT REFERENCES repos(id) ON DELETE RESTRICT,
        mirrorof TEXT,
        deleted  BOOLEAN NOT NULL DEFAULT FALSE,
 
        CONSTRAINT repos_hidden_deleted CHECK (NOT (deleted AND (gitweb OR daemon))),
-       CONSTRAINT repos_one_parent CHECK (NOT (forkof IS NOT NULL AND mirrorof IS NOT NULL))
+       CONSTRAINT repos_one_parent CHECK (NOT (forkof IS NOT NULL AND mirrorof IS NOT NULL)),
+       CONSTRAINT repos_mantis_gitweb CHECK (NOT (mantis AND NOT gitweb))
 );
 CREATE INDEX repos_name_idx ON repos (name);
 GRANT SELECT, INSERT, UPDATE ON repos TO gwa_webaccess;

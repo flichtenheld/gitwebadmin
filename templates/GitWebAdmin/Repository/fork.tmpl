@@ -62,6 +62,12 @@
       <th>git-daemon Access:</th>
       <td>[% INCLUDE yes_no switch=repo.daemon switch_name='daemon' %]</td>
     </tr>
+    [% IF c.is_admin %]
+    <tr>
+      <th>Mantis Integration:</th>
+      <td>[% INCLUDE yes_no switch=0 switch_name='mantis' %]</td>
+    </tr>
+    [% END %]
   </tbody>
 </table>
 <p><input type="submit" value="Create Fork"></p>

@@ -57,6 +57,13 @@ __PACKAGE__->add_columns(
     is_nullable => 0,
     size => 1,
   },
+  "mantis",
+  {
+    data_type => "boolean",
+    default_value => "false",
+    is_nullable => 0,
+    size => 1,
+  },
   "owner",
   {
     data_type => "text",
@@ -84,6 +91,16 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key("id");
 __PACKAGE__->add_unique_constraint("repos_pkey", ["id"]);
 __PACKAGE__->add_unique_constraint("repos_name_key", ["name"]);
+__PACKAGE__->has_many(
+  "branches",
+  "GitWebAdmin::Schema::Branches",
+  { "foreign.rid" => "self.id" },
+);
+__PACKAGE__->has_many(
+  "commits",
+  "GitWebAdmin::Schema::Commits",
+  { "foreign.rid" => "self.id" },
+);
 __PACKAGE__->has_many(
   "logs_pushes",
   "GitWebAdmin::Schema::LogsPush",
@@ -113,8 +130,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-07-08 15:04:56
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:l0GH2s5HGa1xxqiGyCSqxA
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-07-15 14:32:48
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:SlIVtDsUq3Yjk2yHSke9fA
 
 __PACKAGE__->many_to_many('w_groups' => 'writables', 'gid');
 __PACKAGE__->many_to_many('r_groups' => 'readables', 'gid');

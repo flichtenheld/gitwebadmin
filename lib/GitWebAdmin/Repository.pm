@@ -177,8 +177,9 @@ sub do {
       }
     }
     if( $c->is_admin ){
-      # owner and private can only be changed by real admins
+      # these values can only be changed by real admins
       $repo->owner($c->query->param('owner'));
+      $repo->mantis($c->get_checkbox_opt('mantis'));
       $repo->private($c->get_checkbox_opt('private'));
     }
     if( $repo->is_changed ){
@@ -256,7 +257,7 @@ sub create {
     owner => $params->valid('owner') || '',
     descr => $params->valid('description') || '',
     );
-  foreach my $opt (qw(private daemon gitweb)){
+  foreach my $opt (qw(private daemon gitweb mantis)){
     $opts{$opt} = $c->get_checkbox_opt($opt);
   }
   foreach my $opt (qw(forkof mirrorof branch)){
@@ -279,6 +280,7 @@ sub create {
       die "403 Not authorized\n";
     }
     $opts{private} = 1;
+    $opts{mantis} = 0;
     $opts{owner} = $username;
   }
 
@@ -301,6 +303,7 @@ sub delete {
   $repo->name("Attic/".time."/".$repo->name);
   $repo->gitweb(0);
   $repo->daemon(0);
+  $repo->mantis(0);
   $repo->set_w_groups([]);
   $repo->set_r_groups([]);
   $repo->update->discard_changes;
