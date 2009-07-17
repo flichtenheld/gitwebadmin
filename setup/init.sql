@@ -117,6 +117,7 @@ CREATE TABLE branches (
        UNIQUE (rid, branch)
 );
 GRANT ALL ON branches TO gwa_gitaccess;
+GRANT ALL ON branches_id_seq TO gwa_gitaccess;
 
 --
 -- Save a list of commits in each repository
@@ -130,6 +131,7 @@ CREATE TABLE commits (
        UNIQUE (rid, commit)
 );
 GRANT ALL ON commits TO gwa_gitaccess;
+GRANT ALL ON commits_id_seq TO gwa_gitaccess;
 
 --
 -- Map commits to branches (n<-->n)
