@@ -11,33 +11,111 @@
 use strict;
 use warnings;
 
-use File::Spec::Functions qw(rel2abs);
+use File::Spec::Functions qw(rel2abs catfile);
+use File::Basename;
+use File::Slurp;
+use File::Path;
+use Git;
+
+my $prog = basename($0);
 
 use lib '/srv/git/gitwebadmin/lib';
 use GitWebAdmin::Schema;
 
 my $schema = GitWebAdmin::Schema->connect("dbi:Pg:dbname=gitwebadmin");
-my $rs = $schema->resultset('LogsPush');
+my $logs = $schema->resultset('LogsPush');
+my $mantis = $schema->resultset('MantisRepos');
+my $branches = $schema->resultset('Branches');
+my $commits = $schema->resultset('Commits');
 
 my $gitdir = rel2abs($ENV{GIT_DIR});
-$gitdir =~ s;^/srv/git/repositories/;;;
-$gitdir =~ s;/+$;;;
-my $repo = $schema->resultset('Repos')->find($gitdir, {key => 'repos_name_key'})
+(my $reponame = $gitdir) =~ s;^/srv/git/repositories/;;;
+$reponame =~ s;/+$;;;
+my $repo = $schema->resultset('Repos')->find($reponame, {key => 'repos_name_key'})
     or die "Repository $gitdir not found in database\n";
 my $gituser = $ENV{GITOSIS_USER};
 
 # Read all data from STDIN
 ##
 while( <> ){
-    my ($oldrev, $newrev, $ref) = split /\s+/, $_, 3;
+  chomp;
+  my ($oldrev, $newrev, $ref) = split /\s+/, $_, 3;
 
-    # Push logging
-    ##
-    $rs->create({
-	rid => $repo->id,
-	uid => $gituser,
-	old_id => $oldrev,
-	new_id => $newrev,
-	ref => $ref,
-		});
+  # Push logging
+  ##
+  $logs->create({
+    rid => $repo->id,
+    uid => $gituser,
+    old_id => $oldrev,
+    new_id => $newrev,
+    ref => $ref,
+  });
+  print "$prog: Logged ref change $ref ($oldrev -> $newrev) by $gituser\n";
+}
+
+
+# Update commit lists
+# Operate on whole repo, not just the updated branches. Usually it
+# will make no difference and noticing that should be cheap enough.
+##
+if( $mantis->find($repo->id) ){
+  my %branches = map { $_->branch => $_ } $repo->branches;
+
+  my $git = Git->repository($gitdir);
+  my @heads = $git->command(qw(for-each-ref refs/heads));
+  foreach( @heads ){
+    unless( m|^([a-f0-9]{40})\s+commit\s+refs/heads/(.+)$| ){
+      warn "$prog: unknown format for for-each-ref output: $_\n";
+    }
+    my ($sha1, $ref) = ($1, $2);
+    if( not exists $branches{$ref} ){
+      my $branch = $repo->create_related('branches',
+                                         { branch => $ref, commit => $sha1 });
+      print "$prog: Mantis Data: Added branch $ref ($sha1)\n";
+      import_commits($git, $repo, $branch, $sha1);
+    } else {
+      my $old_sha1 = $branches{$ref}->commit;
+      unless( $old_sha1 eq $sha1 ){
+        $branches{$ref}->commit($sha1);
+        $branches{$ref}->update->discard_changes;
+
+        print "$prog: Mantis Data: Updated branch $ref ($old_sha1 -> $sha1)\n";
+
+        import_commits($git, $repo, $branches{$ref}, $sha1, $old_sha1);
+      }
+    }
+  }
+  my $mantisdata = catfile( '/srv/git/mantis/', $repo->name );
+  if( ! -d $mantisdata ){
+    mkpath $mantisdata, 0, 02777
+      or die "mkdir $mantisdata failed: $!\n";
+  }
+  $mantisdata = catfile( $mantisdata, 'commits.txt' );
+  my @data;
+  foreach my $c ($repo->commits){
+    push @data, $c->commit."=".join(',', map { $_->branch } $c->branches)."\n";
+  }
+  write_file("$mantisdata.new", @data)
+    or die "write_file $mantisdata.new failed: $!\n";
+  rename("$mantisdata.new", $mantisdata)
+    or die "rename $mantisdata failed: $!\n";
+}
+
+sub import_commits {
+  my ($git_repo, $db_repo, $branch, $sha1, $old_sha1) = @_;
+
+  my @cmd = qw(rev-list -E --grep=^\[[0-9]+\]);
+  push @cmd, $sha1;
+  push @cmd, "^$old_sha1" if $old_sha1;
+
+  my @commits = $git_repo->command(@cmd);
+  foreach my $c (@commits){
+    chomp $c;
+    warn "$prog: invalid commit $c\n" unless $c =~ /^[a-f0-9]{40}$/;
+    my $commit = $commits->find_or_create(
+      { rid => $db_repo->id, commit => $c },
+      { key => 'commits_rid_key' }
+    );
+    $branch->add_to_commits($commit);
+  }
 }
