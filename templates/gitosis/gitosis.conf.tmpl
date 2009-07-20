@@ -5,9 +5,9 @@ loglevel = [% gitosis.loglevel %]
 
 [% FOREACH g IN groups.keys.sort %]
 [group [% g %]]
-writable = [% groups.$g.writable.join(' ') %]
-readable = [% groups.$g.readable.join(' ') %]
-members  = [% groups.$g.members.join(' ')  %]
+writable = [% groups.$g.writable.sort.join(' ') %]
+readable = [% groups.$g.readable.sort.join(' ') %]
+members  = [% groups.$g.members.sort.join(' ')  %]
 [% END %]
 
 [% FOREACH r IN repos.keys.sort %]
