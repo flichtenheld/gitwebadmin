@@ -1,0 +1,60 @@
+#!/usr/bin/perl
+#
+#  Copyright (C) 2009 Astaro AG  www.astaro.com
+#  All rights reserved.
+#
+#  Author: Frank Lichtenheld <flichtenheld@astaro.com> 20.07.2009
+#
+##############################################################################
+# General update hook for the various GWA parts
+##############################################################################
+use strict;
+use warnings;
+
+use File::Spec::Functions qw(rel2abs);
+use Git;
+
+use constant SHA_UNDEF => '0' x 40;
+
+use lib '/srv/git/gitwebadmin/lib';
+use GitWebAdmin::Schema;
+
+my $schema = GitWebAdmin::Schema->connect("dbi:Pg:dbname=gitwebadmin");
+
+my $gitdir = rel2abs($ENV{GIT_DIR});
+(my $reponame = $gitdir) =~ s;^/srv/git/repositories/;;;
+$reponame =~ s;/+$;;;
+my $repo = $schema->resultset('Repos')->find($reponame, {key => 'repos_name_key'})
+    or die "Repository $reponame not found in database\n";
+my $gituser = $ENV{GITOSIS_USER};
+
+if( $repo->deleted ){
+  die "Repository $reponame is deleted\n";
+}
+if( $repo->mirrorof and defined($gituser) ){
+  die "Repository $reponame is a mirror\n";
+}
+
+my ($ref, $old_sha1, $sha1) = @ARGV;
+my $update_type = 'update';
+if( $sha1 eq SHA_UNDEF ){
+  $update_type = 'delete';
+}elsif( $old_sha1 eq SHA_UNDEF ){
+  $update_type = 'create';
+}
+
+# deletions and non-ff updates are not allowed in public repositories
+unless( $repo->private ){
+  die "Repository $reponame is public,\ndeleting $ref is not allowed\n"
+    if $update_type eq 'delete';
+
+  my $git = Git->repository($gitdir);
+  unless( $update_type eq 'create' ){
+    my @merge_base = $git->command('merge-base', $old_sha1, $sha1);
+    if( $merge_base[0] ne $old_sha1 ){
+      die "Repository $reponame is public,\nnon-fast-forward push to $ref is not allowed\n";
+    }
+  }
+}
+
+
