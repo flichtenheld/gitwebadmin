@@ -1,0 +1,32 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+use File::Spec::Functions qw(rel2abs);
+
+use lib '/srv/git/gitwebadmin/lib';
+use GitWebAdmin::Schema;
+
+my $schema = GitWebAdmin::Schema->connect("dbi:Pg:dbname=gitwebadmin");
+my $rs = $schema->resultset('LogsPush');
+
+my $gitdir = rel2abs($ENV{GIT_DIR});
+$gitdir =~ s;^/srv/git/repositories/;;;
+$gitdir =~ s;/+$;;;
+my $repo = $schema->resultset('Repos')->find($gitdir, {key => 'repos_name_key'})
+    or die "Repository $gitdir not found in database\n";
+my $gituser = $ENV{GITOSIS_USER};
+
+while( <> ){
+    my ($oldrev, $newrev, $ref) = split /\s+/, $_, 3;
+
+    $rs->create({
+	rid => $repo->id,
+	uid => $gituser,
+	old_id => $oldrev,
+	new_id => $newrev,
+	ref => $ref,
+		});
+	
+}
