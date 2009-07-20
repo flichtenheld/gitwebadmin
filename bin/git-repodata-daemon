@@ -60,16 +60,45 @@ while( 1 ){
       unless( m|^([a-f0-9]{40})\s+commit\s+refs/heads/(.+)$| ){
         die "unknown format for for-each-ref output: $_\n";
       }
-      my ($sha1, $branch) = ($1, $2);
-      if( not exists $branches{$branch} ){
-        $rrepo->create_related('branches',
-                               { branch => $branch, commit => $sha1 });
+      my ($sha1, $ref) = ($1, $2);
+      if( not exists $branches{$ref} ){
+        my $branch = $rrepo->create_related('branches',
+                                            { branch => $ref, commit => $sha1 });
+        Dutil::log($rrepo->name.": Added branch $ref ($sha1)");
+        import_commits($git, $rrepo, $branch, $sha1);
       } else {
-        $branches{$branch}->commit($sha1);
-        $branches{$branch}->update if $branches{$branch}->is_changed;
+        my $old_sha1 = $branches{$ref}->commit;
+        unless( $old_sha1 eq $sha1 ){
+          $branches{$ref}->commit($sha1);
+          $branches{$ref}->update->discard_changes;
+
+          Dutil::log($rrepo->name.": Updated branch $ref ($old_sha1 -> $sha1)");
+
+          import_commits($git, $rrepo, $branches{$ref}, $sha1, $old_sha1);
+        }
       }
     }
   }
+  $rs->reset;
 
   sleep 10;
+}
+
+sub import_commits {
+  my ($git, $repo, $branch, $sha1, $old_sha1) = @_;
+
+  my @cmd = qw(rev-list -E --grep=^\[[0-9]+\]);
+  push @cmd, $sha1;
+  push @cmd, "^$old_sha1" if $old_sha1;
+
+  my @commits = $git->command(@cmd);
+  foreach my $c (@commits){
+    chomp $c;
+    die "invalid commit $c\n" unless $c =~ /^[a-f0-9]{40}$/;
+    my $commit = $commits->find_or_create(
+      { rid => $repo->id, commit => $c },
+      { key => 'commits_rid_key' }
+    );
+    $branch->add_to_commits($commit);
+  }
 }
