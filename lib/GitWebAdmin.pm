@@ -31,7 +31,7 @@ sub cgiapp_prerun {
     "dbi:$db_cfg->{driver}:dbname=$db_cfg->{name}",
     $db_cfg->{username}, $db_cfg->{password});
   $c->param('db', $schema);
-  $c->param('user', $ENV{REMOTE_USER}) if $ENV{REMOTE_USER};
+  $c->param('user', lc($ENV{REMOTE_USER})) if $ENV{REMOTE_USER};
   $c->param('user_obj', $schema->resultset('Users')->find($c->param('user')));
 
   $c->run_modes([qw(do list start delete create create_form)]);
