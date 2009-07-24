@@ -29,7 +29,7 @@ my $branches = $schema->resultset('Branches');
 my $commits = $schema->resultset('Commits');
 
 my $gitdir = rel2abs($ENV{GIT_DIR});
-(my $reponame = $gitdir) =~ s;^/srv/git/repositories/;;;
+(my $reponame = $gitdir) =~ s;^(/srv|/var/lib)/git/repositories/;;;
 $reponame =~ s;/+$;;;
 my $repo = $schema->resultset('Repos')->find($reponame, {key => 'repos_name_key'})
     or die "Repository $gitdir not found in database\n";
