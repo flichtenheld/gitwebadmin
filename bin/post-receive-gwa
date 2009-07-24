@@ -16,6 +16,8 @@ use File::Basename;
 use File::Slurp;
 use File::Path;
 use Git;
+use LWP::UserAgent;
+use URI::Escape;
 
 my $prog = basename($0);
 
@@ -99,6 +101,25 @@ if( $mantis->find($repo->id) ){
     or die "write_file $mantisdata.new failed: $!\n";
   rename("$mantisdata.new", $mantisdata)
     or die "rename $mantisdata failed: $!\n";
+
+  my $mantis_url = 'http://mantis.intranet.astaro.de';
+  my $ua = LWP::UserAgent->new;
+
+  my $trigger = $ua->get("$mantis_url/plugin.php?page=AstaroGitIntegration/latest&repo_url=".uri_escape($repo->name));
+
+  my $success;
+  if( $trigger->is_success ){
+    $trigger = $ua->get("$mantis_url/plugin.php?page=AstaroGitIntegration/import&repo_url=".uri_escape($repo->name));
+
+    if( $trigger->is_success ){
+      print "$prog: Mantis: Updated succesfully\n";
+      $success = 1;
+    }else{
+      warn "$prog: Mantis: Astaro Update FAILED: ".$trigger->status_line."\n";
+    }
+  }else{
+    warn "$prog: Mantis: Update FAILED: ".$trigger->status_line."\n";
+  }
 }
 
 sub import_commits {

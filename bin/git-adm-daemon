@@ -18,6 +18,7 @@ use File::Spec::Functions qw(:ALL);
 use File::Slurp;
 use Git;
 use XML::Simple;
+use LWP::UserAgent;
 
 use FindBin;
 use Cwd qw(realpath);
@@ -51,7 +52,8 @@ my $schema = GitWebAdmin::Schema->connect(
 my $groups = $schema->resultset("Groups");
 my $owners = $schema->resultset("Users")->search({ active => 1 });
 my $repos = $schema->resultset("Repos");
-my $mantis = $schema->resultset("MantisRepos");
+my $mantis = $schema->resultset("MantisRepos")->search(
+  undef, { order_by => 'name' });
 
 my $gitdir = rel2abs($config->{gitosis}{repository}, $GWA);
 my $git = Git->repository($gitdir);
@@ -159,10 +161,25 @@ while( 1 ){
       }
       $mantis->reset;
       my $xml = XMLout( { repo => \@mantis_r }, RootName => 'Repositories' );
-      write_file("$repolist.new", $xml)
-        or die "writing of repolist failed\n";
-      rename("$repolist.new", $repolist)
-        or die "rename of repolist failed\n";
+      my $old_xml = read_file($repolist) || '';
+      if( $xml ne $old_xml ){
+        write_file("$repolist.new", $xml)
+          or die "writing of repolist failed\n";
+        rename("$repolist.new", $repolist)
+          or die "rename of repolist failed\n";
+        Dutil::log("Updated $repolist");
+        if( my $mantisurl = $config->{mantis}{baseurl} ){
+          my $ua = LWP::UserAgent->new;
+
+          my $response = $ua->get("$mantisurl/plugin.php?page=AstaroGitIntegration/sync");
+
+          if ($response->is_success) {
+            Dutil::log("triggered mantis sync");
+          }else{
+            Dutil::log("mantis sync failed: ".$response->status_line);
+          }
+        }
+      }
     }
 
     sleep 10;
