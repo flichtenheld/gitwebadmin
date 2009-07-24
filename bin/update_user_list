@@ -13,6 +13,7 @@ use warnings;
 use Net::LDAP;
 use Config::Auto;
 use Data::Dumper;
+use Getopt::Long;
 
 use FindBin;
 use lib "$FindBin::Bin/../lib";
@@ -21,6 +22,10 @@ use GitWebAdmin::Schema;
 
 my $config = Config::Auto::parse("$FindBin::Bin/../gitwebadmin.ini");
 $config = { %$config, %{Config::Auto::parse("$FindBin::Bin/../ldap.ini")} };
+
+my $quiet;
+GetOptions("quiet|q" => \$quiet)
+  or die "Failure to parse command line\n";
 
 my $db_cfg = $config->{database};
 my $schema = GitWebAdmin::Schema->connect(
@@ -35,7 +40,7 @@ my $mesg = $ldap->bind( $ldap_cfg->{bind_dn},
                         password => $ldap_cfg->{password},
   );
 
-print "Get group git_access\n";
+print "Get group git_access\n" unless $quiet;
 $mesg = $ldap->search(
   base   => "OU=AstaroUserGroups,DC=intranet,DC=astaro,DC=de",
   filter => "(CN=git_access)",
@@ -47,8 +52,8 @@ $mesg->code && die $mesg->error;
 die "Group not unique\n" if $mesg->entries > 1;
 
 my @members = map { s/^(CN=.*?),.*/$1/i; $_ } ($mesg->entries)[0]->get_value('member');
-print "\tmembers = @members\n";
-print "Get member data\n";
+print "\tmembers = @members\n" unless $quiet;
+print "Get member data\n"      unless $quiet;
 $mesg = $ldap->search(
   base   => "DC=intranet,DC=astaro,DC=de",
   filter => "(&(ObjectClass=user)(|".join(' ', map { "($_)" } @members)."))",
@@ -61,7 +66,7 @@ my $rs = $schema->resultset('Users');
 my %uids = ();
 foreach my $entry ($mesg->entries){
   my $uid = $entry->get_value('sAMAccountName');
-  print "\tmember ".$entry->get_value('cn')." (uid=$uid)\n";
+  print "\tmember ".$entry->get_value('cn')." (uid=$uid)\n" unless $quiet;
   $rs->update_or_create({ uid => $uid,
                           name => $entry->get_value('cn'),
                           mail => $entry->get_value('mail'),
