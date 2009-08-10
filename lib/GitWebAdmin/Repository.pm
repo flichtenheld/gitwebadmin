@@ -297,7 +297,7 @@ sub delete {
   die "404 Repository not found\n" unless $repo;
   die "403 Not authorized\n" unless $c->has_admin($repo);
   die "404 Repository already deleted\n" if $repo->deleted;
-  die "409 Repository has forks\n" if $repo->repo->count;
+  die "409 Repository has forks\n" if $repo->repo({ deleted => 0 })->count;
 
   $repo->deleted(1);
   $repo->name("Attic/".time."/".$repo->name);
