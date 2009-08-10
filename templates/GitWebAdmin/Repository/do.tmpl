@@ -55,6 +55,14 @@
 <li><a href="[% c.cfg('links').gitweb.replace('%name', repo.name) | url %]">gitweb</a></li>
 </ul>
 [% END %]
+[% IF repo.repo({ deleted => 0 }) %]
+<h2>Forks</h2>
+<ul>
+[% FOREACH f IN DBIxRel(repo.repo({ deleted => 0 })) %]
+<li><a href="[% c.url('repo/' _ f.name) %]">[% f.name %]</a></li>
+[% END %]
+</ul>
+[% END %]
 [% INCLUDE admin_actions %]
 </div> <!-- end actions -->
 
