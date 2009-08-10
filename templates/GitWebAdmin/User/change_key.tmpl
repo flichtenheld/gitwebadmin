@@ -7,7 +7,7 @@
 
 <h1>User [% user.name() | html %] </h1>
 
-<p>Key changed.</p>
+<p>Key(s) changed.</p>
 [% IF c.param('user') == user.uid %]
 <pre>[% user.key.chunk(80).join("\n") %]</pre>
 [% END %]

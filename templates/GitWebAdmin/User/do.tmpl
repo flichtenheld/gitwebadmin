@@ -69,7 +69,7 @@
 [% END %]
 
 [% IF c.param('user') == user.uid %]
-<p><label for="pubkey">Public Key for SSH access:</label></p>
+<p><label for="pubkey">Public Key(s) for SSH access:</label></p>
 <form method="post" action="[% c.url('user/' _ user.uid _ '/key') %]">
   <p><textarea name="pubkey" cols="80" rows="10">[% user.key %]</textarea></p>
   <p><input type="submit" value="Submit"></p>
