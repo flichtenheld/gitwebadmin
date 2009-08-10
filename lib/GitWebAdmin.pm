@@ -26,6 +26,10 @@ GitWebAdmin->tt_config(
 
 sub cgiapp_prerun {
   my $c = shift;
+
+  # CGI.pm is from last millenium...
+  $c->header_add(-charset => 'utf-8');
+
   my $db_cfg = $c->cfg('database');
   my $schema = GitWebAdmin::Schema->connect(
     "dbi:$db_cfg->{driver}:dbname=$db_cfg->{name}",
