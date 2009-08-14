@@ -228,6 +228,9 @@ sub _create_params {
         },{
           name => 'path_git',
           constraint_method => qr{(?<=\.git)$},
+        },{
+          name => 'path_chars',
+          constraint_method => qr{^[a-zA-Z\d][\w@.-]+(/[a-zA-Z\d][\w@.-]+)*$},
         }],
       description => FV_max_length(200),
     },
@@ -237,6 +240,7 @@ sub _create_params {
         URI_chars => 'contains characters not allowed in URIs',
         path_abs => "repository path can't be absolute",
         path_git => "repository path has to end in .git",
+        path_chars => "repository path can only contain letters, numbers and characters @.-",
       }
     }
   };
