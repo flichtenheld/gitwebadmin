@@ -52,7 +52,7 @@ while( <> ){
     new_id => $newrev,
     ref => $ref,
   });
-  print "$prog: Logged ref change $ref ($oldrev -> $newrev) by $gituser\n";
+  print "$prog: Logged ref change $ref by $gituser (".short_id($oldrev)."..".short_id($newrev).")\n";
 }
 
 
@@ -73,7 +73,7 @@ if( $mantis->find($repo->id) ){
     if( not exists $branches{$ref} ){
       my $branch = $repo->create_related('branches',
                                          { branch => $ref, commit => $sha1 });
-      print "$prog: Mantis Data: Added branch $ref ($sha1)\n";
+      print "$prog: Mantis Data: Added branch $ref (".short_id($sha1).")\n";
       import_commits($git, $repo, $branch, $sha1);
     } else {
       my $old_sha1 = $branches{$ref}->commit;
@@ -81,7 +81,7 @@ if( $mantis->find($repo->id) ){
         $branches{$ref}->commit($sha1);
         $branches{$ref}->update->discard_changes;
 
-        print "$prog: Mantis Data: Updated branch $ref ($old_sha1 -> $sha1)\n";
+        print "$prog: Mantis Data: Updated branch $ref (".short_id($old_sha1)."..".short_id($sha1).")\n";
 
         import_commits($git, $repo, $branches{$ref}, $sha1, $old_sha1);
       }
@@ -120,6 +120,12 @@ if( $mantis->find($repo->id) ){
   }else{
     warn "$prog: Mantis: Update FAILED: ".$trigger->status_line."\n";
   }
+}
+
+sub short_id {
+  my ($sha) = @_;
+
+  return substr($sha, 0, 7);
 }
 
 sub import_commits {
