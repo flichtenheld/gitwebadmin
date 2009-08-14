@@ -30,6 +30,12 @@ sub cgiapp_prerun {
   # CGI.pm is from last millenium...
   $c->header_add(-charset => 'utf-8');
 
+  # Browsers should never cache these sites
+  $c->header_add(
+    -expires => 'now',
+    '-cache-control' => 'no-cache'
+    );
+
   my $db_cfg = $c->cfg('database');
   my $schema = GitWebAdmin::Schema->connect(
     "dbi:$db_cfg->{driver}:dbname=$db_cfg->{name}",
