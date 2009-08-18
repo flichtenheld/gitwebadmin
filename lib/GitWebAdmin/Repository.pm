@@ -168,6 +168,8 @@ sub do {
           die "400 Invalid mirror URI\n";
         }
         $repo->mirrorof($mirrorof);
+      }elsif( $repo->mirrorof ){
+        $repo->mirrorof('');
       }
       foreach my $opt (qw(gitweb daemon)){
         $repo->set_column(
