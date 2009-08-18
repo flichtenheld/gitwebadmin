@@ -60,8 +60,8 @@ __PACKAGE__->add_columns(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-07-15 14:32:48
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:YQ2lk3y2d/waYei8xzME4g
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-08-18 21:33:43
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:dTh/e32WFyKGxwJp4x6dcg
 
 __PACKAGE__->has_many(
   "logs_pushes",

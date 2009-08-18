@@ -34,8 +34,8 @@ __PACKAGE__->add_columns(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-07-15 14:32:48
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:eVQ0iqT9oSB6As+IsyM4TQ
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-08-18 21:33:43
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:il2mlIWtfc2CKn0Z8mxJ8w
 
 __PACKAGE__->set_primary_key("id");
 __PACKAGE__->add_unique_constraint("repos_pkey", ["id"]);

@@ -130,8 +130,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-07-15 14:32:48
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:SlIVtDsUq3Yjk2yHSke9fA
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-08-18 21:33:43
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:EttT8/Ec3yZyiesxVRec7w
 
 __PACKAGE__->many_to_many('w_groups' => 'writables', 'gid');
 __PACKAGE__->many_to_many('r_groups' => 'readables', 'gid');

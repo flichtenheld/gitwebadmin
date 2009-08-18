@@ -31,7 +31,6 @@ CREATE TABLE users (
        uid   TEXT PRIMARY KEY,
        name  TEXT,
        mail  TEXT,
-       key   TEXT,
        admin BOOLEAN NOT NULL DEFAULT FALSE,
        active BOOLEAN NOT NULL DEFAULT TRUE,
 
@@ -45,6 +44,24 @@ GRANT ALL ON users TO gwa_admin;
 
 INSERT INTO users VALUES
        ('gitadm', 'Git Administrator');
+
+CREATE TYPE ssh_key_type AS ENUM ('rsa', 'dsa');
+
+CREATE TABLE keys (
+       id    SERIAL PRIMARY KEY,
+       uid   TEXT NOT NULL REFERENCES users(uid) ON DELETE CASCADE,
+       name  TEXT NOT NULL,
+       bits  INT NOT NULL CHECK (floor(log(2,bits)) = log(2,bits)),
+       type  ssh_key_type NOT NULL,
+       fingerprint TEXT NOT NULL,
+       key   TEXT NOT NULL,
+
+       UNIQUE(uid, key),
+       UNIQUE(uid, name)
+);
+GRANT ALL ON keys TO gwa_webaccess;
+GRANT ALL ON SEQUENCE keys_id_seq TO gwa_webaccess;
+GRANT SELECT ON keys TO gwa_gitaccess;
 
 CREATE TABLE groups (
        gid   TEXT PRIMARY KEY,

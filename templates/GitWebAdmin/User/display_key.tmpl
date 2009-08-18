@@ -1,0 +1,42 @@
+[% INCLUDE header.tmpl page_title="User Public Key"
+   navigation=[ { url => 'user/', name => 'Users' },
+                { url => 'user/' _ key.uid.uid, name => key.uid.uid },
+                { name => 'Keys' },
+                { url => 'user/' _ key.uid.uid _ 'key/' _ key.id, name => key.name },
+              ]
+%]
+
+<h1>User [% key.uid.name | html %], Key [% key.name | html %]</h1>
+
+[% IF c.param('user') == key.uid.uid %]
+[% SET keyurl = c.url('user/' _ key.uid.uid _ '/key/' _ key.id) %]
+<table id="keymeta">
+  <tbody>
+    <tr>
+      <th>Name:</th>
+      <td>
+        <form action="[% keyurl %]" method="post">
+          <input type="text" name="name" value="[% key.name | html %]" size="50">
+          <input type="submit" value="Change Name">
+        </form>
+      </td>
+    </tr>
+    <tr>
+      <th>Type:</th>
+      <td>[% key.type %] [% key.bits %]</td>
+    </tr>
+    <tr>
+      <th>Fingerprint:</th>
+      <td>[% key.fingerprint %]</td>
+    </tr>
+    <tr>
+      <th>Key:</th>
+      <td>
+        <pre>[% key.key.chunk(80).join("\n") %]</pre>
+      </td>
+    </tr>
+  </tbody>
+</table>
+[% END %]
+
+[% INCLUDE footer.tmpl %]

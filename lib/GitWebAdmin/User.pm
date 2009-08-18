@@ -11,10 +11,13 @@ use base 'GitWebAdmin';
 use strict;
 use warnings;
 
+use File::Temp qw(tempfile);
+use File::Slurp;
+
 sub setup {
   my $c = shift;
 
-  $c->run_modes([qw(change_key delete_key set_groups set_subscriptions)]);
+  $c->run_modes([qw(add_key change_key delete_key display_key set_groups set_subscriptions)]);
 }
 
 sub find_user {
@@ -47,7 +50,58 @@ sub do {
   return $c->tt_process({ user => $user });
 }
 
-sub change_key {
+sub get_key {
+  my $c = shift;
+
+  my $key;
+  if( my $key_file = $c->query->upload('pubkey_file') ){
+    $key = <$key_file>;
+    close $key_file;
+  }elsif( $c->query->param('pubkey') ){
+    $key = $c->query->param('pubkey');
+  }
+  chomp($key);
+  $key =~ s/^\s+//;
+  $key =~ s/\s+$//;
+
+  return if length($key) > 1000;
+  return if $key =~ m/\n/;
+
+  return $key;
+}
+
+sub find_key {
+  my $c = shift;
+
+  my $user = $c->find_user;
+  die "404 User not found\n" unless $user;
+  # users can only see or change their own keys
+  die "403 Not authorized\n" unless $user->uid eq $c->param('user');
+
+  my $id = $c->param('kid');
+  die "400 No key id given\n" unless $id;
+
+  return $user->find_related('keys', $id);
+}
+
+sub check_key {
+  my ($c, $key) = @_;
+
+  my ($fh, $fname) = tempfile();
+  write_file($fh, \$key)
+    or die "500 Error during key check\n";
+  open my $out, '-|', qw(ssh-keygen -l -f), $fname
+    or die "500 Error during key check\n";
+  my $line = <$out>;
+  close $out or return;
+  if( $line =~ /^(\d+) ((?:[0-9a-f]{2}:){15}[0-9a-f]{2}) \Q$fname\E \(([DR]SA)\)$/ ){
+    return ($1, $2, $3);
+  }
+  return;
+}
+
+my $key_tmpl = "GitWebAdmin/User/display_key.tmpl";
+sub add_key {
   my $c = shift;
 
   my $user = $c->find_user;
@@ -55,11 +109,63 @@ sub change_key {
   # users can only change their own keys
   die "403 Not authorized\n" unless $user->uid eq $c->param('user');
 
-  my $key = $c->query->param('pubkey');
-  $user->key($key);
-  $user->update();
+  my $key = $c->get_key;
+  die "400 No key given or key invalid\n" unless $key;
 
-  return $c->tt_process({ user => $user });
+  my ($bits, $fpr, $type) = $c->check_key($key);
+  die "400 Key invalid\n" unless $fpr;
+
+  my $name = $c->query->param('name');
+  die "400 No name given\n" unless $name;
+
+  my $key_obj = $user->create_related('keys',
+                                      { key => $key, name => $name,
+                                        fingerprint => $fpr, bits => $bits,
+                                        type => lc($type)
+                                      });
+
+  return $c->redirect($c->url('user/'.$key_obj->uid->uid.'/key/'.$key_obj->id));
+}
+
+sub delete_key {
+  my $c = shift;
+
+  my $key = $c->find_key;
+  die "404 Key not found\n" unless $key;
+
+  $key->delete;
+  return $c->redirect($c->url('user/'.$key->uid->uid, '', 'pubkeys'));
+}
+
+sub display_key {
+  my $c = shift;
+
+  my $key = $c->find_key;
+  die "404 Key not found\n" unless $key;
+
+  return $c->tt_process($key_tmpl,
+                        { action => 'show', key => $key });
+}
+
+sub change_key {
+  my $c = shift;
+
+  if( my $d = $c->rest_dispatch({ delete => 'delete_key', put => 'add_key' })){
+    return $c->$d();
+  }
+
+  my $key = $c->find_key;
+  die "404 Key not found\n" unless $key;
+
+  $key->name($c->query->param('name'));
+  my $action = 'nochange';
+  if( $key->is_changed ){
+    $key->update->discard_changes;
+    $action = 'change';
+  }
+
+  return $c->tt_process($key_tmpl,
+                        { action => $action, key => $key });
 }
 
 sub set_groups {

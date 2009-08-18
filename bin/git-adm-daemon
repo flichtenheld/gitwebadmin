@@ -132,13 +132,14 @@ while( 1 ){
 #    print "\told_keys = @old_keys\n";
     my %old_keys = map { $_ => 1 } @old_keys;
     while( my $usr = $owners->next ){
-	next unless $usr->key;
-	my $key_file = catfile($gitdir, "keydir", $usr->uid.".pub");
-	delete $old_keys{$key_file};
+      my @keys = map { $_->key."\n" } $usr->keys({}, { order_by => 'name' });
+      next unless @keys;
+      my $key_file = catfile($gitdir, "keydir", $usr->uid.".pub");
+      delete $old_keys{$key_file};
 #	print "\twrite $key_file\n" unless $quiet;
-	write_file($key_file, $usr->key."\n")
-	    or die "write_file failed: $!\n";
-	$git->command_noisy('add', catfile("keydir", $usr->uid.".pub"));
+      write_file($key_file, \@keys)
+          or die "write_file failed: $!\n";
+      $git->command_noisy('add', catfile("keydir", $usr->uid.".pub"));
     }
     $owners->reset;
 

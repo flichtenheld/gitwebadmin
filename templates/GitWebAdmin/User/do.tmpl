@@ -69,10 +69,29 @@
 [% END %]
 
 [% IF c.param('user') == user.uid %]
-<p><label for="pubkey">Public Key(s) for SSH access:</label></p>
-<form method="post" action="[% c.url('user/' _ user.uid _ '/key') %]">
-  <p><textarea name="pubkey" cols="80" rows="10">[% user.key %]</textarea></p>
-  <p><input type="submit" value="Submit"></p>
+<h2 id="pubkeys">SSH Public Keys</h2>
+[% FOREACH k IN DBIxRel(user.keys).sort('name') %]
+  [% '<p>Public Key(s) for SSH access:</p><ul>' IF loop.first %]
+    [% SET keyurl = c.url('user/' _ user.uid _ '/key/' _ k.id) %]
+    <li><a href="[% keyurl %]">[% k.name | html %]</a>:
+      <code>[% k.bits %] [% k.fingerprint %] [% k.type %]</code>
+      <form action="[% keyurl %]" method="post">
+        <input type="submit" value="Delete">
+        <input type="hidden" name="_method" value="delete">
+      </form>
+  [% '</ul>' IF loop.last %]
+[% END %]
+<h3 id="uploadkey">Upload new Key</h3>
+<form method="post" action="[% c.url('user/' _ user.uid _ '/key') %]" enctype="multipart/form-data">
+  <p><label for="name">Name for the new key:</label> (required)</p>
+  <p><input type="text" name="name" value="" size="50"></p>
+  <p><label for="pubkey">Paste new key:</label></p>
+  <p><textarea name="pubkey" cols="80" rows="10"></textarea></p>
+  <p><label for="pubkey_file">Upload key file:</label></p>
+  <p><input name="pubkey_file" type="file" size="80"></p>
+  <p><input type="submit" value="Submit">
+    <input type="hidden" name="_method" value="put"></p>
+  <p><em>Note:</em> Only one upload method can be used at a time. Uploading files takes precedence.</p>
 </form>
 [% END %]
 
