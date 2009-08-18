@@ -204,6 +204,7 @@ sub has_writable {
 
   my $user = $c->param('user_obj') or return 0;
   return 0 unless $user->active;
+  return 0 if $repo->mirrorof;
   return 1 if $repo->owner->uid eq $user->uid;
   foreach my $w ($repo->w_groups){
     foreach my $u ($w->users){
@@ -218,6 +219,8 @@ sub has_readable {
 
   my $user = $c->param('user_obj') or return 0;
   return 0 unless $user->active;
+  return 1 if $repo->daemon;
+  return 1 if $repo->gitweb;
   return 1 if $c->has_writable($repo);
   foreach my $r ($repo->r_groups){
     foreach my $u ($r->users){
