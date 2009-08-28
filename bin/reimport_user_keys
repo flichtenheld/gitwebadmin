@@ -1,0 +1,80 @@
+#!/usr/bin/perl
+#
+#  Copyright (C) 2009 Astaro AG  www.astaro.com
+#  All rights reserved.
+#
+#  Author: Frank Lichtenheld <flichtenheld@astaro.com> 28.08.2009
+#
+##############################################################################
+
+use strict;
+use warnings;
+
+use autodie;
+use Config::Auto;
+use Data::Dumper;
+use File::Spec::Functions qw(:ALL);
+use File::Basename;
+use File::Slurp;
+
+use FindBin;
+use Cwd qw(realpath);
+use lib "$FindBin::Bin/../lib";
+
+use Dutil;
+use GitWebAdmin::Schema;
+use GitWebAdmin::Utils;
+
+my $GWA      = realpath("$FindBin::Bin/../");
+
+my $config = Config::Auto::parse("$GWA/gitwebadmin.ini");
+
+my $db_cfg = $config->{database};
+my $schema = GitWebAdmin::Schema->connect(
+  "dbi:$db_cfg->{driver}:dbname=$db_cfg->{name}");
+
+my $gitdir = rel2abs($config->{gitosis}{repository}, $GWA);
+
+my @key_files = glob(catfile($gitdir, "keydir", "*.pub"));
+print "files = @key_files\n";
+
+my @users;
+foreach my $old_file (@key_files){
+  my $uname = basename($old_file, '.pub');
+
+  my $user = $schema->resultset('Users')->find($uname)
+    or die "Couldn't find user $uname\n";
+
+  print "read file $old_file\n";
+  my @keys = read_file($old_file);
+
+  push @users, [ $user, \@keys ];
+}
+
+foreach my $u (@users){
+  my ($user, $keys) = @$u;
+
+  my $count = 1;
+  foreach my $key (@$keys){
+    chomp($key);
+
+    my ($bits, $fpr, $type) = GitWebAdmin::Utils::check_key($key);
+    die "Invalid key: $key\n" unless $fpr;
+
+    my $name = $user->uid." ".$count++;
+    if( $key =~ /\s([\w.-]+\@[\w.-]+)$/ ){
+      $name = $1;
+    }
+    if( $user->search_related('keys', { key => $key })->count ){
+      print "Key already in database: $fpr\n";
+      next;
+    }
+    print "Create key $name ($bits $type): $fpr\n";
+    my $key_obj = $user->create_related(
+      'keys',
+      { key => $key, name => $name,
+        fingerprint => $fpr, bits => $bits,
+        type => lc($type)
+      });
+  }
+}
