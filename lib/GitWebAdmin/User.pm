@@ -11,8 +11,7 @@ use base 'GitWebAdmin';
 use strict;
 use warnings;
 
-use File::Temp qw(tempfile);
-use File::Slurp;
+use GitWebAdmin::Utils;
 
 sub setup {
   my $c = shift;
@@ -84,22 +83,6 @@ sub find_key {
   return $user->find_related('keys', $id);
 }
 
-sub check_key {
-  my ($c, $key) = @_;
-
-  my ($fh, $fname) = tempfile();
-  write_file($fh, \$key)
-    or die "500 Error during key check\n";
-  open my $out, '-|', qw(ssh-keygen -l -f), $fname
-    or die "500 Error during key check\n";
-  my $line = <$out>;
-  close $out or return;
-  if( $line =~ /^(\d+) ((?:[0-9a-f]{2}:){15}[0-9a-f]{2}) \Q$fname\E \(([DR]SA)\)$/ ){
-    return ($1, $2, $3);
-  }
-  return;
-}
-
 my $key_tmpl = "GitWebAdmin/User/display_key.tmpl";
 sub add_key {
   my $c = shift;
@@ -112,7 +95,7 @@ sub add_key {
   my $key = $c->get_key;
   die "400 No key given or key invalid\n" unless $key;
 
-  my ($bits, $fpr, $type) = $c->check_key($key);
+  my ($bits, $fpr, $type) = GitWebAdmin::Utils::check_key($key);
   die "400 Key invalid\n" unless $fpr;
 
   my $name = $c->query->param('name');
