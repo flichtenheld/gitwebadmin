@@ -1,3 +1,4 @@
+[% PROCESS methods.tmpl %]
 [% INCLUDE header.tmpl page_title="User Public Key"
    navigation=[ { url => 'user/', name => 'Users' },
                 { url => 'user/' _ key.uid.uid, name => key.uid.uid },
@@ -5,6 +6,10 @@
                 { url => 'user/' _ key.uid.uid _ 'key/' _ key.id, name => key.name },
               ]
 %]
+
+<div id="actions">
+[% INCLUDE admin_actions %]
+</div> <!-- end actions -->
 
 <h1>User [% key.uid.name | html %], Key [% key.name | html %]</h1>
 
