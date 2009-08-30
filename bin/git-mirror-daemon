@@ -33,6 +33,7 @@ Dutil::install_handlers;
 Dutil::log("initialized");
 
 my $schema = GitWebAdmin::Schema->connect("dbi:Pg:dbname=gitwebadmin");
+my $rs = $schema->resultset('ActiveRepos');
 
 my $started = time();
 while( 1 ){
@@ -43,8 +44,7 @@ while( 1 ){
     exit 0;
   }
 
-  my $rs = $schema->resultset('ActiveRepos');
-
+  $rs->reset;
   while( my $repo = $rs->next ){
     next unless $repo->mirrorof;
 
