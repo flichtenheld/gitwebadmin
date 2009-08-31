@@ -4,6 +4,8 @@
 --
 --  Author: Frank Lichtenheld <flichtenheld@astaro.com> 07.07.2009
 
+DROP TABLE keys   CASCADE;
+DROP TYPE  ssh_key_type;
 DROP TABLE users  CASCADE;
 DROP TABLE groups CASCADE;
 DROP TABLE repos  CASCADE;
