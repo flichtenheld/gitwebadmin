@@ -118,7 +118,7 @@ sub subscribe {
 
   my $repo = $c->find_repo;
   die "404 Repository not found\n" unless $repo;
-  die "403 Not authorized for subscribing\n" unless $c->can_subscribe;
+  die "403 Not authorized for subscribing\n" unless $c->can_subscribe($repo);
 
   $repo->add_to_subscribers($c->param('user_obj'));
   return $c->redirect($c->url('repo/' . $repo->name));
@@ -168,6 +168,8 @@ sub do {
           die "400 Invalid mirror URI\n";
         }
         $repo->mirrorof($mirrorof);
+      }elsif( $repo->mirrorof ){
+        $repo->mirrorof('');
       }
       foreach my $opt (qw(gitweb daemon)){
         $repo->set_column(
