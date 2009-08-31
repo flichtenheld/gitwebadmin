@@ -58,7 +58,7 @@ while( 1 ){
         $timestamp = read_file($ts_file) || '';
         if( $timestamp
             and ($timestamp =~ /^\d+$/)
-            and (($time - $timestamp) < 86_400) ){
+            and (($time - $timestamp) < $repo->mirrorupd) ){
           next;
         }
       }

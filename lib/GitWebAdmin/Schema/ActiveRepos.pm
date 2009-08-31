@@ -55,13 +55,15 @@ __PACKAGE__->add_columns(
     is_nullable => 1,
     size => undef,
   },
+  "mirrorupd",
+  { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
   "deleted",
   { data_type => "boolean", default_value => undef, is_nullable => 1, size => 1 },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-08-18 21:33:43
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:dTh/e32WFyKGxwJp4x6dcg
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-08-31 14:01:50
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:t7jDqN3w+w/Gff0IBw3Fjg
 
 __PACKAGE__->has_many(
   "logs_pushes",

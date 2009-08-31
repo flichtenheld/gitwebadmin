@@ -80,6 +80,8 @@ __PACKAGE__->add_columns(
     is_nullable => 1,
     size => undef,
   },
+  "mirrorupd",
+  { data_type => "integer", default_value => 86400, is_nullable => 1, size => 4 },
   "deleted",
   {
     data_type => "boolean",
@@ -130,8 +132,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-08-18 21:33:43
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:EttT8/Ec3yZyiesxVRec7w
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-08-31 14:01:50
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:6DYWfNanfbrqSindW/Mang
 
 __PACKAGE__->many_to_many('w_groups' => 'writables', 'gid');
 __PACKAGE__->many_to_many('r_groups' => 'readables', 'gid');

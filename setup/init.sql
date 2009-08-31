@@ -98,6 +98,7 @@ CREATE TABLE repos (
        owner    TEXT NOT NULL REFERENCES users(uid) ON DELETE RESTRICT,
        forkof   INT REFERENCES repos(id) ON DELETE RESTRICT,
        mirrorof TEXT,
+       mirrorupd INT DEFAULT 86400 CHECK ((mirrorupd >= 600) AND (mirrorupd <= 604800)),
        deleted  BOOLEAN NOT NULL DEFAULT FALSE,
 
        CONSTRAINT repos_hidden_deleted CHECK (NOT (deleted AND (gitweb OR daemon))),
