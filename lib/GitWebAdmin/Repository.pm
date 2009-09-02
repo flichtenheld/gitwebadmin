@@ -277,7 +277,7 @@ sub create {
   unless( $abs =~ m;^\Q$base_dir\E/; ){
     die "403 Repository path $abs can't traverse outside base directory\n";
   }
-  if( $abs =~ m;(/|^)..(/|$); ){
+  if( $abs =~ m;(/|^)\.\.(/|$); ){
     die "400 Malformed path\n";
   }
   unless( $c->is_admin ){
