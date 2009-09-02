@@ -104,7 +104,7 @@ sub add_key {
   my $key_obj = $user->create_related('keys',
                                       { key => $key, name => $name,
                                         fingerprint => $fpr, bits => $bits,
-                                        type => lc($type)
+                                        type => (defined($type) ? lc($type) : undef)
                                       });
 
   return $c->redirect($c->url('user/'.$key_obj->uid->uid.'/key/'.$key_obj->id));

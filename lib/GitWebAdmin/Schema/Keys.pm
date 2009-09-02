@@ -35,7 +35,7 @@ __PACKAGE__->add_columns(
   {
     data_type => "ssh_key_type",
     default_value => undef,
-    is_nullable => 0,
+    is_nullable => 1,
     size => 4,
   },
   "fingerprint",
@@ -60,8 +60,8 @@ __PACKAGE__->add_unique_constraint("keys_uid_key", ["uid", "key"]);
 __PACKAGE__->belongs_to("uid", "GitWebAdmin::Schema::Users", { uid => "uid" });
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-08-31 14:01:50
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:EVAJXtCuwydBxzi0khIYtA
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-09-02 12:19:56
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:VHcPaulzKqRaxZUF6j+xHQ
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

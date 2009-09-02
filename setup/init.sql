@@ -54,7 +54,7 @@ CREATE TABLE keys (
        uid   TEXT NOT NULL REFERENCES users(uid) ON DELETE CASCADE,
        name  TEXT NOT NULL,
        bits  INT NOT NULL CHECK (floor(log(2,bits)) = log(2,bits)),
-       type  ssh_key_type NOT NULL,
+       type  ssh_key_type,
        fingerprint TEXT NOT NULL,
        key   TEXT NOT NULL,
 

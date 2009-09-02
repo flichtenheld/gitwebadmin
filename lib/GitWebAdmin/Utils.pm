@@ -33,6 +33,9 @@ sub check_key {
   close $out or return;
   if( $line =~ /^(\d+) ((?:[0-9a-f]{2}:){15}[0-9a-f]{2}) \Q$fname\E \(([DR]SA)\)$/ ){
     return ($1, $2, $3);
+  }elsif( $line =~ /^(\d+) ((?:[0-9a-f]{2}:){15}[0-9a-f]{2}) \Q$fname\E$/ ){
+    # older ssh-keygen doesn't display the type
+    return ($1, $2, undef);
   }
   return;
 }

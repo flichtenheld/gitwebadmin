@@ -74,7 +74,7 @@ foreach my $u (@users){
       'keys',
       { key => $key, name => $name,
         fingerprint => $fpr, bits => $bits,
-        type => lc($type)
+        type => (defined($type) ? lc($type) : undef)
       });
   }
 }
