@@ -16,8 +16,6 @@ use File::Basename;
 use File::Slurp;
 use File::Path;
 use Git;
-use LWP::UserAgent;
-use URI::Escape;
 
 my $prog = basename($0);
 

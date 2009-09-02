@@ -14,8 +14,12 @@ our @EXPORT_OK = qw(short_id);
 use strict;
 use warnings;
 
-use File::Temp qw(tempfile);
+use File::Path;
+use File::Spec::Functions qw(catfile);
 use File::Slurp;
+use File::Temp qw(tempfile);
+use LWP::UserAgent;
+use URI::Escape;
 
 sub check_key {
   my ($key) = @_;

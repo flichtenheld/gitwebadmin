@@ -92,6 +92,16 @@ __PACKAGE__->has_many(
   "GitWebAdmin::Schema::Writable",
   { "foreign.rid" => "self.id" },
 );
+__PACKAGE__->has_many(
+  "branches",
+  "GitWebAdmin::Schema::Branches",
+  { "foreign.rid" => "self.id" },
+);
+__PACKAGE__->has_many(
+  "commits",
+  "GitWebAdmin::Schema::Commits",
+  { "foreign.rid" => "self.id" },
+);
 __PACKAGE__->many_to_many('w_groups' => 'writables', 'gid');
 __PACKAGE__->many_to_many('r_groups' => 'readables', 'gid');
 __PACKAGE__->many_to_many('subscribers' => 'subscriptions', 'uid');

@@ -20,6 +20,7 @@ use lib "$FindBin::Bin/../lib";
 
 use Dutil;
 use GitWebAdmin::Schema;
+use GitWebAdmin::Utils;
 
 my $GIT      = "/srv/git";
 my $LOG      = "$GIT/mirror.log";
