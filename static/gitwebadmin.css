@@ -9,10 +9,20 @@ body {
     color: black;
     background: white;
     font-size: 100%;
+    border: solid #d9d8d1;
+    border-width: 1px;
 }
 
 img {
     border: 0;
+}
+
+a {
+    color: #00c;
+}
+
+a:hover, a:visited, a:active {
+        color: #800;
 }
 
 #outer {
@@ -26,6 +36,18 @@ img {
     border-top: black 1px double;
     border-bottom: black 1px double;
     padding: .5em;
+    font-size: 110%;
+    font-weight: bold;
+    background-color: #d9d8d1;
+    border: none;
+}
+
+#navbar a:visited, a.header {
+        color: #00c;
+}
+
+#navbar a:hover {
+        color: #800;
 }
 
 #footer {
@@ -61,6 +83,7 @@ img {
     font-size: 90%;
     text-align: right;
     float: right;
+    margin-right: 1em;
 }
 
 #repolist {
@@ -71,6 +94,10 @@ img {
 #repolist td, #repolist th {
     padding: .5em;
     border: 1px black solid;
+}
+
+#repolist th {
+   background-color: #edece6;
 }
 
 #repolist tr {
@@ -84,6 +111,10 @@ img {
     border: 1px black solid;
     padding: 1em .5em;
     width: auto;
+    background-color: #edece6;
+    border: solid #d9d8d1;
+    border-width: 1px;
+    margin-right: 1em;
 }
 
 #actions ul {
