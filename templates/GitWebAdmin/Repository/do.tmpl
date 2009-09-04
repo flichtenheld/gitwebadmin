@@ -96,10 +96,12 @@
       [% IF c.has_admin(repo) %]
       <th><label for="mirrorof">Mirror of:</label></th>
       <td><input type="text" name="mirrorof" size="50" value="[% repo.mirrorof | html %]"></td>
+      <td>[% err_mirrorof %]</td>
     </tr>
     <tr>
       <th><label for="mirrorupd">Mirror Update Intervall:</label></th>
       <td><input type="text" name="mirrorupd" size="10" value="[% repo.mirrorupd | html %]"></td>
+      <td>[% err_mirrorupd %]</td>
       [% ELSE %]
       <th>Mirror of:</th>
       <td><code>[% repo.mirrorof | html %]</code></td>
@@ -115,6 +117,7 @@
       [% IF c.has_change(repo) %]
       <th><label for="description">Description:</label></th>
       <td><input type="text" name="description" size="50" value="[% repo.descr | html %]"></td>
+      <td>[% err_description %]</td>
       [% ELSE %]
       <th>Description:</th>
       <td>[% repo.descr | html %]</td>

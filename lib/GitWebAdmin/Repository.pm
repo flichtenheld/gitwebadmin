@@ -16,6 +16,12 @@ use File::Spec::Functions qw(rel2abs);
 use CGI::Application::Plugin::ValidateRM qw(check_rm check_rm_error_page);
 use Data::FormValidator::Constraints qw(:closures);
 
+sub setup {
+  my $c = shift;
+
+  $c->run_modes([qw(edit_form)]);
+}
+
 sub find_repo {
   my $c = shift;
   my $path = shift;
@@ -134,6 +140,16 @@ sub unsubscribe {
   return $c->redirect($c->url('repo/' . $repo->name));
 }
 
+sub edit_form {
+  my $c = shift;
+  my $errs = shift;
+
+  my $repo = $c->find_repo;
+  die "404 Repository not found\n" unless $repo;
+
+  return $c->tt_process('GitWebAdmin/Repository/do.tmpl', {repo => $repo, %$errs});
+}
+
 sub do {
   my $c = shift;
 
@@ -152,26 +168,23 @@ sub do {
     die "403 Not authorized\n"
       unless $c->has_change($repo);
 
+    my $params = $c->check_rm('edit_form', '_edit_params')
+      or return $c->check_rm_error_page;
+
     # owner can always change description
-    $repo->descr($c->query->param('description'));
+    $repo->descr($params->valid('description'));
 
     if( $c->has_admin($repo) ) {
       # the following things can only be changed
       # by admins and owners in private repositories
-      $repo->branch($c->query->param('branch'));
+      $repo->branch($params->valid('branch'));
 
-      if( $c->query->param('mirrorof') ){
-        my $mirrorof = $c->query->param('mirrorof');
-        $mirrorof =~ s/^\s+//;
-        $mirrorof =~ s/\s+$//;
-        unless( $mirrorof =~ m;^(git|https?|ssh)://;i ){
-          die "400 Invalid mirror URI\n";
-        }
-        $repo->mirrorof($mirrorof);
+      if( $params->valid('mirrorof') ){
+        $repo->mirrorof($params->valid('mirrorof'));
       }elsif( $repo->mirrorof ){
         $repo->mirrorof('');
       }
-      $repo->mirrorupd($c->query->param('mirrorupd'));
+      $repo->mirrorupd($params->valid('mirrorupd'));
       foreach my $opt (qw(gitweb daemon)){
         $repo->set_column(
           $opt,
@@ -181,7 +194,7 @@ sub do {
     }
     if( $c->is_admin ){
       # these values can only be changed by real admins
-      $repo->owner($c->query->param('owner'));
+      $repo->owner($params->valid('owner'));
       $repo->mantis($c->get_checkbox_opt('mantis'));
       $repo->private($c->get_checkbox_opt('private'));
     }
@@ -214,6 +227,53 @@ sub __mirrorupd_range {
   return ($val >= 600 and $val <= 604800);
 };
 
+my $constraints = {
+  mirrorof => [
+    {
+      name => 'URI_type',
+      constraint_method => qr{^(git|https?|ssh)://}i,
+    },{
+      name => 'URI_chars',
+      constraint_method => qr{^\S+$},
+    }],
+  mirrorupd => \&__mirrorupd_range,
+  path => [
+    {
+      name => 'path_abs',
+      constraint_method => qr{^[^/]},
+    },{
+      name => 'path_git',
+      constraint_method => qr{(?<=\.git)$},
+    },{
+      name => 'path_chars',
+      constraint_method => qr{^[a-zA-Z\d][\w@.-]+(/[a-zA-Z\d][\w@.-]+)*$},
+    }],
+  description => FV_max_length(200),
+};
+my $constraint_msgs = {
+  constraints => {
+    URI_type => 'unsupported URI type (supported: git/http/ssh)',
+    URI_chars => 'contains characters not allowed in URIs',
+    mirrorupd_range => 'must be in the range 600 - 604_800',
+    path_abs => "repository path can't be absolute",
+    path_git => "repository path has to end in .git",
+    path_chars => "repository path can only contain letters, numbers and characters @.-",
+  }
+};
+
+sub _edit_params {
+  return {
+    required => [qw(description branch options)],
+    optional => [qw(owner forkof mirrorof mirrorupd _form)],
+    defaults => {
+      branch => 'master',
+      mirrorupd => 86_400,
+    },
+    constraint_methods => $constraints,
+    msgs => $constraint_msgs,
+  };
+}
+
 sub _create_params {
   return {
     required => [qw(path)],
@@ -222,39 +282,8 @@ sub _create_params {
       branch => 'master',
       mirrorupd => 86_400,
     },
-    constraint_methods => {
-      mirrorof => [
-        {
-          name => 'URI_type',
-          constraint_method => qr{^(git|https?|ssh)://}i,
-        },{
-          name => 'URI_chars',
-          constraint_method => qr{^\S+$},
-        }],
-      mirrorupd => \&__mirrorupd_range,
-      path => [
-        {
-          name => 'path_abs',
-          constraint_method => qr{^[^/]},
-        },{
-          name => 'path_git',
-          constraint_method => qr{(?<=\.git)$},
-        },{
-          name => 'path_chars',
-          constraint_method => qr{^[a-zA-Z\d][\w@.-]+(/[a-zA-Z\d][\w@.-]+)*$},
-        }],
-      description => FV_max_length(200),
-    },
-    msgs => {
-      constraints => {
-        URI_type => 'unsupported URI type (supported: git/http/ssh)',
-        URI_chars => 'contains characters not allowed in URIs',
-        mirrorupd_range => 'must be in the range 600 - 604_800',
-        path_abs => "repository path can't be absolute",
-        path_git => "repository path has to end in .git",
-        path_chars => "repository path can only contain letters, numbers and characters @.-",
-      }
-    }
+    constraint_methods => $constraints,
+    msgs => $constraint_msgs,
   };
 }
 
