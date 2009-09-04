@@ -171,6 +171,7 @@ sub do {
       }elsif( $repo->mirrorof ){
         $repo->mirrorof('');
       }
+      $repo->mirrorupd($c->query->param('mirrorupd'));
       foreach my $opt (qw(gitweb daemon)){
         $repo->set_column(
           $opt,
@@ -207,12 +208,19 @@ sub create_form {
   return $c->tt_process($errs);
 }
 
+sub __mirrorupd_range {
+  my ($dfv, $val) = @_;
+  $dfv->set_current_constraint_name('mirrorupd_range');
+  return ($val >= 600 and $val <= 604800);
+};
+
 sub _create_params {
   return {
     required => [qw(path)],
-    optional => [qw(owner description branch options forkof mirrorof)],
+    optional => [qw(owner description branch options forkof mirrorof mirrorupd)],
     defaults => {
       branch => 'master',
+      mirrorupd => 86_400,
     },
     constraint_methods => {
       mirrorof => [
@@ -223,6 +231,7 @@ sub _create_params {
           name => 'URI_chars',
           constraint_method => qr{^\S+$},
         }],
+      mirrorupd => \&__mirrorupd_range,
       path => [
         {
           name => 'path_abs',
@@ -240,6 +249,7 @@ sub _create_params {
       constraints => {
         URI_type => 'unsupported URI type (supported: git/http/ssh)',
         URI_chars => 'contains characters not allowed in URIs',
+        mirrorupd_range => 'must be in the range 600 - 604_800',
         path_abs => "repository path can't be absolute",
         path_git => "repository path has to end in .git",
         path_chars => "repository path can only contain letters, numbers and characters @.-",
@@ -266,7 +276,7 @@ sub create {
   foreach my $opt (qw(private daemon gitweb mantis)){
     $opts{$opt} = $c->get_checkbox_opt($opt);
   }
-  foreach my $opt (qw(forkof mirrorof branch)){
+  foreach my $opt (qw(forkof mirrorof mirrorupd branch)){
     $opts{$opt} = $params->valid($opt)
       if $params->valid($opt);
   }
