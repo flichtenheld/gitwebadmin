@@ -141,5 +141,47 @@ sub import_commits {
   }
 }
 
+sub call_trigger {
+  my ($config, $repo, $refupd, $trigger) = @_;
+
+  my $method = $trigger->method;
+  my $uri = $trigger->uri;
+
+  my %replace = (
+    name => $repo->name,
+    rid => $repo->id,
+    ssh => $config->{links}{ssh},
+    daemon => $config->{links}{daemon},
+    ref => $refupd->ref,
+    old_cid => $refupd->old_id,
+    new_cid => $refupd->new_id,
+    user => $refupd->uid->uid,
+  );
+  my $keys = join('|', keys %replace);
+  # links can contain further replacements
+  $uri =~ s/\%(ssh|daemon)/$replace{$1}/ige;
+  $uri =~ s/\%($keys)/$replace{$1}/ige;
+  if( $trigger->method eq 'ssh' ){
+    my ($host, @cmd) = split /\s+/, $uri;
+    warn "no command given for ssh trigger: $uri\n";
+    system('ssh', $host, @cmd) and do {
+      warn "ssh trigger failed ('$uri'): $!\n";
+      return;
+    };
+    return 1;
+  }elsif( $trigger->method eq 'http' ){
+    my $ua = LWP::UserAgent->new;
+
+    my $trigger = $ua->get($uri);
+    unless( $trigger->is_success ){
+      warn "http trigger failed ('$uri'): ".$trigger->status_line."\n";
+      return;
+    }
+    return 1;
+  }else{
+    warn "unknown trigger method $method\n";
+    return;
+  }
+}
 
 1;

@@ -13,10 +13,13 @@ use warnings;
 use autodie;
 use File::Spec::Functions;
 
-use lib "/srv/git/gitwebadmin/lib";
+use FindBin;
+use Cwd qw(realpath);
+use lib "$FindBin::Bin/../lib";;
 
 use Dutil;
 use GitWebAdmin::Schema;
+use GitWebAdmin::Utils;
 
 my $GIT      = "/srv/git";
 my $LOG      = "$GIT/notifications.log";
@@ -28,6 +31,9 @@ Dutil::redirect( $LOG );
 Dutil::install_handlers;
 
 Dutil::log("initialized");
+
+my $GWA    = realpath("$FindBin::Bin/../");
+my $config = Config::Auto::parse("$GWA/gitwebadmin.ini");
 
 my $schema = GitWebAdmin::Schema->connect("dbi:Pg:dbname=gitwebadmin");
 my $rs = $schema->resultset('LogsPush')->search({notified => 0});
@@ -49,6 +55,13 @@ while( 1 ){
 	$ENV{GIT_DIR} = $path;
 
         my $update_id = $row->ref." (".$row->old_id."->".$row->new_id.")";
+
+        my @triggers = $repo->triggers;
+        foreach my $trigger (@triggers){
+          Dutil::log($repo->name.": Calling trigger ".$trigger->name);
+          GitWebAdmin::Utils::call_trigger($config, $repo, $row, $trigger);
+        }
+
 	my @recipients = map { $_->mail } $repo->subscribers;
 	if( @recipients ){
           CORE::open my $fh, '-|', ('/srv/git/hooks/post-receive-email',
