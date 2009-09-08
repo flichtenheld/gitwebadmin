@@ -163,7 +163,8 @@ sub call_trigger {
   $uri =~ s/\%($keys)/$replace{$1}/ige;
   if( $trigger->method eq 'ssh' ){
     my ($host, @cmd) = split /\s+/, $uri;
-    warn "no command given for ssh trigger: $uri\n";
+    warn "no command given for ssh trigger: $uri\n"
+      unless @cmd;
     system('ssh', $host, @cmd) and do {
       warn "ssh trigger failed ('$uri'): $!\n";
       return;
