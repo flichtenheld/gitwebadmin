@@ -17,6 +17,9 @@ DROP TABLE logs_push CASCADE;
 DROP TABLE commit_to_branch CASCADE;
 DROP TABLE commits CASCADE;
 DROP TABLE branches CASCADE;
+DROP TABLE external_triggers CASCADE;
+DROP TABLE repo_triggers CASCADE;
+DROP TYPE  trigger_method_type;
 DROP ROLE gwa_webaccess;
 DROP ROLE gwa_gitaccess;
 DROP ROLE gwa_admin;
@@ -217,5 +220,25 @@ GRANT ALL ON logs_push_logid_seq TO gwa_gitaccess;
 GRANT ALL ON logs_push TO gwa_admin;
 CREATE INDEX logs_push_uid_idx ON logs_push (uid);
 CREATE INDEX logs_push_ref_idx ON logs_push (ref);
+
+CREATE TYPE trigger_method_type AS ENUM('ssh', 'http');
+
+CREATE TABLE external_triggers (
+	id   SERIAL PRIMARY KEY,
+        name TEXT NOT NULL UNIQUE,
+        method trigger_method_type NOT NULL DEFAULT 'ssh',
+        uri  TEXT NOT NULL UNIQUE
+);
+GRANT SELECT ON external_triggers TO gwa_gitaccess;
+GRANT ALL ON external_triggers TO gwa_admin;
+
+CREATE TABLE repo_triggers (
+	rid  INT NOT NULL REFERENCES repos(id) ON DELETE CASCADE,
+        tid  INT NOT NULL REFERENCES external_triggers(id) ON DELETE CASCADE,
+
+        UNIQUE(rid, tid)
+);
+GRANT SELECT ON repo_triggers TO gwa_gitaccess;
+GRANT ALL ON repo_triggers TO gwa_admin;
 
 COMMIT;

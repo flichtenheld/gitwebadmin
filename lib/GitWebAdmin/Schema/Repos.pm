@@ -121,6 +121,11 @@ __PACKAGE__->has_many(
 );
 __PACKAGE__->belongs_to("owner", "GitWebAdmin::Schema::Users", { uid => "owner" });
 __PACKAGE__->has_many(
+  "repo_triggers",
+  "GitWebAdmin::Schema::RepoTriggers",
+  { "foreign.rid" => "self.id" },
+);
+__PACKAGE__->has_many(
   "subscriptions",
   "GitWebAdmin::Schema::Subscriptions",
   { "foreign.rid" => "self.id" },
@@ -132,12 +137,13 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-08-31 14:01:50
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:6DYWfNanfbrqSindW/Mang
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-09-07 19:06:14
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:AZ8bfJfwr2kHN7bhk8Q9lA
 
 __PACKAGE__->many_to_many('w_groups' => 'writables', 'gid');
 __PACKAGE__->many_to_many('r_groups' => 'readables', 'gid');
 __PACKAGE__->many_to_many('subscribers' => 'subscriptions', 'uid');
+__PACKAGE__->many_to_many('triggers' => 'repo_triggers', 'tid');
 
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;
