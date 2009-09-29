@@ -9,7 +9,7 @@ package GitWebAdmin::Utils;
 
 use base 'Exporter';
 
-our @EXPORT_OK = qw(short_id json_bool);
+our @EXPORT_OK = qw(short_id);
 
 use strict;
 use warnings;
@@ -18,7 +18,6 @@ use File::Path;
 use File::Spec::Functions qw(catfile);
 use File::Slurp;
 use File::Temp qw(tempfile);
-use JSON::XS;
 use LWP::UserAgent;
 use URI::Escape;
 
@@ -49,8 +48,10 @@ my $mantis_url = 'http://mantis.intranet.astaro.de';
 sub update_mantis_data {
   my ($git_repo, $db_repo) = @_;
 
-  my %branches = map { $_->branch => $_ } $db_repo->branches;
+  $| = 1;
 
+  my $changed = 0;
+  my %branches = map { $_->branch => $_ } $db_repo->branches;
   my @heads = $git_repo->command(qw(for-each-ref refs/heads));
   foreach( @heads ){
     unless( m|^([a-f0-9]{40})\s+commit\s+refs/heads/(.+)$| ){
@@ -66,7 +67,8 @@ sub update_mantis_data {
       $branch->commit($sha1);
       $branch->update->discard_changes;
 
-      print "Mantis Data: Added branch $ref (".short_id($sha1).")\n";
+      $changed++;
+      print "[".time."] Mantis Data: Added branch $ref (".short_id($sha1).")\n";
     } else {
       my $old_sha1 = $branches{$ref}->commit;
       unless( $old_sha1 eq $sha1 ){
@@ -75,9 +77,14 @@ sub update_mantis_data {
         $branches{$ref}->commit($sha1);
         $branches{$ref}->update->discard_changes;
 
-        print "Mantis Data: Updated branch $ref (".short_id($old_sha1)."..".short_id($sha1).")\n";
+        $changed++;
+        print "[".time."] Mantis Data: Updated branch $ref (".short_id($old_sha1)."..".short_id($sha1).")\n";
       }
     }
+  }
+  unless( $changed ){
+    print "No branches updated\n";
+    return 1;
   }
   my $mantisdata = catfile( '/srv/git/mantis/', $db_repo->name );
   if( ! -d $mantisdata ){
@@ -103,7 +110,7 @@ sub update_mantis_data {
     $trigger = $ua->get("$mantis_url/plugin.php?page=AstaroGitIntegration/import&repo_url=".uri_escape($db_repo->name));
 
     if( $trigger->is_success ){
-      print "Mantis: Updated succesfully\n";
+      print "[".time."] Mantis: Updated succesfully\n";
       $success = 1;
     }else{
       warn "Mantis: Astaro Update FAILED: ".$trigger->status_line."\n";
@@ -184,12 +191,6 @@ sub call_trigger {
     warn "unknown trigger method $method\n";
     return;
   }
-}
-
-sub json_bool {
-  my ($value) = @_;
-
-  return $value ? JSON::XS::true : JSON::XS::false;
 }
 
 1;
