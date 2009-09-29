@@ -145,5 +145,36 @@ __PACKAGE__->many_to_many('r_groups' => 'readables', 'gid');
 __PACKAGE__->many_to_many('subscribers' => 'subscriptions', 'uid');
 __PACKAGE__->many_to_many('triggers' => 'repo_triggers', 'tid');
 
+use GitWebAdmin::Utils qw(json_bool);
+sub TO_JSON {
+  my ($self) = @_;
+
+  my @optional;
+  if( $self->mirrorof ){
+    push @optional, (
+      mirrorof => $self->mirrorof,
+      mirror_intervall => int($self->mirrorupd),
+    );
+  }
+  if( $self->forkof ){
+    push @optional, (
+      fork_of => $self->forkof->name
+    );
+  }
+
+  return { id => int($self->id), name => $self->name,
+           description => $self->descr,
+           owner => $self->owner->uid,
+           default_branch => $self->branch,
+           private => json_bool($self->private),
+           daemon => json_bool($self->daemon),
+           gitweb => json_bool($self->gitweb),
+           mantis => json_bool($self->mantis),
+           groups_write_access => [ map { $_->gid } $self->w_groups ],
+           groups_read_access => [ map { $_->gid } $self->r_groups ],
+           @optional
+  };
+}
+
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;

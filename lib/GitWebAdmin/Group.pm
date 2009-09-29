@@ -29,6 +29,7 @@ sub list {
     {}, { order_by => 'gid' });
   die "404 No Groups found\n" unless @groups;
 
+  return $c->json_output(\@groups) if $c->want_json;
   return $c->tt_process({ groups => \@groups });
 }
 
@@ -105,6 +106,7 @@ sub do {
     $group->update->discard_changes;
   }
 
+  return $c->json_output($group) if $c->want_json;
   return $c->tt_process({ group => $group });
 }
 

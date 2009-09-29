@@ -106,5 +106,16 @@ __PACKAGE__->many_to_many('w_groups' => 'writables', 'gid');
 __PACKAGE__->many_to_many('r_groups' => 'readables', 'gid');
 __PACKAGE__->many_to_many('subscribers' => 'subscriptions', 'uid');
 
+use GitWebAdmin::Utils qw(json_bool);
+sub TO_JSON {
+  my ($self) = @_;
+
+  return { id => int($self->id), name => $self->name,
+           description => $self->descr,
+           owner => $self->owner->uid,
+           private => json_bool($self->private)
+  };
+}
+
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;

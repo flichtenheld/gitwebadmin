@@ -37,6 +37,7 @@ sub list {
     {}, { order_by => 'uid' });
   die "404 No Users found\n" unless @users;
 
+  return $c->json_output(\@users) if $c->want_json;
   return $c->tt_process({ users => \@users });
 }
 
@@ -46,6 +47,7 @@ sub do {
   my $user = $c->find_user;
   die "404 User not found\n" unless $user;
 
+  return $c->json_output($user) if $c->want_json;
   return $c->tt_process({ user => $user });
 }
 
@@ -126,6 +128,7 @@ sub display_key {
   my $key = $c->find_key;
   die "404 Key not found\n" unless $key;
 
+  return $c->json_output($key) if $c->want_json;
   return $c->tt_process($key_tmpl,
                         { action => 'show', key => $key });
 }

@@ -20,6 +20,10 @@ sub start {
   my $groups = $db->resultset('Groups');
   my $users = $db->resultset('Users');
 
+  return $c->json_output({ repos =>  [ map { $_->name } $repos->all  ],
+                           groups => [ map { $_->gid }  $groups->all ],
+                           users  => [ map { $_->uid }  $users->all  ],
+                         }) if $c->want_json;
   return $c->tt_process({ repos => $repos,
                           groups => $groups,
                           users => $users });

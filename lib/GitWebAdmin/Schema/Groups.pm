@@ -56,5 +56,17 @@ __PACKAGE__->many_to_many('users' => 'members', 'uid');
 __PACKAGE__->many_to_many('w_repos' => 'writables', 'rid');
 __PACKAGE__->many_to_many('r_repos' => 'readables', 'rid');
 
+use GitWebAdmin::Utils qw(json_bool);
+sub TO_JSON {
+  my ($self) = @_;
+
+  return { gid => $self->gid,
+           name => $self->name,
+           members => [ map { $_->uid } $self->users ],
+           write_access => [ map { $_->name } $self->w_repos ],
+           read_access  => [ map { $_->name } $self->r_repos ],
+  };
+}
+
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;

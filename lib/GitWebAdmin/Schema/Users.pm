@@ -79,5 +79,18 @@ __PACKAGE__->has_many(
 __PACKAGE__->many_to_many('groups' => 'members', 'gid');
 __PACKAGE__->many_to_many('subscribed_repos' => 'subscriptions', 'rid');
 
+use GitWebAdmin::Utils qw(json_bool);
+sub TO_JSON {
+  my ($self) = @_;
+
+  return { uid => $self->uid,
+           name => $self->name,
+           mail => $self->mail,
+           admin => json_bool($self->admin),
+           active => json_bool($self->active),
+           groups => [ map { $_->gid } $self->groups ],
+  };
+}
+
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;

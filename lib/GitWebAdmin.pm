@@ -5,6 +5,8 @@ use strict;
 use warnings;
 
 use URI::Escape;
+use HTTP::Negotiate;
+use JSON::XS;
 use List::MoreUtils qw(any);
 use FindBin;
 
@@ -236,6 +238,30 @@ sub is_subscribed {
   my $user = $c->param('user_obj') or return 0;
   my @res = $repo->subscriptions({ uid => $user->uid });
   return scalar @res;
+}
+
+sub want_json {
+  my ($c) = @_;
+
+  my $output = $c->query->param('output');
+  if( $output ){
+    return $output eq 'json';
+  }
+  my @variants = (
+    [ 'html', 1, 'text/html',        undef, 'utf-8', 'en', 1000 ],
+    [ 'json', 1, 'application/json', undef, 'utf-8', 'en',  500 ],
+  );
+  $output = HTTP::Negotiate::choose(\@variants);
+  return $output eq 'json';
+}
+
+sub json_output {
+  my ($c, $data) = @_;
+
+  $c->header_add( '-type' => 'application/json' );
+  my $json = JSON::XS->new->pretty->allow_blessed(1)->convert_blessed(1);
+
+  return $json->encode($data);
 }
 
 1;

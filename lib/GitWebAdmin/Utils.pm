@@ -9,7 +9,7 @@ package GitWebAdmin::Utils;
 
 use base 'Exporter';
 
-our @EXPORT_OK = qw(short_id);
+our @EXPORT_OK = qw(short_id json_bool);
 
 use strict;
 use warnings;
@@ -18,6 +18,7 @@ use File::Path;
 use File::Spec::Functions qw(catfile);
 use File::Slurp;
 use File::Temp qw(tempfile);
+use JSON::XS;
 use LWP::UserAgent;
 use URI::Escape;
 
@@ -183,6 +184,12 @@ sub call_trigger {
     warn "unknown trigger method $method\n";
     return;
   }
+}
+
+sub json_bool {
+  my ($value) = @_;
+
+  return $value ? JSON::XS::true : JSON::XS::false;
 }
 
 1;

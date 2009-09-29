@@ -82,6 +82,7 @@ sub list {
   }
   die "404 Repositories not found\n" unless @repos;
 
+  return $c->json_output(\@repos) if $c->want_json;
   return $c->tt_process({ path => $path, repos => \@repos });
 }
 
@@ -211,6 +212,7 @@ sub do {
                           { repo => $repo, changed => $changed });
   }
 
+  return $c->json_output($repo) if $c->want_json;
   return $c->tt_process({ repo => $repo, changed => $changed });
 }
 

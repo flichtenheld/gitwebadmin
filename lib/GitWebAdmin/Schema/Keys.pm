@@ -63,6 +63,17 @@ __PACKAGE__->belongs_to("uid", "GitWebAdmin::Schema::Users", { uid => "uid" });
 # Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-09-02 12:19:56
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:VHcPaulzKqRaxZUF6j+xHQ
 
+use GitWebAdmin::Utils qw(json_bool);
+sub TO_JSON {
+  my ($self) = @_;
+
+  return { id => int($self->id),
+           name => $self->name,
+           bits => int($self->bits),
+           type => $self->type,
+           fingerprint => $self->fingerprint
+  };
+}
 
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;
