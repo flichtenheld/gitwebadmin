@@ -79,6 +79,10 @@ a:hover, a:visited, a:active {
     color: #d00;
 }
 
+.inactive {
+    text-decoration: line-through;
+}
+
 #userlogin {
     font-size: 90%;
     text-align: right;
