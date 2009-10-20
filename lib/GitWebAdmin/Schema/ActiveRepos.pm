@@ -113,7 +113,8 @@ sub TO_JSON {
   return { id => int($self->id), name => $self->name,
            description => $self->descr,
            owner => $self->owner->uid,
-           private => json_bool($self->private)
+           private => json_bool($self->private),
+           mantis => json_bool($self->mantis),
   };
 }
 
