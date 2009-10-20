@@ -1,0 +1,52 @@
+#!/usr/bin/perl
+#
+#  Copyright (C) 2009 Astaro AG  www.astaro.com
+#  All rights reserved.
+#
+#  Author: Frank Lichtenheld <flichtenheld@astaro.com> 24.09.2009
+#
+##############################################################################
+
+use strict;
+use warnings;
+
+use autodie;
+use File::Spec::Functions;
+use Config::Auto;
+
+use FindBin;
+use Cwd qw(realpath);
+use lib "$FindBin::Bin/../lib";;
+
+use GitWebAdmin::Schema;
+use GitWebAdmin::Utils;
+
+my $GIT      = "/srv/git";
+
+my $GWA    = realpath("$FindBin::Bin/../");
+my $config = Config::Auto::parse("$GWA/gitwebadmin.ini");
+
+my $schema = GitWebAdmin::Schema->connect("dbi:Pg:dbname=gitwebadmin");
+
+my $tid = $ARGV[0]
+  or die "Usage: init_trigger <tid>\n";
+
+my $trigger = $schema->resultset('ExternalTriggers')->find($tid)
+  or die "Couldn't find trigger with id $tid\n";
+my $rt = $schema->resultset('RepoTriggers')->search({tid => $tid});
+my $lp = $schema->resultset('LogsPush');
+my $upd = $lp->new({ ref => 'refs/head/master',
+                     old_id => '0'x40,
+                     new_id => '0'x40,
+                     uid => 'flichtenheld' });
+
+while( my $rt_row = $rt->next ){
+  my $repo = $rt_row->rid;
+  my $path = catfile('/srv/git/repositories', $repo->name);
+
+  $ENV{GIT_DIR} = $path;
+
+  print "Call trigger ".$trigger->name." on repo ".$repo->name."\n";
+  GitWebAdmin::Utils::call_trigger($config, $repo, $upd, $trigger);
+  sleep 5;
+}
