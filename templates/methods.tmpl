@@ -23,6 +23,14 @@
 </select>
 [% END %]
 
+[% BLOCK trigger_method %]
+<select name="[% select_name %]">
+[% FOREACH m IN [ 'ssh', 'http' ] %]
+  <option value="[% m %]"[% ' selected="selected"' IF selected == m %]>[% m | html %]</option>
+[% END %]
+</select>
+[% END %]
+
 [% BLOCK group_chooser %]
 <select name="[% select_name %]" size="5" multiple="multiple">
 <option value="none"[% ' selected="selected"' UNLESS selected.size %]>None</option>

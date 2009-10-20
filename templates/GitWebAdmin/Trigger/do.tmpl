@@ -1,0 +1,68 @@
+[% PROCESS methods.tmpl %]
+[% INCLUDE header.tmpl page_title="Trigger Page"
+   navigation=[ { url => 'trigger/', name => 'Triggers' },
+                { name => trigger.name },
+              ]
+%]
+
+[% IF c.is_admin %]
+<div id="actions">
+<h2>Actions</h2>
+<form action="[% c.url('trigger/' _ trigger.name) %]" method="post">
+<p><input type="submit" value="Delete Trigger">
+<input type="hidden" name="_method" value="delete"></p>
+</form>
+[% INCLUDE admin_actions %]
+</div> <!-- end actions -->
+[% END %]
+
+<h1>Trigger [% trigger.name | html %]</h1>
+
+[% IF c.is_admin %]
+<form action="[% c.url('trigger/' _ trigger.name) %]" method="post">
+[% END %]
+<table id="triggermeta">
+  <tbody>
+    <tr>
+[% IF c.is_admin %]
+      <th><label for="name">Name:</label></th>
+      <td><input type="text" name="name" size="80" value="[% trigger.name | html %]"></td>
+    </tr>
+    <tr>
+      <th><label for="method">Method:</label></th>
+      <td>[% INCLUDE trigger_method select_name="method" selected=trigger.method %]</td>
+    </tr>
+    <tr>
+      <th><label for="uri">URI:</label></th>
+      <td><input type="text" name="uri" size="80" value="[% trigger.uri | html %]"></td>
+[% ELSE %]
+      <th>Method:</th>
+      <td>[% trigger.method %]</td>
+    </tr>
+    <tr>
+      <th>URI:</th>
+      <td>[% trigger.uri | html %]</td>
+[% END %]
+    </tr>
+  </tbody>
+</table>
+
+[% IF c.is_admin %]
+<h2>Repositories</h2>
+
+<p>[% INCLUDE repo_chooser select_name="repos" selected=DBIxRel(trigger.repos) %]</p>
+
+<p><input type="submit" value="Apply Changes"></p>
+</form>
+
+[% ELSE %]
+
+[% FOREACH r IN DBIxRel(trigger.repos).sort('name') %]
+[% '<p>The trigger is activated for the following repositories:</p><ul>' IF loop.first() %]
+<li><a href="[% c.url('repo/' _ r.name()) %]">[% r.name() | html %]</a></li>
+[% '</ul>' IF loop.last() %]
+[% END %]
+
+[% END %]
+
+[% INCLUDE footer.tmpl %]

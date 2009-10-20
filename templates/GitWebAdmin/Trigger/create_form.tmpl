@@ -1,0 +1,38 @@
+[% PROCESS methods.tmpl %]
+[% INCLUDE header.tmpl page_title="Create Trigger"
+   navigation=[ { url => 'trigger/', name => 'Triggers' },
+                { name => 'Create' },
+              ]
+%]
+
+<h1>Create Trigger</h1>
+
+<form action="[% c.url('trigger/create') %]" method="post">
+<input type="hidden" name="_method" value="put">
+<table id="triggermeta">
+  <tbody>
+    <tr>
+  <tbody>
+    <tr>
+      <th><label for="name">Name:</label></th>
+      <td><input type="text" name="name" size="80" value=""></td>
+    </tr>
+    <tr>
+      <th><label for="method">Method:</label></th>
+      <td>[% INCLUDE trigger_method select_name="method" selected="ssh" %]</td>
+    </tr>
+    <tr>
+      <th><label for="uri">URI:</label></th>
+      <td><input type="text" name="uri" size="80" value=""></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Repositories</h2>
+
+<p>[% INCLUDE repo_chooser select_name="repos" selected=[] %]</p>
+
+<p><input type="submit" value="Create Trigger"></p>
+</form>
+
+[% INCLUDE footer.tmpl %]

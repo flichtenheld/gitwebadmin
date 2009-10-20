@@ -1,0 +1,16 @@
+[% INCLUDE header.tmpl page_title="Trigger List"
+   navigation=[ { name => 'Triggers' },
+              ]
+%]
+
+<h1>Triggers</h1>
+
+[% FOREACH t IN triggers %]
+[% '<ul>' IF loop.first() %]
+<li><a href="[% c.url('trigger/' _ t.name()) %]">[% t.name() | html %]</a></li>
+[% '</ul>' IF loop.last() %]
+[% END %]
+
+<p><a href="[% c.url('trigger/create') %]">Create New Trigger</a></p>
+
+[% INCLUDE footer.tmpl %]

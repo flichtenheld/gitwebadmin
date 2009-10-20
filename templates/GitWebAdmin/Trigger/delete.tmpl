@@ -1,0 +1,10 @@
+[% INCLUDE header.tmpl page_title="Trigger Page"
+   navigation=[ { url => 'trigger/', name => 'Triggers' },
+                { name => trigger.name },
+              ]
+%]
+
+<p class="no">Trigger [% trigger.name | html %] successfully deleted</p>
+
+
+[% INCLUDE footer.tmpl %]

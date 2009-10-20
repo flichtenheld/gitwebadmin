@@ -51,6 +51,18 @@ __PACKAGE__->has_many(
 # Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-09-07 19:06:14
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:abp8nC01HQDBaKessSBzIw
 
+__PACKAGE__->many_to_many('repos' => 'repo_triggers', 'rid');
+
+sub TO_JSON {
+  my ($self) = @_;
+
+  return { id => $self->id,
+           name => $self->name,
+           method => $self->method, uri => $self->uri,
+           repos => [ map { $_->name } $self->repos ],
+  };
+}
+
 
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;

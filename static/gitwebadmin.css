@@ -62,7 +62,8 @@ a:hover, a:visited, a:active {
     margin-bottom: .1ex;
 }
 
-#repometa th, #usermeta th, #keymeta th {
+#repometa th, #usermeta th, #keymeta th,
+#triggermeta th {
     text-align: left;
     vertical-align: top;
 }

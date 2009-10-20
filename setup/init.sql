@@ -229,8 +229,9 @@ CREATE TABLE external_triggers (
         method trigger_method_type NOT NULL DEFAULT 'ssh',
         uri  TEXT NOT NULL UNIQUE
 );
+GRANT ALL ON external_triggers TO gwa_webaccess;
+GRANT ALL ON external_triggers_id_seq TO gwa_webaccess;
 GRANT SELECT ON external_triggers TO gwa_gitaccess;
-GRANT ALL ON external_triggers TO gwa_admin;
 
 CREATE TABLE repo_triggers (
 	rid  INT NOT NULL REFERENCES repos(id) ON DELETE CASCADE,
@@ -238,7 +239,7 @@ CREATE TABLE repo_triggers (
 
         UNIQUE(rid, tid)
 );
+GRANT ALL ON repo_triggers TO gwa_webaccess;
 GRANT SELECT ON repo_triggers TO gwa_gitaccess;
-GRANT ALL ON repo_triggers TO gwa_admin;
 
 COMMIT;
