@@ -43,7 +43,7 @@ my $started = time();
 while( 1 ){
 
     my $time = time();
-    if( ($time - $started) > (7 * 86_400) ){
+    if( ($time - $started) > (7 * 86_400 + 50 * 60) ){
 	Dutil::log("weekly restart");
 	exit 0;
     }
