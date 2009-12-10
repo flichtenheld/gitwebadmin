@@ -265,8 +265,8 @@ my $constraint_msgs = {
 
 sub _edit_params {
   return {
-    required => [qw(description branch options)],
-    optional => [qw(owner forkof mirrorof mirrorupd _form)],
+    required => [qw(description branch)],
+    optional => [qw(owner options forkof mirrorof mirrorupd _form)],
     defaults => {
       branch => 'master',
       mirrorupd => 86_400,
