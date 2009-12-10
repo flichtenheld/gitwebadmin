@@ -74,6 +74,7 @@ foreach my $entry ($mesg->entries){
   $uids{$uid}++;
 }
 $uids{gitadm}++;
+$uids{gitrobot}++;
 my $actives = $rs->search({ active => 1 });
 while( my $user = $actives->next ){
   unless( $uids{$user->uid} ){
