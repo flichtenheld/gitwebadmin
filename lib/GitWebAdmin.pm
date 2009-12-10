@@ -124,7 +124,7 @@ sub get_checkbox_opt {
   my ($c, $option, $boxes) = @_;
   $boxes ||= 'options';
 
-  if( any { $_ eq $option } $c->query->param('options') ){
+  if( any { $_ eq $option } $c->query->param($boxes) ){
     return 1;
   }
   return 0;
