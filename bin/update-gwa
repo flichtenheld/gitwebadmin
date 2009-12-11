@@ -28,6 +28,12 @@ my $repo = $schema->resultset('Repos')->find($reponame, {key => 'repos_name_key'
     or die "Repository $reponame not found in database\n";
 my $gituser = $ENV{GITOSIS_USER};
 
+my $user;
+if( $gituser ){
+  $user = $schema->resultset('Users')->find($gituser)
+    or die "User $gituser not found in database\n";
+}
+
 if( $repo->deleted ){
   die "Repository $reponame is deleted\n";
 }
@@ -53,6 +59,13 @@ unless( $repo->private ){
     my @merge_base = $git->command('merge-base', $old_sha1, $sha1);
     if( $merge_base[0] ne $old_sha1 ){
       die "Repository $reponame is public,\nnon-fast-forward push to $ref is not allowed\n";
+    }
+  }
+
+  #FIXME: do not hardcode criteria
+  if( $repo->mantis and not $repo->mirrorof and $ref eq 'refs/heads/axg8000' ){
+    unless( $user->admin ){
+      die "Push to $ref only allowed for Release-Manager at this time\n";
     }
   }
 }
