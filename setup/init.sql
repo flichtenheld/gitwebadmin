@@ -6,6 +6,9 @@
 
 DROP TABLE keys   CASCADE;
 DROP TYPE  ssh_key_type;
+DROP TABLE push_acl CASCADE;
+DROP TYPE  push_action_type;
+DROP TYPE  acl_result_type;
 DROP TABLE users  CASCADE;
 DROP TABLE groups CASCADE;
 DROP TABLE repos  CASCADE;
@@ -123,6 +126,36 @@ CREATE OR REPLACE FUNCTION repo_id (text) RETURNS int AS $$
 $$ LANGUAGE SQL STABLE STRICT;
 INSERT INTO repos (name, owner) VALUES
        ('gitosis-admin.git', 'gitadm');
+
+CREATE TYPE push_action_type AS ENUM ('create', 'update', 'replace', 'delete');
+CREATE TYPE acl_result_type  AS ENUM ('allow', 'deny');
+
+CREATE TABLE push_acl (
+       id       SERIAL PRIMARY KEY,
+       priority INT UNIQUE NOT NULL,
+       "user"   TEXT REFERENCES users(uid) ON DELETE CASCADE,
+       "group"  TEXT REFERENCES groups(gid) ON DELETE CASCADE,
+       repo     INT REFERENCES repos(id) ON DELETE CASCADE,
+       user_flags   TEXT,
+       repo_flags   TEXT,
+       ref          TEXT,
+       action       push_action_type,
+       result       acl_result_type NOT NULL DEFAULT 'deny',
+       comment      TEXT
+);
+GRANT SELECT ON push_acl TO gwa_webaccess;
+GRANT SELECT ON push_acl TO gwa_gitaccess;
+
+INSERT INTO push_acl
+       (priority, "user", repo, user_flags, repo_flags, action,  result, comment)
+VALUES
+       (1000,       NULL, NULL,    'admin',      NULL,    NULL, 'allow', 'admin can do everything'),
+       (2000,       NULL, NULL,  '!active',      NULL,    NULL,  'deny', 'deny everything to inactive users'),
+       (3000,       NULL, NULL,       NULL, 'deleted',    NULL,  'deny', 'deleted repositories cannot be changed'),
+       (4000,       NULL, NULL,       NULL,'mirrorof',    NULL,  'deny', 'only local pushes to mirror repositories'),
+       (5000,       NULL, NULL,       NULL, 'private',    NULL, 'allow', 'allow everything in private repositories'),
+       (6000,       NULL, NULL,       NULL,      NULL,'delete',  'deny', 'cannot delete references in public repositories'),
+       (6010,       NULL, NULL,       NULL,      NULL,'replace', 'deny', 'cannot replace references in public repositories');
 
 --
 -- ### BEGIN MANTIS INTEGRATION ###

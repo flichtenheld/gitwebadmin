@@ -62,6 +62,11 @@ __PACKAGE__->has_many(
   { "foreign.uid" => "self.uid" },
 );
 __PACKAGE__->has_many(
+  "push_acls",
+  "GitWebAdmin::Schema::PushAcl",
+  { "foreign.user" => "self.uid" },
+);
+__PACKAGE__->has_many(
   "repo",
   "GitWebAdmin::Schema::Repos",
   { "foreign.owner" => "self.uid" },
@@ -73,8 +78,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-08-18 21:33:43
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Mjr82Kcx9as+R9OW4AD8Ig
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-01-11 22:33:05
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:qU4eTC8k0nCF+AzohnDxZw
 
 __PACKAGE__->many_to_many('groups' => 'members', 'gid');
 __PACKAGE__->many_to_many('subscribed_repos' => 'subscriptions', 'rid');

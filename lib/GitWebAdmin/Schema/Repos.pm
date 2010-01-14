@@ -109,6 +109,11 @@ __PACKAGE__->has_many(
   { "foreign.rid" => "self.id" },
 );
 __PACKAGE__->has_many(
+  "push_acls",
+  "GitWebAdmin::Schema::PushAcl",
+  { "foreign.repo" => "self.id" },
+);
+__PACKAGE__->has_many(
   "readables",
   "GitWebAdmin::Schema::Readable",
   { "foreign.rid" => "self.id" },
@@ -137,8 +142,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-09-07 19:06:14
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:AZ8bfJfwr2kHN7bhk8Q9lA
+# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-01-11 22:33:05
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:oJCDskONu9v0PDaov3D6Dg
 
 __PACKAGE__->many_to_many('w_groups' => 'writables', 'gid');
 __PACKAGE__->many_to_many('r_groups' => 'readables', 'gid');
