@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 #
 #  Copyright (C) 2009 Astaro AG  www.astaro.com
 #  All rights reserved.
@@ -57,6 +57,7 @@ if( -d $path ){
   # update the mirror URI in case it has changed
   $git->command_noisy(qw(config remote.origin.url), $url);
   $git->command_noisy(qw(fetch --verbose --update-head-ok));
+  $git->command_noisy(qw(remote prune origin));
   write_file($ts_file, time());
   Dutil::log("update complete");
   exit;
