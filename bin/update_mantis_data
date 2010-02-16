@@ -1,0 +1,35 @@
+#!/usr/bin/perl
+#
+#  Copyright (C) 2010 Astaro AG  www.astaro.com
+#  All rights reserved.
+#
+#  Author: Frank Lichtenheld <flichtenheld@astaro.com> 22.01.2010
+#
+##############################################################################
+# Manually call update_mantis_data on all repos
+##############################################################################
+use strict;
+use warnings;
+
+use File::Spec::Functions qw(catfile);
+use Git;
+
+use lib './lib';
+use GitWebAdmin::Schema;
+use GitWebAdmin::Utils;
+
+my $schema = GitWebAdmin::Schema->connect("dbi:Pg:dbname=gitwebadmin");
+my $mantis = $schema->resultset('Repos')->search({ mantis => 1 });
+
+while( my $repo = $mantis->next() ){
+  printf "repo=%s\n", $repo->name;
+  my $gitdir = catfile('/srv/git/repositories', $repo->name);
+  unless( -d $gitdir ){
+    warn "Directory $gitdir not found, skipping repo\n";
+    next;
+  }
+  my $git = Git->repository($gitdir);
+  $schema->txn_begin;
+  GitWebAdmin::Utils::update_mantis_data($git, $repo);
+  $schema->txn_commit;
+}
