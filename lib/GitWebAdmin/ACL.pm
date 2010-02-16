@@ -33,16 +33,16 @@ sub check_acl {
   my %debug = %$params;
   $debug{user} = $params->{user}->uid if $params->{user};
   $debug{repo} = $params->{repo}->name if $params->{repo};
-  warn "D: check_acl:\n".Data::Dumper->Dump([\%debug], [qw(*input_params)]);
+#  warn "D: check_acl:\n".Data::Dumper->Dump([\%debug], [qw(*input_params)]);
 
   my @acls = $db->resultset('PushAcl')->search({}, { order_by => 'priority' });
   foreach (@acls){
-    warn "D: rule ".$_->acl2str;
+#    warn "D: rule ".$_->acl2str;
     my $result = $_->check_acl($params);
-    warn "D: matched!\n" if $result;
+#    warn "D: matched!\n" if $result;
     return $result if $result;
   }
-  return 'deny';
+  return 'allow';
 }
 
 1;
