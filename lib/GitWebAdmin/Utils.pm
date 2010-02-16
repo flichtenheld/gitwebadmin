@@ -121,25 +121,25 @@ sub update_mantis_data {
   rename("$mantisdata.new", $mantisdata)
     or die "rename $mantisdata failed: $!\n";
 
-  my $ua = LWP::UserAgent->new;
+#   my $ua = LWP::UserAgent->new;
 
-  my $trigger = $ua->get("$mantis_url/plugin.php?page=AstaroGitIntegration/latest&repo_url=".uri_escape($db_repo->name));
+#   my $trigger = $ua->get("$mantis_url/plugin.php?page=AstaroGitIntegration/latest&repo_url=".uri_escape($db_repo->name));
 
-  my $success = 0;
-  if( $trigger->is_success ){
-    $trigger = $ua->get("$mantis_url/plugin.php?page=AstaroGitIntegration/import&repo_url=".uri_escape($db_repo->name));
+#   my $success = 0;
+#   if( $trigger->is_success ){
+#     $trigger = $ua->get("$mantis_url/plugin.php?page=AstaroGitIntegration/import&repo_url=".uri_escape($db_repo->name));
 
-    if( $trigger->is_success ){
-      print "Mantis: Updated succesfully\n";
-      $success = 1;
-    }else{
-      warn "Mantis: Astaro Update FAILED: ".$trigger->status_line."\n";
-    }
-  }else{
-    warn "Mantis: Update FAILED: ".$trigger->status_line."\n";
-  }
+#     if( $trigger->is_success ){
+#       print "Mantis: Updated succesfully\n";
+#       $success = 1;
+#     }else{
+#       warn "Mantis: Astaro Update FAILED: ".$trigger->status_line."\n";
+#     }
+#   }else{
+#     warn "Mantis: Update FAILED: ".$trigger->status_line."\n";
+#   }
 
-  return $success;
+#   return $success;
 }
 
 sub short_id {
