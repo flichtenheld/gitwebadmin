@@ -52,12 +52,14 @@ sub update_mantis_data {
   my $changed = 0;
   my %branches = map { $_->branch => $_ } $db_repo->branches;
   my @heads = $git_repo->command(qw(for-each-ref refs/heads));
+  my %heads;
   foreach( @heads ){
     unless( m|^([a-f0-9]{40})\s+commit\s+refs/heads/(.+)$| ){
       warn "unknown format for for-each-ref output: $_\n";
       next;
     }
     my ($sha1, $ref) = ($1, $2);
+    $heads{$ref} = $sha1;
     if( not exists $branches{$ref} ){
       my $branch = $db_repo->create_related('branches',
                                             { branch => $ref, commit => '0'x40 });
@@ -79,6 +81,25 @@ sub update_mantis_data {
         $changed++;
         print "Mantis Data: Updated branch $ref (".short_id($old_sha1)."..".short_id($sha1).")\n";
       }
+    }
+  }
+  # remove data for deleted branches
+  foreach my $ref (sort keys %branches){
+    if( not exists $heads{$ref} ){
+      my $branch = $branches{$ref};
+
+      my @commits = $branch->commits;
+      $branch->delete_related('commit_to_branches');
+      $branch->delete;
+      foreach my $commit (@commits){
+        unless( $commit->branches->count ){
+          $commit->delete;
+          warn "Manits Data: Deleted orphaned commit ".$commit->commit." ($ref)\n";
+        }
+      }
+
+      $changed++;
+      print "Mantis Data: Removed branch $ref (".short_id($branch->commit).")\n";
     }
   }
   unless( $changed ){
