@@ -1,0 +1,193 @@
+#!/usr/bin/perl
+#
+#  Copyright (C) 2010 Astaro AG  www.astaro.com
+#  All rights reserved.
+#
+#  Author: Frank Lichtenheld <flichtenheld@astaro.com> 19.02.2010
+#
+##############################################################################
+
+use strict;
+use warnings;
+
+use autodie;
+use Config::Auto;
+use Data::Dumper;
+use File::Basename;
+use File::Spec::Functions qw(:ALL);
+use File::Slurp;
+use File::Temp qw(tempfile);
+#use Git;
+use Storable qw(store_fd);
+
+use FindBin;
+use Cwd qw(realpath);
+use lib "$FindBin::Bin/../lib";
+
+use GitWebAdmin::Schema;
+
+my $GWA      = realpath("$FindBin::Bin/../");
+
+my $config = Config::Auto::parse("$GWA/gitwebadmin.ini");
+
+my $db_cfg = $config->{database};
+my $schema = GitWebAdmin::Schema->connect(
+  "dbi:$db_cfg->{driver}:dbname=$db_cfg->{name}");
+
+my $repos = $schema->resultset("Repos")->search({
+  gitweb => 1, deleted => 0 });
+
+my @data;
+while( my $repo = $repos->next ){
+#  print "\t".$repo->name."\n";
+  unless( -d catfile($config->{gitosis}{repositories}, $repo->name) ){
+#    print "\t\tskipped\n";
+    next;
+  }
+  my %repo = (
+    path => $repo->name,
+    descr_long => $repo->descr,
+    descr => chop_str($repo->descr, 25, 5),
+    owner => $repo->owner->name,
+    forklist => [map { $_->name } $repo->repo({ gitweb => 1, deleted => 0 })],
+    );
+  utf8::decode($repo{owner});
+
+  my @activity = git_get_last_activity($repo->name);
+  ($repo{age}, $repo{age_string}) = @activity;
+
+  push @data, \%repo;
+}
+
+#print Dumper(\@data);
+
+my $cachefile = $config->{gitweb}{cache};
+my ($fh, $outfile) = tempfile( 'gitweb.index.cache.XXXXXX',
+                               DIR => dirname($cachefile),
+                               UNLINK => 0 );
+store_fd \@data, $fh;
+close $fh;
+chmod 0644, $outfile;
+#print "rename($outfile, $cachefile)\n";
+rename($outfile, $cachefile);
+
+# remaining code taken from
+# gitweb - simple web interface to track changes in git repositories
+#
+# (C) 2005-2006, Kay Sievers <kay.sievers@vrfy.org>
+# (C) 2005, Christian Gierke
+#
+# This program is licensed under the GPLv2
+
+sub git_get_last_activity {
+	my ($path) = @_;
+
+	my $git_dir = "$config->{gitosis}{repositories}/$path";
+        $ENV{GIT_DIR} = $git_dir;
+	CORE::open(my $fd, "-|", '/usr/local/bin/git', 'for-each-ref',
+                   '--format=%(committer)',
+                   '--sort=-committerdate',
+                   '--count=1',
+                   'refs/heads') or return;
+	my $most_recent = <$fd>;
+	close $fd or return;
+	if (defined $most_recent &&
+	    $most_recent =~ / (\d+) [-+][01]\d\d\d$/) {
+		my $timestamp = $1;
+		my $age = time - $timestamp;
+		return ($age, age_string($age));
+	}
+	return (undef, undef);
+}
+
+# Try to chop given string on a word boundary between position
+# $len and $len+$add_len. If there is no word boundary there,
+# chop at $len+$add_len. Do not chop if chopped part plus ellipsis
+# (marking chopped part) would be longer than given string.
+sub chop_str {
+	my $str = shift;
+	my $len = shift;
+	my $add_len = shift || 10;
+	my $where = shift || 'right'; # 'left' | 'center' | 'right'
+
+	# Make sure perl knows it is utf8 encoded so we don't
+	# cut in the middle of a utf8 multibyte char.
+	utf8::decode($str);
+
+	# allow only $len chars, but don't cut a word if it would fit in $add_len
+	# if it doesn't fit, cut it if it's still longer than the dots we would add
+	# remove chopped character entities entirely
+
+	# when chopping in the middle, distribute $len into left and right part
+	# return early if chopping wouldn't make string shorter
+	if ($where eq 'center') {
+		return $str if ($len + 5 >= length($str)); # filler is length 5
+		$len = int($len/2);
+	} else {
+		return $str if ($len + 4 >= length($str)); # filler is length 4
+	}
+
+	# regexps: ending and beginning with word part up to $add_len
+	my $endre = qr/.{$len}\w{0,$add_len}/;
+	my $begre = qr/\w{0,$add_len}.{$len}/;
+
+	if ($where eq 'left') {
+		$str =~ m/^(.*?)($begre)$/;
+		my ($lead, $body) = ($1, $2);
+		if (length($lead) > 4) {
+			$lead = " ...";
+		}
+		return "$lead$body";
+
+	} elsif ($where eq 'center') {
+		$str =~ m/^($endre)(.*)$/;
+		my ($left, $str)  = ($1, $2);
+		$str =~ m/^(.*?)($begre)$/;
+		my ($mid, $right) = ($1, $2);
+		if (length($mid) > 5) {
+			$mid = " ... ";
+		}
+		return "$left$mid$right";
+
+	} else {
+		$str =~ m/^($endre)(.*)$/;
+		my $body = $1;
+		my $tail = $2;
+		if (length($tail) > 4) {
+			$tail = "... ";
+		}
+		return "$body$tail";
+	}
+}
+
+# convert age in seconds to "nn units ago" string
+sub age_string {
+	my $age = shift;
+	my $age_str;
+
+	if ($age > 60*60*24*365*2) {
+		$age_str = (int $age/60/60/24/365);
+		$age_str .= " years ago";
+	} elsif ($age > 60*60*24*(365/12)*2) {
+		$age_str = int $age/60/60/24/(365/12);
+		$age_str .= " months ago";
+	} elsif ($age > 60*60*24*7*2) {
+		$age_str = int $age/60/60/24/7;
+		$age_str .= " weeks ago";
+	} elsif ($age > 60*60*24*2) {
+		$age_str = int $age/60/60/24;
+		$age_str .= " days ago";
+	} elsif ($age > 60*60*2) {
+		$age_str = int $age/60/60;
+		$age_str .= " hours ago";
+	} elsif ($age > 60*2) {
+		$age_str = int $age/60;
+		$age_str .= " min ago";
+	} elsif ($age > 2) {
+		$age_str = int $age;
+		$age_str .= " sec ago";
+	} else {
+		$age_str .= " right now";
+	}
+	return $age_str;
+}
