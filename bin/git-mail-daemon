@@ -81,7 +81,7 @@ while( 1 ){
           close $fh
 	    or die "post-receive-email failed: $!\n";
 
-          if( $count > 10_000_000 ){
+          if( $count > 10_000_000 or length($mail) > 50_000_000 ){
             Dutil::log($repo->name.": Mail too large for $update_id");
             goto FINISHED;
           }
