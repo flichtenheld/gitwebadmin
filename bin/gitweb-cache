@@ -52,6 +52,7 @@ while( my $repo = $repos->next ){
     forklist => [map { $_->name } $repo->repo({ gitweb => 1, deleted => 0 })],
     );
   utf8::decode($repo{owner});
+  $repo{forks} = scalar @{$repo{forklist}};
 
   my @activity = git_get_last_activity($repo->name);
   ($repo{age}, $repo{age_string}) = @activity;
