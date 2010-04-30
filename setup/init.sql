@@ -157,6 +157,10 @@ VALUES
        (6000,       NULL, NULL,       NULL,      NULL,'delete',  'deny', 'cannot delete references in public repositories'),
        (6010,       NULL, NULL,       NULL,      NULL,'replace', 'deny', 'cannot replace references in public repositories');
 
+CREATE VIEW show_push_acl AS
+       SELECT push_acl.id, priority, "user", "group", repos.name AS repository, user_flags, repo_flags, ref, result, comment
+       FROM push_acl LEFT OUTER JOIN repos ON repo = repos.id ORDER BY priority;
+
 --
 -- ### BEGIN MANTIS INTEGRATION ###
 --
