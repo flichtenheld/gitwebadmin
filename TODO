@@ -1,43 +1,40 @@
 TODO
 ====
 
-General
- * Improve layout of Homepage                               - DONE
- * Move actions to sidebar                                  - DONE
- * Unify form validation by using Data::FormValidator or
+general
+ * unify form validation by using Data::FormValidator or
    FormValidator::Simple (via DBIx::Class::Validate)
- * Layout in Opera                                          - DONE
- * Email notifications
+ * log configuration changes in database and provide
+   notifications for configuration changes (Mantis#12081)
 
-Repo
- * show private/public status                               - DONE
- * do not list private repositories in lists                - DONE
- * split paths in lists
- * create as mirror from upstream                           - DONE
- * delete moves to attic                                    - DONE
+SQL/database backend
+ * switch to versioned schema to allow easy upgrades
+ * remove hardcoded database names and allow to use password
+   authentication (currently most scripts assume ident
+   authentication)
+ * improve trigger handling (fire triggers on trigger
+   configuration changes)
 
-User
- * can set and change his pubkey                            - DONE
- * can edit description and options of repositories he owns - DONE
- * can fork existing repositories into private repositories - DONE
- * can create new private repositories                      - DONE
- * can edit permissions of private repositories             - DONE
- * can delete private repositories                          - DONE
- * can rename private repositories
- * can subscribe to repositories                            - DONE
- * can manage subscriptions                                 - DONE
+gitosis/git backend
+ * allow renaming repositories (Mantis#12053)
+ * investigate whether switching to gitolite would be useful
+ * investigate whether a tighter backend integration would be
+   useful
+ * smarter deletions (e.g. handle empty repos)
+ * handle UTF-8 in diffs/logs correctly in notification mails
+   (Mantis#13243)
+ * more flexible forks & mirrors handling (e.g. allow to create
+   mirrors as forks of other mirrors) (Mantis#12083)
 
-Admin
- * can fork existing repositories into public repositories  - DONE
- * can create new repositories                              - DONE
- * can edit description and options of all repositories     - DONE
- * can edit permissions of all repositories                 - DONE
- * can delete repositories                                  - DONE
- * can rename all repositories
- * can manage subscriptions for all users                   - DONE
- * can delete groups                                        - DONE
- * can edit groups                                          - DONE
+mantis integration
+ * remove commits->branch mappings, makes no sense
+ * make more general to allow adding support for other BTS
 
-Comments:
+frontend
+ * split paths in repo lists
+ * don't use multiselect boxes, requires too much concentration
+   for users. use widgets that allow to easily add or remove one
+   element
+ * add confirmation dialogs for invasive changes (e.g. delete repository)
+ * add UI for ACL handling
 
-Renaming repositories needs design of backend support first.
