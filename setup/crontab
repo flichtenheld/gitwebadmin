@@ -1,12 +1,13 @@
 MAILTO=<admin email address>
 PATH=/usr/local/bin:/usr/bin:/bin
 # m h dom mon dow user	command
-11 * * * * gitadm /srv/git/gitwebadmin/bin/git-adm-daemon
-@reboot    gitadm /srv/git/gitwebadmin/bin/git-adm-daemon
-22 * * * * git    /srv/git/gitwebadmin/bin/git-mail-daemon
-@reboot    git    /srv/git/gitwebadmin/bin/git-mail-daemon
-33 * * * * git    /srv/git/gitwebadmin/bin/git-mirror-daemon
-@reboot    git    /srv/git/gitwebadmin/bin/git-mirror-daemon
-44 * * * * gitadm /srv/git/gitwebadmin/bin/update_user_list -q
-02 3 * * * postgres cd /srv/git/backups/pgsql && pg_dump gitwebadmin | lzma > gitwebadmin_dump_$(date -u +'\%Y\%m\%d_\%H\%M').lzma
-04 4 * * 0 git    /srv/git/gitwebadmin/bin/git-maintenance
+11   * * * * gitadm /srv/git/gitwebadmin/bin/git-adm-daemon
+@reboot      gitadm /srv/git/gitwebadmin/bin/git-adm-daemon
+22   * * * * git    /srv/git/gitwebadmin/bin/git-mail-daemon
+@reboot      git    /srv/git/gitwebadmin/bin/git-mail-daemon
+33   * * * * git    /srv/git/gitwebadmin/bin/git-mirror-daemon
+@reboot      git    /srv/git/gitwebadmin/bin/git-mirror-daemon
+44   * * * * gitadm /srv/git/gitwebadmin/bin/update_user_list -q
+02   3 * * * postgres cd /srv/git/backups/pgsql && pg_dump gitwebadmin | lzma > gitwebadmin_dump_$(date -u +'\%Y\%m\%d_\%H\%M').lzma
+04   4 * * 0 git    /srv/git/gitwebadmin/bin/git-maintenance
+*/10 * * * * gitadm /srv/git/gitwebadmin/bin/gitweb-cache
