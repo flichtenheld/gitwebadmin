@@ -37,4 +37,5 @@ frontend
    element
  * add confirmation dialogs for invasive changes (e.g. delete repository)
  * add UI for ACL handling
+ * allow to manage users via UI
 

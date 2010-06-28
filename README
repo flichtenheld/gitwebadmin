@@ -1,4 +1,25 @@
-Copyright and License:
+DESCRIPTION
+
+GitWebAdmin is an administration tool for a git server hosting
+multiple Git repositories. It stores all the configuration in a
+SQL database (PostgreSQL is the only database currently supported). It
+includes a web interface to edit the configuration and several tools
+to use the configuration to write configuration and data files for
+other components of the Git server. It also includes hooks to use in
+the hosted Git repositories for advanced features.
+
+Read INSTALL for more information on setting up GitWebAdmin.
+
+RESOURCES
+
+http://github.com/flichtenheld/gitwebadmin is currently the homepage
+for GitWebAdmin. Feel free to use the issue tracking system and wiki
+provided by GitHub.
+
+Patches are welcome both by pull request via GitHub and by pull
+request/patch submission via email to opensource@astaro.com.
+
+COPYRIGHT AND LICENSE
 
   Copyright (C) 2009,2010 Astaro GmbH & Co. KG  www.astaro.com
 

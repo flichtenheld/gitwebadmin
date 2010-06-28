@@ -1,0 +1,55 @@
+DOWNLOADING
+
+GitWebAdmin can currently only downloaded from the Git repository at
+http://github.com/flichtenheld/gitwebadmin. There are no versioned
+release available at this point.
+
+REQUIREMENTS
+
+* git >= 1.6
+
+  You will need a patched version of gitweb if you want to use the
+  gitweb-cache tool. See  http://github.com/flichtenheld/git (branch
+  "astaro").
+
+* gitosis
+
+  Requires a patched version of gitosis
+  (http://eagain.net/gitweb/?p=gitosis.git), which
+  can be found at http://github.com/flichtenheld/gitosis (branch
+  "astaro").
+
+* Perl >= 5.8
+
+  CPAN modules:
+   CGI::Application
+   Config::Auto
+   DBIx::Class
+   JSON::XS
+   LWP
+   Template
+   
+* PostgreSQL >= 8.3
+
+INSTALLATION
+
+This is very basic, but it should give you a first idea where
+to start.
+
+ 1) Create a postgres database and initialize it with setup/init.sql
+ 2) Install gitosis
+ 3) Check out the gitosis-admin repository
+ 4) Edit gitwebadmin.ini
+ 5) Start bin/git-adm-daemon. It will edit the gitosis.conf and push
+    the result.
+ 6) Populate the users table in the database. There is currently no
+    UI for this. bin/update_user_list is an example that uses an
+    LDAP database to generate the user list.
+ 7) Configure your web server. GitWebAdmin assumes that the web server
+    handles the authentication and leaves the username in REMOTE_USER
+    environment variable.
+    FIXME: add example configuration(s) to gwa repository
+ 8) Start the remaining utility daemons and scripts. See setup/crontab
+    for a list and example configuration.
+
+
