@@ -98,7 +98,7 @@ while( 1 ){
     while( my $grp = $groups->next ){
 #	print "\t".$grp->gid."\n" unless $quiet;
       $out_cfg{groups}{$grp->gid} = {
-        members => [ map { $_->uid } $grp->users ],
+        members => [ map { $_->uid } $grp->users({ active => 1 }) ],
         writable => [ map { strip_git($_->name) }
                           $grp->w_repos($repo_filter) ],
         readable => [ map { strip_git($_->name) }
