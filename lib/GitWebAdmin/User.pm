@@ -78,7 +78,7 @@ sub get_key {
   $key =~ s/^\s+//;
   $key =~ s/\s+$//;
 
-  return if length($key) > 1000;
+  return if length($key) > 3000;
   return if $key =~ m/\n/;
 
   return $key;
