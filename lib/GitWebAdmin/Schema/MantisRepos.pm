@@ -1,41 +1,60 @@
 package GitWebAdmin::Schema::MantisRepos;
 
+# Created by DBIx::Class::Schema::Loader
+# DO NOT MODIFY THE FIRST PART OF THIS FILE
+
 use strict;
 use warnings;
 
-use base 'DBIx::Class';
+use base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components("Core");
+
+=head1 NAME
+
+GitWebAdmin::Schema::MantisRepos
+
+=cut
+
 __PACKAGE__->table("mantis_repos");
+
+=head1 ACCESSORS
+
+=head2 id
+
+  data_type: 'integer'
+  is_nullable: 1
+
+=head2 name
+
+  data_type: 'text'
+  is_nullable: 1
+
+=head2 descr
+
+  data_type: 'text'
+  is_nullable: 1
+
+=head2 branches
+
+  data_type: 'text'
+  is_nullable: 1
+
+=cut
+
 __PACKAGE__->add_columns(
   "id",
-  { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
+  { data_type => "integer", is_nullable => 1 },
   "name",
-  {
-    data_type => "text",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "text", is_nullable => 1 },
   "descr",
-  {
-    data_type => "text",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "text", is_nullable => 1 },
   "branches",
-  {
-    data_type => "text",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "text", is_nullable => 1 },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-08-18 21:33:43
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:il2mlIWtfc2CKn0Z8mxJ8w
+# Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-08-12 17:07:09
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:e5F6Xwmdu26rcZnA7fBHiA
 
 __PACKAGE__->set_primary_key("id");
 __PACKAGE__->add_unique_constraint("repos_pkey", ["id"]);

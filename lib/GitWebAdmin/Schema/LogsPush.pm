@@ -1,73 +1,128 @@
 package GitWebAdmin::Schema::LogsPush;
 
+# Created by DBIx::Class::Schema::Loader
+# DO NOT MODIFY THE FIRST PART OF THIS FILE
+
 use strict;
 use warnings;
 
-use base 'DBIx::Class';
+use base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components("Core");
+
+=head1 NAME
+
+GitWebAdmin::Schema::LogsPush
+
+=cut
+
 __PACKAGE__->table("logs_push");
+
+=head1 ACCESSORS
+
+=head2 logid
+
+  data_type: 'bigint'
+  is_auto_increment: 1
+  is_nullable: 0
+  sequence: 'logs_push_logid_seq'
+
+=head2 rid
+
+  data_type: 'integer'
+  is_foreign_key: 1
+  is_nullable: 0
+
+=head2 uid
+
+  data_type: 'text'
+  is_foreign_key: 1
+  is_nullable: 0
+
+=head2 date
+
+  data_type: 'timestamp'
+  default_value: current_timestamp
+  is_nullable: 0
+  original: {default_value => \"now()"}
+
+=head2 old_id
+
+  data_type: 'text'
+  is_nullable: 0
+
+=head2 new_id
+
+  data_type: 'text'
+  is_nullable: 0
+
+=head2 ref
+
+  data_type: 'text'
+  is_nullable: 0
+
+=head2 notified
+
+  data_type: 'boolean'
+  default_value: false
+  is_nullable: 0
+
+=cut
+
 __PACKAGE__->add_columns(
   "logid",
   {
-    data_type => "bigint",
-    default_value => "nextval('logs_push_logid_seq'::regclass)",
-    is_nullable => 0,
-    size => 8,
+    data_type         => "bigint",
+    is_auto_increment => 1,
+    is_nullable       => 0,
+    sequence          => "logs_push_logid_seq",
   },
   "rid",
-  { data_type => "integer", default_value => undef, is_nullable => 0, size => 4 },
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
   "uid",
-  {
-    data_type => "text",
-    default_value => undef,
-    is_nullable => 0,
-    size => undef,
-  },
+  { data_type => "text", is_foreign_key => 1, is_nullable => 0 },
   "date",
   {
-    data_type => "timestamp without time zone",
-    default_value => "now()",
-    is_nullable => 0,
-    size => 8,
+    data_type     => "timestamp",
+    default_value => \"current_timestamp",
+    is_nullable   => 0,
+    original      => { default_value => \"now()" },
   },
   "old_id",
-  {
-    data_type => "text",
-    default_value => undef,
-    is_nullable => 0,
-    size => undef,
-  },
+  { data_type => "text", is_nullable => 0 },
   "new_id",
-  {
-    data_type => "text",
-    default_value => undef,
-    is_nullable => 0,
-    size => undef,
-  },
+  { data_type => "text", is_nullable => 0 },
   "ref",
-  {
-    data_type => "text",
-    default_value => undef,
-    is_nullable => 0,
-    size => undef,
-  },
+  { data_type => "text", is_nullable => 0 },
   "notified",
-  {
-    data_type => "boolean",
-    default_value => "false",
-    is_nullable => 0,
-    size => 1,
-  },
+  { data_type => "boolean", default_value => \"false", is_nullable => 0 },
 );
 __PACKAGE__->set_primary_key("logid");
-__PACKAGE__->add_unique_constraint("logs_push_pkey", ["logid"]);
+
+=head1 RELATIONS
+
+=head2 rid
+
+Type: belongs_to
+
+Related object: L<GitWebAdmin::Schema::Repos>
+
+=cut
+
 __PACKAGE__->belongs_to("rid", "GitWebAdmin::Schema::Repos", { id => "rid" });
+
+=head2 uid
+
+Type: belongs_to
+
+Related object: L<GitWebAdmin::Schema::Users>
+
+=cut
+
 __PACKAGE__->belongs_to("uid", "GitWebAdmin::Schema::Users", { uid => "uid" });
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-08-18 21:33:43
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:+l6B26zyboQGEyrhnOcp4g
+# Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-08-12 17:07:09
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:f/1dJ7Usf09iZo2dF1e0Iw
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

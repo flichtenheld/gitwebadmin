@@ -1,67 +1,105 @@
 package GitWebAdmin::Schema::Keys;
 
+# Created by DBIx::Class::Schema::Loader
+# DO NOT MODIFY THE FIRST PART OF THIS FILE
+
 use strict;
 use warnings;
 
-use base 'DBIx::Class';
+use base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components("Core");
+
+=head1 NAME
+
+GitWebAdmin::Schema::Keys
+
+=cut
+
 __PACKAGE__->table("keys");
+
+=head1 ACCESSORS
+
+=head2 id
+
+  data_type: 'integer'
+  is_auto_increment: 1
+  is_nullable: 0
+  sequence: 'keys_id_seq'
+
+=head2 uid
+
+  data_type: 'text'
+  is_foreign_key: 1
+  is_nullable: 0
+
+=head2 name
+
+  data_type: 'text'
+  is_nullable: 0
+
+=head2 bits
+
+  data_type: 'integer'
+  is_nullable: 0
+
+=head2 type
+
+  data_type: 'ssh_key_type'
+  is_nullable: 1
+  size: 4
+
+=head2 fingerprint
+
+  data_type: 'text'
+  is_nullable: 0
+
+=head2 key
+
+  data_type: 'text'
+  is_nullable: 0
+
+=cut
+
 __PACKAGE__->add_columns(
   "id",
   {
-    data_type => "integer",
-    default_value => "nextval('keys_id_seq'::regclass)",
-    is_nullable => 0,
-    size => 4,
+    data_type         => "integer",
+    is_auto_increment => 1,
+    is_nullable       => 0,
+    sequence          => "keys_id_seq",
   },
   "uid",
-  {
-    data_type => "text",
-    default_value => undef,
-    is_nullable => 0,
-    size => undef,
-  },
+  { data_type => "text", is_foreign_key => 1, is_nullable => 0 },
   "name",
-  {
-    data_type => "text",
-    default_value => undef,
-    is_nullable => 0,
-    size => undef,
-  },
+  { data_type => "text", is_nullable => 0 },
   "bits",
-  { data_type => "integer", default_value => undef, is_nullable => 0, size => 4 },
+  { data_type => "integer", is_nullable => 0 },
   "type",
-  {
-    data_type => "ssh_key_type",
-    default_value => undef,
-    is_nullable => 1,
-    size => 4,
-  },
+  { data_type => "ssh_key_type", is_nullable => 1, size => 4 },
   "fingerprint",
-  {
-    data_type => "text",
-    default_value => undef,
-    is_nullable => 0,
-    size => undef,
-  },
+  { data_type => "text", is_nullable => 0 },
   "key",
-  {
-    data_type => "text",
-    default_value => undef,
-    is_nullable => 0,
-    size => undef,
-  },
+  { data_type => "text", is_nullable => 0 },
 );
 __PACKAGE__->set_primary_key("id");
 __PACKAGE__->add_unique_constraint("keys_uid_key1", ["uid", "name"]);
-__PACKAGE__->add_unique_constraint("keys_pkey", ["id"]);
 __PACKAGE__->add_unique_constraint("keys_uid_key", ["uid", "key"]);
+
+=head1 RELATIONS
+
+=head2 uid
+
+Type: belongs_to
+
+Related object: L<GitWebAdmin::Schema::Users>
+
+=cut
+
 __PACKAGE__->belongs_to("uid", "GitWebAdmin::Schema::Users", { uid => "uid" });
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-09-02 12:19:56
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:VHcPaulzKqRaxZUF6j+xHQ
+# Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-08-12 17:07:09
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:WmjTXkB4zij/yl5D9BqR/w
 
 use GitWebAdmin::Utils qw(json_bool);
 sub TO_JSON {

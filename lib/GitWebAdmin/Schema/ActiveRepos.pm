@@ -1,69 +1,123 @@
 package GitWebAdmin::Schema::ActiveRepos;
 
+# Created by DBIx::Class::Schema::Loader
+# DO NOT MODIFY THE FIRST PART OF THIS FILE
+
 use strict;
 use warnings;
 
-use base 'DBIx::Class';
+use base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components("Core");
+
+=head1 NAME
+
+GitWebAdmin::Schema::ActiveRepos
+
+=cut
+
 __PACKAGE__->table("active_repos");
+
+=head1 ACCESSORS
+
+=head2 id
+
+  data_type: 'integer'
+  is_nullable: 1
+
+=head2 name
+
+  data_type: 'text'
+  is_nullable: 1
+
+=head2 descr
+
+  data_type: 'text'
+  is_nullable: 1
+
+=head2 branch
+
+  data_type: 'text'
+  is_nullable: 1
+
+=head2 private
+
+  data_type: 'boolean'
+  is_nullable: 1
+
+=head2 daemon
+
+  data_type: 'boolean'
+  is_nullable: 1
+
+=head2 gitweb
+
+  data_type: 'boolean'
+  is_nullable: 1
+
+=head2 mantis
+
+  data_type: 'boolean'
+  is_nullable: 1
+
+=head2 owner
+
+  data_type: 'text'
+  is_nullable: 1
+
+=head2 forkof
+
+  data_type: 'integer'
+  is_nullable: 1
+
+=head2 mirrorof
+
+  data_type: 'text'
+  is_nullable: 1
+
+=head2 mirrorupd
+
+  data_type: 'integer'
+  is_nullable: 1
+
+=head2 deleted
+
+  data_type: 'boolean'
+  is_nullable: 1
+
+=cut
+
 __PACKAGE__->add_columns(
   "id",
-  { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
+  { data_type => "integer", is_nullable => 1 },
   "name",
-  {
-    data_type => "text",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "text", is_nullable => 1 },
   "descr",
-  {
-    data_type => "text",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "text", is_nullable => 1 },
   "branch",
-  {
-    data_type => "text",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "text", is_nullable => 1 },
   "private",
-  { data_type => "boolean", default_value => undef, is_nullable => 1, size => 1 },
+  { data_type => "boolean", is_nullable => 1 },
   "daemon",
-  { data_type => "boolean", default_value => undef, is_nullable => 1, size => 1 },
+  { data_type => "boolean", is_nullable => 1 },
   "gitweb",
-  { data_type => "boolean", default_value => undef, is_nullable => 1, size => 1 },
+  { data_type => "boolean", is_nullable => 1 },
   "mantis",
-  { data_type => "boolean", default_value => undef, is_nullable => 1, size => 1 },
+  { data_type => "boolean", is_nullable => 1 },
   "owner",
-  {
-    data_type => "text",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "text", is_nullable => 1 },
   "forkof",
-  { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
+  { data_type => "integer", is_nullable => 1 },
   "mirrorof",
-  {
-    data_type => "text",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "text", is_nullable => 1 },
   "mirrorupd",
-  { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
+  { data_type => "integer", is_nullable => 1 },
   "deleted",
-  { data_type => "boolean", default_value => undef, is_nullable => 1, size => 1 },
+  { data_type => "boolean", is_nullable => 1 },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2009-08-31 14:01:50
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:t7jDqN3w+w/Gff0IBw3Fjg
+# Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-08-12 17:07:09
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:0uGPDdjXRT8oN/xhA0Gsuw
 
 __PACKAGE__->has_many(
   "logs_pushes",
@@ -95,11 +149,6 @@ __PACKAGE__->has_many(
 __PACKAGE__->has_many(
   "branches",
   "GitWebAdmin::Schema::Branches",
-  { "foreign.rid" => "self.id" },
-);
-__PACKAGE__->has_many(
-  "commits",
-  "GitWebAdmin::Schema::Commits",
   { "foreign.rid" => "self.id" },
 );
 __PACKAGE__->many_to_many('w_groups' => 'writables', 'gid');

@@ -1,85 +1,162 @@
 package GitWebAdmin::Schema::Users;
 
+# Created by DBIx::Class::Schema::Loader
+# DO NOT MODIFY THE FIRST PART OF THIS FILE
+
 use strict;
 use warnings;
 
-use base 'DBIx::Class';
+use base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components("Core");
+
+=head1 NAME
+
+GitWebAdmin::Schema::Users
+
+=cut
+
 __PACKAGE__->table("users");
+
+=head1 ACCESSORS
+
+=head2 uid
+
+  data_type: 'text'
+  is_nullable: 0
+
+=head2 name
+
+  data_type: 'text'
+  is_nullable: 1
+
+=head2 mail
+
+  data_type: 'text'
+  is_nullable: 1
+
+=head2 admin
+
+  data_type: 'boolean'
+  default_value: false
+  is_nullable: 0
+
+=head2 active
+
+  data_type: 'boolean'
+  default_value: true
+  is_nullable: 0
+
+=cut
+
 __PACKAGE__->add_columns(
   "uid",
-  {
-    data_type => "text",
-    default_value => undef,
-    is_nullable => 0,
-    size => undef,
-  },
+  { data_type => "text", is_nullable => 0 },
   "name",
-  {
-    data_type => "text",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "text", is_nullable => 1 },
   "mail",
-  {
-    data_type => "text",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "text", is_nullable => 1 },
   "admin",
-  {
-    data_type => "boolean",
-    default_value => "false",
-    is_nullable => 0,
-    size => 1,
-  },
+  { data_type => "boolean", default_value => \"false", is_nullable => 0 },
   "active",
-  {
-    data_type => "boolean",
-    default_value => "true",
-    is_nullable => 0,
-    size => 1,
-  },
+  { data_type => "boolean", default_value => \"true", is_nullable => 0 },
 );
 __PACKAGE__->set_primary_key("uid");
-__PACKAGE__->add_unique_constraint("users_pkey", ["uid"]);
+
+=head1 RELATIONS
+
+=head2 keys
+
+Type: has_many
+
+Related object: L<GitWebAdmin::Schema::Keys>
+
+=cut
+
 __PACKAGE__->has_many(
   "keys",
   "GitWebAdmin::Schema::Keys",
   { "foreign.uid" => "self.uid" },
+  {},
 );
+
+=head2 logs_pushes
+
+Type: has_many
+
+Related object: L<GitWebAdmin::Schema::LogsPush>
+
+=cut
+
 __PACKAGE__->has_many(
   "logs_pushes",
   "GitWebAdmin::Schema::LogsPush",
   { "foreign.uid" => "self.uid" },
+  {},
 );
+
+=head2 members
+
+Type: has_many
+
+Related object: L<GitWebAdmin::Schema::Members>
+
+=cut
+
 __PACKAGE__->has_many(
   "members",
   "GitWebAdmin::Schema::Members",
   { "foreign.uid" => "self.uid" },
+  {},
 );
+
+=head2 push_acls
+
+Type: has_many
+
+Related object: L<GitWebAdmin::Schema::PushAcl>
+
+=cut
+
 __PACKAGE__->has_many(
   "push_acls",
   "GitWebAdmin::Schema::PushAcl",
   { "foreign.user" => "self.uid" },
+  {},
 );
+
+=head2 repo
+
+Type: has_many
+
+Related object: L<GitWebAdmin::Schema::Repos>
+
+=cut
+
 __PACKAGE__->has_many(
   "repo",
   "GitWebAdmin::Schema::Repos",
   { "foreign.owner" => "self.uid" },
+  {},
 );
+
+=head2 subscriptions
+
+Type: has_many
+
+Related object: L<GitWebAdmin::Schema::Subscriptions>
+
+=cut
+
 __PACKAGE__->has_many(
   "subscriptions",
   "GitWebAdmin::Schema::Subscriptions",
   { "foreign.uid" => "self.uid" },
+  {},
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-01-11 22:33:05
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:qU4eTC8k0nCF+AzohnDxZw
+# Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-08-12 17:07:09
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:7eKqtKIp73sDKyaaiiGWHw
 
 __PACKAGE__->many_to_many('groups' => 'members', 'gid');
 __PACKAGE__->many_to_many('subscribed_repos' => 'subscriptions', 'rid');

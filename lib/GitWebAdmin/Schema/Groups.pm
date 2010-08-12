@@ -1,61 +1,116 @@
 package GitWebAdmin::Schema::Groups;
 
+# Created by DBIx::Class::Schema::Loader
+# DO NOT MODIFY THE FIRST PART OF THIS FILE
+
 use strict;
 use warnings;
 
-use base 'DBIx::Class';
+use base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components("Core");
+
+=head1 NAME
+
+GitWebAdmin::Schema::Groups
+
+=cut
+
 __PACKAGE__->table("groups");
+
+=head1 ACCESSORS
+
+=head2 gid
+
+  data_type: 'text'
+  is_nullable: 0
+
+=head2 name
+
+  data_type: 'text'
+  is_nullable: 1
+
+=head2 descr
+
+  data_type: 'text'
+  is_nullable: 1
+
+=cut
+
 __PACKAGE__->add_columns(
   "gid",
-  {
-    data_type => "text",
-    default_value => undef,
-    is_nullable => 0,
-    size => undef,
-  },
+  { data_type => "text", is_nullable => 0 },
   "name",
-  {
-    data_type => "text",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "text", is_nullable => 1 },
   "descr",
-  {
-    data_type => "text",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "text", is_nullable => 1 },
 );
 __PACKAGE__->set_primary_key("gid");
-__PACKAGE__->add_unique_constraint("groups_pkey", ["gid"]);
+
+=head1 RELATIONS
+
+=head2 members
+
+Type: has_many
+
+Related object: L<GitWebAdmin::Schema::Members>
+
+=cut
+
 __PACKAGE__->has_many(
   "members",
   "GitWebAdmin::Schema::Members",
   { "foreign.gid" => "self.gid" },
+  {},
 );
+
+=head2 push_acls
+
+Type: has_many
+
+Related object: L<GitWebAdmin::Schema::PushAcl>
+
+=cut
+
 __PACKAGE__->has_many(
   "push_acls",
   "GitWebAdmin::Schema::PushAcl",
   { "foreign.group" => "self.gid" },
+  {},
 );
+
+=head2 readables
+
+Type: has_many
+
+Related object: L<GitWebAdmin::Schema::Readable>
+
+=cut
+
 __PACKAGE__->has_many(
   "readables",
   "GitWebAdmin::Schema::Readable",
   { "foreign.gid" => "self.gid" },
+  {},
 );
+
+=head2 writables
+
+Type: has_many
+
+Related object: L<GitWebAdmin::Schema::Writable>
+
+=cut
+
 __PACKAGE__->has_many(
   "writables",
   "GitWebAdmin::Schema::Writable",
   { "foreign.gid" => "self.gid" },
+  {},
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-01-11 22:33:05
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:yMKv5KtQZ+xx68FeNrmpmw
+# Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-08-12 17:07:09
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Hl6XJAA5E8b+B4Ao2BtGfQ
 
 __PACKAGE__->many_to_many('users' => 'members', 'uid');
 __PACKAGE__->many_to_many('w_repos' => 'writables', 'rid');

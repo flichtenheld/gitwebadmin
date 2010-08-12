@@ -1,149 +1,283 @@
 package GitWebAdmin::Schema::Repos;
 
+# Created by DBIx::Class::Schema::Loader
+# DO NOT MODIFY THE FIRST PART OF THIS FILE
+
 use strict;
 use warnings;
 
-use base 'DBIx::Class';
+use base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components("Core");
+
+=head1 NAME
+
+GitWebAdmin::Schema::Repos
+
+=cut
+
 __PACKAGE__->table("repos");
+
+=head1 ACCESSORS
+
+=head2 id
+
+  data_type: 'integer'
+  is_auto_increment: 1
+  is_nullable: 0
+  sequence: 'repos_id_seq'
+
+=head2 name
+
+  data_type: 'text'
+  is_nullable: 0
+
+=head2 descr
+
+  data_type: 'text'
+  is_nullable: 1
+
+=head2 branch
+
+  data_type: 'text'
+  default_value: 'master'
+  is_nullable: 0
+
+=head2 private
+
+  data_type: 'boolean'
+  default_value: false
+  is_nullable: 0
+
+=head2 daemon
+
+  data_type: 'boolean'
+  default_value: false
+  is_nullable: 0
+
+=head2 gitweb
+
+  data_type: 'boolean'
+  default_value: false
+  is_nullable: 0
+
+=head2 mantis
+
+  data_type: 'boolean'
+  default_value: false
+  is_nullable: 0
+
+=head2 owner
+
+  data_type: 'text'
+  is_foreign_key: 1
+  is_nullable: 0
+
+=head2 forkof
+
+  data_type: 'integer'
+  is_foreign_key: 1
+  is_nullable: 1
+
+=head2 mirrorof
+
+  data_type: 'text'
+  is_nullable: 1
+
+=head2 mirrorupd
+
+  data_type: 'integer'
+  default_value: 86400
+  is_nullable: 1
+
+=head2 deleted
+
+  data_type: 'boolean'
+  default_value: false
+  is_nullable: 0
+
+=cut
+
 __PACKAGE__->add_columns(
   "id",
   {
-    data_type => "integer",
-    default_value => "nextval('repos_id_seq'::regclass)",
-    is_nullable => 0,
-    size => 4,
+    data_type         => "integer",
+    is_auto_increment => 1,
+    is_nullable       => 0,
+    sequence          => "repos_id_seq",
   },
   "name",
-  {
-    data_type => "text",
-    default_value => undef,
-    is_nullable => 0,
-    size => undef,
-  },
+  { data_type => "text", is_nullable => 0 },
   "descr",
-  {
-    data_type => "text",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "text", is_nullable => 1 },
   "branch",
-  {
-    data_type => "text",
-    default_value => "'master'::text",
-    is_nullable => 0,
-    size => undef,
-  },
+  { data_type => "text", default_value => "master", is_nullable => 0 },
   "private",
-  {
-    data_type => "boolean",
-    default_value => "false",
-    is_nullable => 0,
-    size => 1,
-  },
+  { data_type => "boolean", default_value => \"false", is_nullable => 0 },
   "daemon",
-  {
-    data_type => "boolean",
-    default_value => "false",
-    is_nullable => 0,
-    size => 1,
-  },
+  { data_type => "boolean", default_value => \"false", is_nullable => 0 },
   "gitweb",
-  {
-    data_type => "boolean",
-    default_value => "false",
-    is_nullable => 0,
-    size => 1,
-  },
+  { data_type => "boolean", default_value => \"false", is_nullable => 0 },
   "mantis",
-  {
-    data_type => "boolean",
-    default_value => "false",
-    is_nullable => 0,
-    size => 1,
-  },
+  { data_type => "boolean", default_value => \"false", is_nullable => 0 },
   "owner",
-  {
-    data_type => "text",
-    default_value => undef,
-    is_nullable => 0,
-    size => undef,
-  },
+  { data_type => "text", is_foreign_key => 1, is_nullable => 0 },
   "forkof",
-  { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
   "mirrorof",
-  {
-    data_type => "text",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "text", is_nullable => 1 },
   "mirrorupd",
-  { data_type => "integer", default_value => 86400, is_nullable => 1, size => 4 },
+  { data_type => "integer", default_value => 86400, is_nullable => 1 },
   "deleted",
-  {
-    data_type => "boolean",
-    default_value => "false",
-    is_nullable => 0,
-    size => 1,
-  },
+  { data_type => "boolean", default_value => \"false", is_nullable => 0 },
 );
 __PACKAGE__->set_primary_key("id");
-__PACKAGE__->add_unique_constraint("repos_pkey", ["id"]);
 __PACKAGE__->add_unique_constraint("repos_name_key", ["name"]);
+
+=head1 RELATIONS
+
+=head2 branches
+
+Type: has_many
+
+Related object: L<GitWebAdmin::Schema::Branches>
+
+=cut
+
 __PACKAGE__->has_many(
   "branches",
   "GitWebAdmin::Schema::Branches",
   { "foreign.rid" => "self.id" },
+  {},
 );
-__PACKAGE__->has_many(
-  "commits",
-  "GitWebAdmin::Schema::Commits",
-  { "foreign.rid" => "self.id" },
-);
+
+=head2 logs_pushes
+
+Type: has_many
+
+Related object: L<GitWebAdmin::Schema::LogsPush>
+
+=cut
+
 __PACKAGE__->has_many(
   "logs_pushes",
   "GitWebAdmin::Schema::LogsPush",
   { "foreign.rid" => "self.id" },
+  {},
 );
+
+=head2 push_acls
+
+Type: has_many
+
+Related object: L<GitWebAdmin::Schema::PushAcl>
+
+=cut
+
 __PACKAGE__->has_many(
   "push_acls",
   "GitWebAdmin::Schema::PushAcl",
   { "foreign.repo" => "self.id" },
+  {},
 );
+
+=head2 readables
+
+Type: has_many
+
+Related object: L<GitWebAdmin::Schema::Readable>
+
+=cut
+
 __PACKAGE__->has_many(
   "readables",
   "GitWebAdmin::Schema::Readable",
   { "foreign.rid" => "self.id" },
+  {},
 );
+
+=head2 forkof
+
+Type: belongs_to
+
+Related object: L<GitWebAdmin::Schema::Repos>
+
+=cut
+
 __PACKAGE__->belongs_to("forkof", "GitWebAdmin::Schema::Repos", { id => "forkof" });
+
+=head2 repo
+
+Type: has_many
+
+Related object: L<GitWebAdmin::Schema::Repos>
+
+=cut
+
 __PACKAGE__->has_many(
   "repo",
   "GitWebAdmin::Schema::Repos",
   { "foreign.forkof" => "self.id" },
+  {},
 );
+
+=head2 owner
+
+Type: belongs_to
+
+Related object: L<GitWebAdmin::Schema::Users>
+
+=cut
+
 __PACKAGE__->belongs_to("owner", "GitWebAdmin::Schema::Users", { uid => "owner" });
+
+=head2 repo_triggers
+
+Type: has_many
+
+Related object: L<GitWebAdmin::Schema::RepoTriggers>
+
+=cut
+
 __PACKAGE__->has_many(
   "repo_triggers",
   "GitWebAdmin::Schema::RepoTriggers",
   { "foreign.rid" => "self.id" },
+  {},
 );
+
+=head2 subscriptions
+
+Type: has_many
+
+Related object: L<GitWebAdmin::Schema::Subscriptions>
+
+=cut
+
 __PACKAGE__->has_many(
   "subscriptions",
   "GitWebAdmin::Schema::Subscriptions",
   { "foreign.rid" => "self.id" },
+  {},
 );
+
+=head2 writables
+
+Type: has_many
+
+Related object: L<GitWebAdmin::Schema::Writable>
+
+=cut
+
 __PACKAGE__->has_many(
   "writables",
   "GitWebAdmin::Schema::Writable",
   { "foreign.rid" => "self.id" },
+  {},
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-01-11 22:33:05
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:oJCDskONu9v0PDaov3D6Dg
+# Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-08-12 17:07:09
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:RoksWS2hvi2NfmM9AHwUiA
 
 __PACKAGE__->many_to_many('w_groups' => 'writables', 'gid');
 __PACKAGE__->many_to_many('r_groups' => 'readables', 'gid');

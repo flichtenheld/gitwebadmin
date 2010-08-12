@@ -27,7 +27,6 @@ gitosis/git backend
    mirrors as forks of other mirrors) (Mantis#12083)
 
 mantis integration
- * remove commits->branch mappings, makes no sense
  * make more general to allow adding support for other BTS
 
 frontend

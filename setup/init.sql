@@ -30,8 +30,6 @@ DROP TABLE readable CASCADE;
 DROP TABLE members  CASCADE;
 DROP TABLE subscriptions CASCADE;
 DROP TABLE logs_push CASCADE;
-DROP TABLE commit_to_branch CASCADE;
-DROP TABLE commits CASCADE;
 DROP TABLE branches CASCADE;
 DROP TABLE external_triggers CASCADE;
 DROP TABLE repo_triggers CASCADE;

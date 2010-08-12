@@ -1,91 +1,161 @@
 package GitWebAdmin::Schema::PushAcl;
 
+# Created by DBIx::Class::Schema::Loader
+# DO NOT MODIFY THE FIRST PART OF THIS FILE
+
 use strict;
 use warnings;
 
-use base 'DBIx::Class';
+use base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components("Core");
+
+=head1 NAME
+
+GitWebAdmin::Schema::PushAcl
+
+=cut
+
 __PACKAGE__->table("push_acl");
+
+=head1 ACCESSORS
+
+=head2 id
+
+  data_type: 'integer'
+  is_auto_increment: 1
+  is_nullable: 0
+  sequence: 'push_acl_id_seq'
+
+=head2 priority
+
+  data_type: 'integer'
+  is_nullable: 0
+
+=head2 user
+
+  data_type: 'text'
+  is_foreign_key: 1
+  is_nullable: 1
+
+=head2 group
+
+  data_type: 'text'
+  is_foreign_key: 1
+  is_nullable: 1
+
+=head2 repo
+
+  data_type: 'integer'
+  is_foreign_key: 1
+  is_nullable: 1
+
+=head2 user_flags
+
+  data_type: 'text'
+  is_nullable: 1
+
+=head2 repo_flags
+
+  data_type: 'text'
+  is_nullable: 1
+
+=head2 ref
+
+  data_type: 'text'
+  is_nullable: 1
+
+=head2 action
+
+  data_type: 'push_action_type'
+  is_nullable: 1
+  size: 4
+
+=head2 result
+
+  data_type: 'acl_result_type'
+  default_value: 'deny'
+  is_nullable: 0
+  size: 4
+
+=head2 comment
+
+  data_type: 'text'
+  is_nullable: 1
+
+=cut
+
 __PACKAGE__->add_columns(
   "id",
   {
-    data_type => "integer",
-    default_value => "nextval('push_acl_id_seq'::regclass)",
-    is_nullable => 0,
-    size => 4,
+    data_type         => "integer",
+    is_auto_increment => 1,
+    is_nullable       => 0,
+    sequence          => "push_acl_id_seq",
   },
   "priority",
-  { data_type => "integer", default_value => undef, is_nullable => 0, size => 4 },
+  { data_type => "integer", is_nullable => 0 },
   "user",
-  {
-    data_type => "text",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "text", is_foreign_key => 1, is_nullable => 1 },
   "group",
-  {
-    data_type => "text",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "text", is_foreign_key => 1, is_nullable => 1 },
   "repo",
-  { data_type => "integer", default_value => undef, is_nullable => 1, size => 4 },
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
   "user_flags",
-  {
-    data_type => "text",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "text", is_nullable => 1 },
   "repo_flags",
-  {
-    data_type => "text",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "text", is_nullable => 1 },
   "ref",
-  {
-    data_type => "text",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "text", is_nullable => 1 },
   "action",
-  {
-    data_type => "push_action_type",
-    default_value => undef,
-    is_nullable => 1,
-    size => 4,
-  },
+  { data_type => "push_action_type", is_nullable => 1, size => 4 },
   "result",
   {
     data_type => "acl_result_type",
-    default_value => "'deny'::acl_result_type",
+    default_value => "deny",
     is_nullable => 0,
     size => 4,
   },
   "comment",
-  {
-    data_type => "text",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "text", is_nullable => 1 },
 );
 __PACKAGE__->set_primary_key("id");
 __PACKAGE__->add_unique_constraint("push_acl_priority_key", ["priority"]);
-__PACKAGE__->add_unique_constraint("push_acl_pkey", ["id"]);
+
+=head1 RELATIONS
+
+=head2 group
+
+Type: belongs_to
+
+Related object: L<GitWebAdmin::Schema::Groups>
+
+=cut
+
 __PACKAGE__->belongs_to("group", "GitWebAdmin::Schema::Groups", { gid => "group" });
+
+=head2 user
+
+Type: belongs_to
+
+Related object: L<GitWebAdmin::Schema::Users>
+
+=cut
+
 __PACKAGE__->belongs_to("user", "GitWebAdmin::Schema::Users", { uid => "user" });
+
+=head2 repo
+
+Type: belongs_to
+
+Related object: L<GitWebAdmin::Schema::Repos>
+
+=cut
+
 __PACKAGE__->belongs_to("repo", "GitWebAdmin::Schema::Repos", { id => "repo" });
 
 
-# Created by DBIx::Class::Schema::Loader v0.04005 @ 2010-01-11 22:33:05
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:ALGanwUy5ilhywKg9PPECQ
+# Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-08-12 17:07:09
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:jkUaioBRe0PtI6EVvqOICw
 
 use List::MoreUtils qw(none);
 use Data::Dumper;
