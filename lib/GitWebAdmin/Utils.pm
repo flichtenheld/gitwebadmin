@@ -54,12 +54,11 @@ sub check_key {
   return;
 }
 
-# Update commit lists
+# Update branch lists
 # Always operate on whole repo, not just the updated branches. Usually it
 # will make no difference and noticing that should be cheap enough.
 ##
-my $mantis_url = 'http://mantis.intranet.astaro.de';
-sub update_mantis_data {
+sub update_branch_data {
   my ($git_repo, $db_repo) = @_;
 
   my $changed = 0;
@@ -76,23 +75,21 @@ sub update_mantis_data {
     if( not exists $branches{$ref} ){
       my $branch = $db_repo->create_related('branches',
                                             { branch => $ref, commit => '0'x40 });
-      import_commits($git_repo, $db_repo, $branch, $sha1);
 
       $branch->commit($sha1);
       $branch->update->discard_changes;
 
       $changed++;
-      print "Mantis Data: Added branch $ref (".short_id($sha1).")\n";
+      print "Branch List: Added branch $ref (".short_id($sha1).")\n";
     } else {
       my $old_sha1 = $branches{$ref}->commit;
       unless( $old_sha1 eq $sha1 ){
-        import_commits($git_repo, $db_repo, $branches{$ref}, $sha1, $old_sha1);
 
         $branches{$ref}->commit($sha1);
         $branches{$ref}->update->discard_changes;
 
         $changed++;
-        print "Mantis Data: Updated branch $ref (".short_id($old_sha1)."..".short_id($sha1).")\n";
+        print "Branch List: Updated branch $ref (".short_id($old_sha1)."..".short_id($sha1).")\n";
       }
     }
   }
@@ -101,85 +98,21 @@ sub update_mantis_data {
     if( not exists $heads{$ref} ){
       my $branch = $branches{$ref};
 
-      my @commits = $branch->commits;
-      $branch->delete_related('commit_to_branches');
       $branch->delete;
-      foreach my $commit (@commits){
-        unless( $commit->branches->count ){
-          $commit->delete;
-          warn "Manits Data: Deleted orphaned commit ".$commit->commit." ($ref)\n";
-        }
-      }
-
       $changed++;
-      print "Mantis Data: Removed branch $ref (".short_id($branch->commit).")\n";
+      print "Branch List: Removed branch $ref (".short_id($branch->commit).")\n";
     }
   }
   unless( $changed ){
     print "No branches updated\n";
-    return 1;
   }
-  my $mantisdata = catfile( '/srv/git/mantis/', $db_repo->name );
-  if( ! -d $mantisdata ){
-    mkpath $mantisdata, 0, 02777
-      or die "mkdir $mantisdata failed: $!\n";
-  }
-  $mantisdata = catfile( $mantisdata, 'commits.txt' );
-  my @data;
-  foreach my $c ($db_repo->commits){
-    push @data, $c->commit."=".join(',', map { $_->branch } $c->branches)."\n";
-  }
-  write_file("$mantisdata.new", @data)
-    or die "write_file $mantisdata.new failed: $!\n";
-  rename("$mantisdata.new", $mantisdata)
-    or die "rename $mantisdata failed: $!\n";
-
-#   my $ua = LWP::UserAgent->new;
-
-#   my $trigger = $ua->get("$mantis_url/plugin.php?page=AstaroGitIntegration/latest&repo_url=".uri_escape($db_repo->name));
-
-#   my $success = 0;
-#   if( $trigger->is_success ){
-#     $trigger = $ua->get("$mantis_url/plugin.php?page=AstaroGitIntegration/import&repo_url=".uri_escape($db_repo->name));
-
-#     if( $trigger->is_success ){
-#       print "Mantis: Updated succesfully\n";
-#       $success = 1;
-#     }else{
-#       warn "Mantis: Astaro Update FAILED: ".$trigger->status_line."\n";
-#     }
-#   }else{
-#     warn "Mantis: Update FAILED: ".$trigger->status_line."\n";
-#   }
-
-#   return $success;
+  return $changed;
 }
 
 sub short_id {
   my ($sha) = @_;
 
   return substr($sha, 0, 7);
-}
-
-sub import_commits {
-  my ($git_repo, $db_repo, $branch, $sha1, $old_sha1) = @_;
-
-  my $commits = $db_repo->result_source->schema->resultset('Commits');
-
-  my @cmd = qw(rev-list -E --grep=^\[[0-9]+\]);
-  push @cmd, $sha1;
-  push @cmd, "^$old_sha1" if $old_sha1;
-
-  my @commits = $git_repo->command(@cmd);
-  foreach my $c (@commits){
-    chomp $c;
-    warn "invalid commit $c\n" unless $c =~ /^[a-f0-9]{40}$/;
-    my $commit = $commits->find_or_create(
-      { rid => $db_repo->id, commit => $c },
-      { key => 'commits_rid_key' }
-    );
-    $branch->add_to_commits($commit);
-  }
 }
 
 sub call_trigger {

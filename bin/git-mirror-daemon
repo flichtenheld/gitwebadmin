@@ -27,8 +27,10 @@ use autodie;
 use File::Spec::Functions;
 use File::Slurp;
 use Git;
+use Config::Auto;
 
 use FindBin;
+use Cwd qw(realpath);
 use lib "$FindBin::Bin/../lib";
 
 use Dutil;
@@ -46,9 +48,19 @@ Dutil::install_handlers;
 
 Dutil::log("initialized");
 
+my $GWA    = realpath("$FindBin::Bin/../");
+my $config = Config::Auto::parse("$GWA/gitwebadmin.ini");
+
 my $schema = GitWebAdmin::Schema->connect("dbi:Pg:dbname=gitwebadmin");
-my $rs = $schema->resultset('ActiveRepos');
-my $mantis = $schema->resultset('MantisRepos');
+my $rs = $schema->resultset('Repos')->search({ deleted => 0 });
+
+my $lp = $schema->resultset('LogsPush');
+# fake data, we don't know what changed
+my $upd = $lp->new({ ref => 'refs/head/master',
+                     old_id => '0'x40,
+                     new_id => '0'x40,
+                     uid => 'gitadm' });
+
 
 my $started = time();
 while( 1 ){
@@ -83,9 +95,13 @@ while( 1 ){
       $git->command_noisy(qw(config remote.origin.url), $repo->mirrorof);
       $git->command_noisy(qw(fetch --verbose --update-head-ok));
       write_file($ts_file, time());
-      if( $mantis->find($repo->id) ){
-        Dutil::log("update Mantis data");
-        GitWebAdmin::Utils::update_mantis_data($git, $repo);
+      Dutil::log("update branch data");
+      if( GitWebAdmin::Utils::update_branch_data($git, $repo) ){
+        my @triggers = $repo->triggers;
+        foreach my $trigger (@triggers){
+          Dutil::log($repo->name.": Calling trigger ".$trigger->name);
+          GitWebAdmin::Utils::call_trigger($config, $repo, $upd, $trigger);
+        }
       }
       Dutil::log("update complete");
       next;
@@ -101,11 +117,13 @@ while( 1 ){
     system(qw(gitosis-run-hook post-update))
       and die "gitosis failed: $!\n";
     delete $ENV{GIT_DIR};
-    if( $mantis->find($repo->id) ){
-      Dutil::log("update Mantis data");
-      my $git = Git->repository($gitdir);
-
-      GitWebAdmin::Utils::update_mantis_data($git, $repo);
+    Dutil::log("update branch data");
+    my $git = Git->repository($gitdir);
+    GitWebAdmin::Utils::update_branch_data($git, $repo);
+    my @triggers = $repo->triggers;
+    foreach my $trigger (@triggers){
+      Dutil::log($repo->name.": Calling trigger ".$trigger->name);
+      GitWebAdmin::Utils::call_trigger($config, $repo, $upd, $trigger);
     }
     Dutil::log("clone complete");
   }

@@ -19,7 +19,7 @@
 #  Author: Frank Lichtenheld <flichtenheld@astaro.com> 22.01.2010
 #
 ##############################################################################
-# Manually call update_mantis_data on all repos
+# Manually call update_branch_data on all repos
 ##############################################################################
 use strict;
 use warnings;
@@ -32,9 +32,9 @@ use GitWebAdmin::Schema;
 use GitWebAdmin::Utils;
 
 my $schema = GitWebAdmin::Schema->connect("dbi:Pg:dbname=gitwebadmin");
-my $mantis = $schema->resultset('Repos')->search({ mantis => 1 });
+my $repos = $schema->resultset('Repos')->search({ deleted => 0 });
 
-while( my $repo = $mantis->next() ){
+while( my $repo = $repos->next() ){
   printf "repo=%s\n", $repo->name;
   my $gitdir = catfile('/srv/git/repositories', $repo->name);
   unless( -d $gitdir ){
@@ -43,6 +43,6 @@ while( my $repo = $mantis->next() ){
   }
   my $git = Git->repository($gitdir);
   $schema->txn_begin;
-  GitWebAdmin::Utils::update_mantis_data($git, $repo);
+  GitWebAdmin::Utils::update_branch_data($git, $repo);
   $schema->txn_commit;
 }

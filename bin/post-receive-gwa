@@ -38,7 +38,6 @@ use GitWebAdmin::Utils qw(short_id);
 
 my $schema = GitWebAdmin::Schema->connect("dbi:Pg:dbname=gitwebadmin");
 my $logs = $schema->resultset('LogsPush');
-my $mantis = $schema->resultset('MantisRepos');
 
 my $gitdir = rel2abs($ENV{GIT_DIR});
 (my $reponame = $gitdir) =~ s;^(/srv|/var/lib)/git/repositories/;;;
@@ -65,9 +64,6 @@ while( <> ){
   print "$prog: Logged ref change $ref by $gituser (".short_id($oldrev)."..".short_id($newrev).")\n";
 }
 
-# Update Mantis data if needed
-if( $mantis->find($repo->id) ){
-  my $git = Git->repository($gitdir);
-
-  GitWebAdmin::Utils::update_mantis_data($git, $repo);
-}
+# Update branch data
+my $git = Git->repository($gitdir);
+GitWebAdmin::Utils::update_branch_data($git, $repo);
