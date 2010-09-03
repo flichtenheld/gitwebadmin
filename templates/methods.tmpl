@@ -86,6 +86,20 @@
 </select>
 [% END %]
 
+[% BLOCK trigger_chooser %]
+<select name="[% select_name %]" size="5" multiple="multiple">
+<option value="none"[% ' selected="selected"' UNLESS selected.size %]>None</option>
+[% db = c.param('db');
+   striggers = {};
+   FOREACH ts IN selected;
+   SET striggers.${ts.id} = 1;
+   END;
+   FOREACH t IN DBIxRel(db.resultset('ExternalTriggers').search).sort('name'); %]
+  <option value="[% t.id %]"[% ' selected="selected"' IF striggers.${t.id} %]>[% t.name | html %]</option>
+  [% END %]
+</select>
+[% END %]
+
 [% BLOCK admin_actions  %]
 <h2>Admin</h2>
 <ul>

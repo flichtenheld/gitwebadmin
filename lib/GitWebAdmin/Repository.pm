@@ -56,12 +56,9 @@ sub repo_path_dispatch {
   my $c = shift;
 
   my $path = $c->param('repo_path');
-  if( $path =~ s;/permissions$;; ){
+  if( $path =~ s;/(permissions|subscription|triggers)$;; ){
     $c->param('repo_path', $path);
-    return 'permissions';
-  }elsif( $path =~ s;/subscription$;; ){
-    $c->param('repo_path', $path);
-    return 'subscription';
+    return $1;
   }elsif( $path !~ /\.git$/ ){
     return 'list';
   }
@@ -120,6 +117,27 @@ sub permissions {
   }
 
   return $c->redirect($c->url('repo/' . $repo->name, '', 'permissions'));
+}
+
+sub triggers {
+  my $c = shift;
+
+  my $repo = $c->find_repo;
+  die "404 Repository not found\n" unless $repo;
+
+  if( $ENV{REQUEST_METHOD} eq 'POST' ){
+    # only the owner can edit the repository
+    die "403 Not authorized\n"
+      unless $c->has_admin($repo);
+
+    my $triggers = $c->get_obj_list('ExternalTriggers', 'triggers');
+    $repo->set_triggers($triggers);
+  }else{
+    #FIXME
+    die "405 Method not allowed\n";
+  }
+
+  return $c->redirect($c->url('repo/' . $repo->name, '', 'triggers'));
 }
 
 sub subscription {
