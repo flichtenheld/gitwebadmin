@@ -47,6 +47,31 @@
   </tbody>
 </table>
 
+<h2>URI variables</h2>
+
+<p>You can use variables in the URI, which will be replaced when calling the trigger. The following variables are availble:</p>
+
+<dl>
+  <dt>%name</dt>
+  <dd>Full name of the repository, e.g. <tt>axg/core/confd.git</tt></dd>
+  <dt>%rid</dt>
+  <dd>Numeric id of the repository, e.g. <tt>147</tt></dd>
+  <dt>%ssh</dt>
+  <dd>Value of configuration setting <tt>links.ssh</tt></dd>
+  <dt>%daemon</dt>
+  <dd>Value of configuration setting <tt>links.daemon</tt></dd>
+  <dt>%ref</dt>
+  <dd>Name of the updated ref, e.g. <tt>refs/heads/master</tt></dd>
+  <dt>%old_cid</dt>
+  <dd>SHA1 ID of the updated ref before the update. If the ref was newly created, contains <tt>0000000000000000000000000000000000000000</tt></dd>
+  <dt>%new_cid</dt>
+  <dd>SHA1 ID of the updated ref after the update. If the ref was deleted, contains <tt>0000000000000000000000000000000000000000</tt></dd>
+  <dt>%user</dt>
+  <dd>User that updated the ref</dd>
+</dl>
+
+<p><em>NB: When a trigger is associated with a mirror repository, the trigger will only be called once when any branches where updated, not once per ref. In this case <var>%ref</var> will be <tt>refs/heads/master</tt>, both <var>%old_cid</var> and <var>%new_cid</var> will be <tt>0000000000000000000000000000000000000000</tt>, and <var>%user</var> will be <tt>gitadm</tt>.</em></p>
+
 [% IF c.is_admin %]
 <h2>Repositories</h2>
 
