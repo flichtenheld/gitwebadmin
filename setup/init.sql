@@ -244,7 +244,7 @@ GRANT ALL ON logs_push TO gwa_admin;
 CREATE INDEX logs_push_uid_idx ON logs_push (uid);
 CREATE INDEX logs_push_ref_idx ON logs_push (ref);
 
-CREATE TYPE trigger_method_type AS ENUM('ssh', 'http');
+CREATE TYPE trigger_method_type AS ENUM('ssh', 'http', 'local');
 
 CREATE TABLE external_triggers (
 	id   SERIAL PRIMARY KEY,

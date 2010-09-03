@@ -38,7 +38,7 @@
 
 [% BLOCK trigger_method %]
 <select name="[% select_name %]">
-[% FOREACH m IN [ 'ssh', 'http' ] %]
+[% FOREACH m IN [ 'ssh', 'http', 'local' ] %]
   <option value="[% m %]"[% ' selected="selected"' IF selected == m %]>[% m | html %]</option>
 [% END %]
 </select>

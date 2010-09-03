@@ -153,6 +153,13 @@ sub call_trigger {
       return;
     }
     return 1;
+  }elsif( $trigger->method eq 'local' ){
+    my @cmd = split /\s+/, $uri;
+    system(@cmd) and do {
+      warn "local trigger failed ('$uri'): $!\n";
+      return;
+    };
+    return 1;
   }else{
     warn "unknown trigger method $method\n";
     return;
