@@ -88,6 +88,7 @@ CREATE TABLE groups (
        descr  TEXT
 );
 GRANT ALL ON groups TO gwa_webaccess;
+GRANT SELECT ON groups TO gwa_gitaccess;
 
 INSERT INTO groups VALUES
        ('gitosis-admin', 'Gitosis Adminstrators');
@@ -99,6 +100,7 @@ CREATE TABLE members (
        UNIQUE(uid,gid)
 );
 GRANT ALL ON members TO gwa_webaccess;
+GRANT SELECT ON members TO gwa_gitaccess;
 
 INSERT INTO members VALUES
        ('gitadm', 'gitosis-admin');
