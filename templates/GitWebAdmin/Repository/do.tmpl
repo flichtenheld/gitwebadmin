@@ -207,4 +207,20 @@
 </div>
 [% END %]
 
+<div id="trigger">
+[% IF c.has_admin(repo) %]
+  <form action="[% c.url('repo/' _ repo.name _ '/triggers') %]" method="post">
+  <p><label for="w_groups">Triggers:</label></p>
+  <p>[% PROCESS trigger_chooser select_name='triggers' selected=DBIxRel(repo.triggers) %]</p>
+  <p><input type="submit" value="Change Triggers"></p>
+  </form>
+[% ELSE %]
+  [% FOREACH t IN DBIxRel(repo.triggers).sort('name') %]
+    [% '<p>Triggers:</p><ul>' IF loop.first() %]
+    <li><a href="[% c.url('trigger/' _ t.name) %]">[% t.name | html %]</a></li>
+    [% '</ul>' IF loop.last() %]
+  [% END %]
+[% END %]
+</div>
+
 [% INCLUDE footer.tmpl %]
