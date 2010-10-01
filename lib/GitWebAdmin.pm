@@ -212,8 +212,6 @@ sub can_subscribe {
   return 0 unless $user->active;
 
   return 1 if $c->has_readable($repo);
-  # world-readable anyway
-  return 1 if $repo->gitweb or $repo->daemon;
 
   return 0;
 }
@@ -241,6 +239,7 @@ sub has_readable {
   return 1 if $repo->daemon;
   return 1 if $repo->gitweb;
   return 1 if $c->has_writable($repo);
+  return 1 if $c->is_admin;
   foreach my $r ($repo->r_groups){
     foreach my $u ($r->users){
       return 1 if $user->uid eq $u->uid;

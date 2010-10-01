@@ -42,6 +42,7 @@
 <input type="hidden" name="_method" value="delete"></p>
 </form>
 [% END %]
+[% IF c.can_subscribe(repo) %]
 <form action="[% c.url('repo/' _ repo.name _ '/subscription') %]" method="post">
   [% IF c.is_subscribed(repo) %]
     <p><input type="submit" value="Unsubscribe">
@@ -51,6 +52,7 @@
     <input type="hidden" name="_method" value="put"></p>
   [% END %]
 </form>
+[% END %]
 [% IF repo.gitweb %]
 <h2>Links</h2>
 <ul>
