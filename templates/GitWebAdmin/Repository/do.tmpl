@@ -30,10 +30,12 @@
 
 <div id="actions">
 <h2>Actions</h2>
+[% IF c.has_readable(repo) %]
 <form action="[% c.url('repo/' _ repo.name) %]" method="get">
 <p><input type="submit" value="Fork Repository">
 <input type="hidden" name="_form" value="fork"></p>
 </form>
+[% END %]
 [% IF c.has_admin(repo) %]
 <form action="[% c.url('repo/' _ repo.name) %]" method="post">
 <p><input type="submit" value="Delete Repository">

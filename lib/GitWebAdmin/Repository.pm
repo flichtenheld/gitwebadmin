@@ -361,8 +361,15 @@ sub create {
     $opts{mantis} = 0;
     $opts{owner} = $username;
   }
-
   my $rs = $c->param('db')->resultset('Repos');
+  if( $opts{forkof} ){
+    my $forked = $rs->find($opts{forkof})
+      or die "404 Repository to fork doesn't exist\n";
+
+    unless( $c->has_readable($forked) ){
+      die "403 Not authorized to fork\n";
+    }
+  }
   my $new_repo = $rs->create({ %opts });
 
   return $c->redirect($c->url('repo/' . $new_repo->name));
