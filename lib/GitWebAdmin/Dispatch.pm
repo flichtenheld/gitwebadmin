@@ -58,6 +58,7 @@ sub dispatch_args {
       'user/:id/key/:kid[delete]' => { app => 'User', rm => 'delete_key' },
       'user/:id/groups[post]' => { app => 'User', rm => 'set_groups' },
       'user/:id/subscriptions[post]' => { app => 'User', rm => 'set_subscriptions' },
+      'acl/'              => { app => 'ACL', rm => 'list' },
       ':app/create[get]'     => { rm => 'create_form' },
       ':app/create[put]'     => { rm => 'create' },
       ':app/:id[delete]'     => { rm => 'delete' },

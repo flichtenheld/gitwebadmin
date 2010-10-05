@@ -20,7 +20,7 @@
 ##############################################################################
 package GitWebAdmin::ACL;
 
-use base 'Exporter';
+use base qw(Exporter GitWebAdmin);
 
 our @EXPORT_OK = qw(filter_acl check_acl);
 
@@ -57,5 +57,20 @@ sub check_acl {
   }
   return 'allow';
 }
+
+sub list {
+  my $c = shift;
+
+  my $db = $c->param('db');
+  my @acls = $db->resultset('PushAcl')->search(
+    {}, {
+      order_by => [ $c->query->param('sort_by') || (), 'priority' ],
+    });
+  die "404 No ACLs found\n" unless @acls;
+
+  return $c->json_output(\@acls) if $c->want_json;
+  return $c->tt_process({ acls => \@acls });
+}
+
 
 1;

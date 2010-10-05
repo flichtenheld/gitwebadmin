@@ -249,5 +249,23 @@ sub _check_column_flag {
   return 1;
 }
 
+sub TO_JSON {
+  my ($self) = @_;
+
+  return { id => int($self->id),
+           priority => int($self->priority),
+           user => $self->get_column('user'),
+           user_flags => $self->user_flags,
+           group => $self->get_column('group'),
+           repo => $self->repo->name,
+           repo_flags => $self->repo_flags,
+           ref => $self->ref,
+           action => $self->action,
+           result => $self->result,
+           comment => $self->comment
+  };
+}
+
+
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;

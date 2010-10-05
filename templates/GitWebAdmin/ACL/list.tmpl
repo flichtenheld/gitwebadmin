@@ -1,0 +1,43 @@
+[% INCLUDE header.tmpl page_title="ACLs"
+   navigation=[ { name => 'ACLs' },
+              ]
+%]
+
+<h1>ACLs</h1>
+
+<table id="repolist">
+  <thead>
+    <tr>
+      <th><a href="?sort_by=priority#repolist">Priority</a></th>
+      <th><a href="?sort_by=me.user#repolist">User</a></th>
+      <th>User Flags</th>
+      <th><a href="?sort_by=me.group#repolist">Group</a></th>
+      <th>Repository</th>
+      <th>Repository Flags</th>
+      <th><a href="?sort_by=ref#repolist">Reference</a></th>
+      <th><a href="?sort_by=action#repolist">Action</a></th>
+      <th><a href="?sort_by=result#repolist">Result</a></th>
+      <th>Comment</th>
+    </tr>
+  </thead>
+  <tbody>
+[% FOREACH a IN acls %]
+   <tr>
+     <td>[% a.priority %]</td>
+     <td><a href="[% c.url('user/' _ a.user.uid) %]">[% a.user.name | html %]</a></td>
+     <td>[% a.user_flags | html %]</td>
+     <td><a href="[% c.url('group/' _ a.group.gid) %]">[% a.group.name | html %]</a></td>
+     <td><a href="[% c.url('repo/' _ a.repo.name) %]">[% a.repo.name | html %]</a></td>
+     <td>[% a.repo_flags | html %]</td>
+     <td><tt>[% a.ref | html %]</tt></td>
+     <td>[% a.action %]</td>
+     <td>[% a.result %]</td>
+     <td>[% a.comment | html %]</td>
+   </tr>
+[% END %]
+  </tbody>
+</table>
+
+<p><a href="[% c.url('acl/add') %]">Add ACL</a></p>
+
+[% INCLUDE footer.tmpl %]
