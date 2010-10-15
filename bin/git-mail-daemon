@@ -76,7 +76,7 @@ while( 1 ){
           GitWebAdmin::Utils::call_trigger($config, $repo, $row, $trigger);
         }
 
-	my @recipients = map { $_->mail } $repo->subscribers;
+	my @recipients = map { $_->mail } $repo->subscribers({ active => 1 });
 	if( @recipients ){
           CORE::open my $fh, '-|', ('/srv/git/hooks/post-receive-email',
                                     $row->ref, $row->old_id, $row->new_id)
