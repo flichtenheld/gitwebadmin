@@ -70,12 +70,10 @@
       <th>git-daemon Access:</th>
       <td>[% INCLUDE yes_no switch=1 switch_name='daemon' %]</td>
     </tr>
-    [% IF c.is_admin %]
     <tr>
-      <th>Mantis Integration:</th>
-      <td>[% INCLUDE yes_no switch=0 switch_name='mantis' %]</td>
+      <th><label for="tags">Repository Tags:</label></th>
+      <td><input type="text" name="tags" size="40" value="[% repo.tags.join(', ') | html %]"></td>
     </tr>
-    [% END %]
   </tbody>
 </table>
 <p><input type="submit" value="Create Repository"></p>

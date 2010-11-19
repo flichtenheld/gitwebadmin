@@ -223,15 +223,17 @@ sub do {
           $c->get_checkbox_opt($opt)
           );
       }
+      my %tags = map { $_ => 1 } split m/\s*,\s*/, $params->valid('tags');
+      foreach my $tag ($repo->repo_tags){
+        $tag->delete unless $tags{$tag->tag};
+      }
+      foreach my $tag (keys %tags){
+        $repo->find_or_create_related('repo_tags', { tag => $tag });
+      }
     }
     if( $c->is_admin ){
       # these values can only be changed by real admins
       $repo->owner($params->valid('owner'));
-      if( $c->get_checkbox_opt('mantis') ){
-       $repo->find_or_create_related('repo_tags', { tag => 'mantis' }, { key => 'repo_tags_rid_key' });
-      }else{
-        $repo->delete_related('repo_tags', { tag => 'mantis' });
-      }
       $repo->private($c->get_checkbox_opt('private'));
     }
     if( $repo->is_changed ){
@@ -301,7 +303,7 @@ my $constraint_msgs = {
 sub _edit_params {
   return {
     required => [qw(description branch)],
-    optional => [qw(owner options forkof mirrorof mirrorupd _form)],
+    optional => [qw(owner options tags forkof mirrorof mirrorupd _form)],
     defaults => {
       branch => 'master',
       mirrorupd => 86_400,
@@ -314,7 +316,7 @@ sub _edit_params {
 sub _create_params {
   return {
     required => [qw(path)],
-    optional => [qw(owner description branch options forkof mirrorof mirrorupd)],
+    optional => [qw(owner description branch options tags forkof mirrorof mirrorupd)],
     defaults => {
       branch => 'master',
       mirrorupd => 86_400,
@@ -339,7 +341,7 @@ sub create {
     owner => $params->valid('owner') || '',
     descr => $params->valid('description') || '',
     );
-  foreach my $opt (qw(private daemon gitweb mantis)){
+  foreach my $opt (qw(private daemon gitweb)){
     $opts{$opt} = $c->get_checkbox_opt($opt);
   }
   foreach my $opt (qw(forkof mirrorof mirrorupd branch)){
@@ -362,7 +364,6 @@ sub create {
       die "403 Not authorized\n";
     }
     $opts{private} = 1;
-    $opts{mantis} = 0;
     $opts{owner} = $username;
   }
   my $rs = $c->param('db')->resultset('Repos');
@@ -374,10 +375,8 @@ sub create {
       die "403 Not authorized to fork\n";
     }
   }
-  $opts{repo_tags} = [];
-  if( delete($opts{mantis}) ){
-     push @{$opts{repo_tags}}, { tag => 'mantis' };
-  }
+  $opts{repo_tags} = [
+    map { { tag => $_ } } split m/\s*,\s*/, $params->valid('tags') ];
   my $new_repo = $rs->create({ %opts });
 
   return $c->redirect($c->url('repo/' . $new_repo->name));

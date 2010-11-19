@@ -171,10 +171,14 @@
       <td>[% INCLUDE yes_no switch=repo.daemon switch_name='daemon' %]</td>
     </tr>
     <tr>
-      <th>Mantis Integration:</th>
-      <td>[% INCLUDE yes_no switch=repo.has_tag('mantis') switch_name='mantis' %]</td>
+      [% IF c.has_admin(repo) %]
+      <th><label for="tags">Repository Tags:</label></th>
+      <td><input type="text" name="tags" size="40" value="[% repo.tags.join(', ') | html %]"></td>
+      [% ELSE %]
+      <th>Repository Tags:</th>
+      <td>[% repo.tags.join(', ') | html %]</td>
+      [% END %]
     </tr>
-    [% END %]
   </tbody>
 </table>
 [% IF c.has_change(repo) %]

@@ -315,17 +315,23 @@ sub TO_JSON {
            private => json_bool($self->private),
            daemon => json_bool($self->daemon),
            gitweb => json_bool($self->gitweb),
-           tags => [ map { $_->tag } $self->repo_tags ],
+           tags => [ $self->tags ],
            groups_write_access => [ map { $_->gid } $self->w_groups ],
            groups_read_access => [ map { $_->gid } $self->r_groups ],
            @optional
   };
 }
 
+sub tags {
+  my ($self) = @_;
+
+  return map { $_->tag } $self->repo_tags;
+}
+
 sub has_tag {
   my( $self, $tag ) = @_;
 
-  return !!$self->search_related_rs('repo_tags', { tag => 'mantis' })->count;
+  return !!$self->search_related_rs('repo_tags', { tag => $tag })->count;
 }
 
 # You can replace this text with custom content, and it will be preserved on regeneration
