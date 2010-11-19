@@ -93,7 +93,7 @@ while( 1 ){
       my $git = Git->repository($path);
       # update the mirror URI in case it has changed
       $git->command_noisy(qw(config remote.origin.url), $repo->mirrorof);
-      $git->command_noisy(qw(fetch --verbose --update-head-ok));
+      $git->command_noisy(qw(fetch --update-head-ok));
       write_file($ts_file, time());
       Dutil::log("update branch data");
       GitWebAdmin::Utils::update_branch_data($git, $repo, 'gitadm');
