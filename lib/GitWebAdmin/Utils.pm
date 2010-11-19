@@ -59,12 +59,19 @@ sub check_key {
 # will make no difference and noticing that should be cheap enough.
 ##
 sub update_branch_data {
-  my ($git_repo, $db_repo) = @_;
+  my ($git_repo, $db_repo, $log_user) = @_;
 
   my $changed = 0;
   my %branches = map { $_->branch => $_ } $db_repo->branches;
   my @heads = $git_repo->command(qw(for-each-ref refs/heads));
   my %heads;
+  my (%log_data , $schema, $logs);
+  if( $log_user ) {
+    $schema = $db_repo->result_source->schema;
+    $logs = $schema->resultset('LogsPush');
+    %log_data = ( rid => $db_repo->id, uid => $log_user,
+                  old_id => '0'x40, new_id => '0'x40 );
+  }
   foreach( @heads ){
     unless( m|^([a-f0-9]{40})\s+commit\s+refs/heads/(.+)$| ){
       warn "unknown format for for-each-ref output: $_\n";
@@ -81,6 +88,8 @@ sub update_branch_data {
 
       $changed++;
       print "Branch List: Added branch $ref (".short_id($sha1).")\n";
+      $logs->create({ %log_data, new_id => $sha1, ref => "refs/heads/$ref" })
+        if $log_user;
     } else {
       my $old_sha1 = $branches{$ref}->commit;
       unless( $old_sha1 eq $sha1 ){
@@ -90,6 +99,9 @@ sub update_branch_data {
 
         $changed++;
         print "Branch List: Updated branch $ref (".short_id($old_sha1)."..".short_id($sha1).")\n";
+        $logs->create({ %log_data,
+                        old_id => $old_sha1, new_id => $sha1,
+                        ref => "refs/heads/$ref" }) if $log_user;
       }
     }
   }
@@ -101,6 +113,8 @@ sub update_branch_data {
       $branch->delete;
       $changed++;
       print "Branch List: Removed branch $ref (".short_id($branch->commit).")\n";
+      $logs->create({ %log_data, old_id => $branch->commit,
+                      ref => "refs/heads/$ref" }) if $log_user;
     }
   }
   unless( $changed ){

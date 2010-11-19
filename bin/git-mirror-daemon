@@ -96,13 +96,7 @@ while( 1 ){
       $git->command_noisy(qw(fetch --verbose --update-head-ok));
       write_file($ts_file, time());
       Dutil::log("update branch data");
-      if( GitWebAdmin::Utils::update_branch_data($git, $repo) ){
-        my @triggers = $repo->triggers;
-        foreach my $trigger (@triggers){
-          Dutil::log($repo->name.": Calling trigger ".$trigger->name);
-          GitWebAdmin::Utils::call_trigger($config, $repo, $upd, $trigger);
-        }
-      }
+      GitWebAdmin::Utils::update_branch_data($git, $repo, 'gitadm');
       Dutil::log("update complete");
       next;
     }
