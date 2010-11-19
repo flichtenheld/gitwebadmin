@@ -3,7 +3,7 @@
    navigation=[ { url => 'user/', name => 'Users' },
                 { url => 'user/' _ key.uid.uid, name => key.uid.uid },
                 { name => 'Keys' },
-                { url => 'user/' _ key.uid.uid _ 'key/' _ key.id, name => key.name },
+                { url => 'user/' _ key.uid.uid _ '/key/' _ key.id, name => key.name },
               ]
 %]
 
