@@ -54,11 +54,6 @@ __PACKAGE__->table("active_repos");
   data_type: 'boolean'
   is_nullable: 1
 
-=head2 mantis
-
-  data_type: 'boolean'
-  is_nullable: 1
-
 =head2 owner
 
   data_type: 'text'
@@ -101,8 +96,6 @@ __PACKAGE__->add_columns(
   { data_type => "boolean", is_nullable => 1 },
   "gitweb",
   { data_type => "boolean", is_nullable => 1 },
-  "mantis",
-  { data_type => "boolean", is_nullable => 1 },
   "owner",
   { data_type => "text", is_nullable => 1 },
   "forkof",
@@ -116,8 +109,8 @@ __PACKAGE__->add_columns(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-08-12 17:07:09
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:0uGPDdjXRT8oN/xhA0Gsuw
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2010-11-19 17:48:39
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:5Av/SZCgcADbki8CH63CcA
 
 __PACKAGE__->has_many(
   "logs_pushes",
@@ -136,6 +129,12 @@ __PACKAGE__->has_many(
   { "foreign.forkof" => "self.id" },
 );
 __PACKAGE__->belongs_to("owner", "GitWebAdmin::Schema::Users", { uid => "owner" });
+__PACKAGE__->has_many(
+  "repo_tags",
+  "GitWebAdmin::Schema::RepoTags",
+  { "foreign.rid" => "self.id" },
+  {},
+);
 __PACKAGE__->has_many(
   "subscriptions",
   "GitWebAdmin::Schema::Subscriptions",
@@ -163,7 +162,7 @@ sub TO_JSON {
            description => $self->descr,
            owner => $self->owner->uid,
            private => json_bool($self->private),
-           mantis => json_bool($self->mantis),
+           tags => [ map { $_->tag } $self->repo_tags ],
   };
 }
 

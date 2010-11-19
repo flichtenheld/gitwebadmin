@@ -170,10 +170,9 @@
       <th>git-daemon Access:</th>
       <td>[% INCLUDE yes_no switch=repo.daemon switch_name='daemon' %]</td>
     </tr>
-    [% IF repo.gitweb AND !repo.private %]
     <tr>
       <th>Mantis Integration:</th>
-      <td>[% INCLUDE yes_no switch=repo.mantis switch_name='mantis' %]</td>
+      <td>[% INCLUDE yes_no switch=repo.has_tag('mantis') switch_name='mantis' %]</td>
     </tr>
     [% END %]
   </tbody>

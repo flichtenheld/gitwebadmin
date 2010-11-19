@@ -24,6 +24,7 @@ DROP TYPE  push_action_type;
 DROP TYPE  acl_result_type;
 DROP TABLE users  CASCADE;
 DROP TABLE groups CASCADE;
+DROP TABLE repo_tags CASCADE;
 DROP TABLE repos  CASCADE;
 DROP TABLE writable CASCADE;
 DROP TABLE readable CASCADE;
@@ -113,7 +114,6 @@ CREATE TABLE repos (
        private  BOOLEAN NOT NULL DEFAULT FALSE,
        daemon   BOOLEAN NOT NULL DEFAULT FALSE,
        gitweb   BOOLEAN NOT NULL DEFAULT FALSE,
-       mantis   BOOLEAN NOT NULL DEFAULT FALSE,
        owner    TEXT NOT NULL REFERENCES users(uid) ON DELETE RESTRICT,
        forkof   INT REFERENCES repos(id) ON DELETE RESTRICT,
        mirrorof TEXT,
@@ -122,7 +122,6 @@ CREATE TABLE repos (
 
        CONSTRAINT repos_hidden_deleted CHECK (NOT (deleted AND (gitweb OR daemon))),
        CONSTRAINT repos_one_parent CHECK (NOT (forkof IS NOT NULL AND mirrorof IS NOT NULL)),
-       CONSTRAINT repos_mantis_gitweb CHECK (NOT (mantis AND NOT gitweb))
 );
 CREATE INDEX repos_name_idx ON repos (name);
 GRANT SELECT, INSERT, UPDATE ON repos TO gwa_webaccess;
@@ -139,6 +138,15 @@ CREATE OR REPLACE FUNCTION repo_id (text) RETURNS int AS $$
 $$ LANGUAGE SQL STABLE STRICT;
 INSERT INTO repos (name, owner) VALUES
        ('gitosis-admin.git', 'gitadm');
+
+CREATE TABLE repo_tags (
+       rid   INT REFERENCES repos(id) ON DELETE CASCADE,
+       tag   TEXT NOT NULL,
+
+       UNIQUE (rid, tag)
+);
+GRANT ALL ON repo_tags TO gwa_webaccess;
+GRANT SELECT ON repo_tags TO gwa_gitaccess;
 
 CREATE TYPE push_action_type AS ENUM ('create', 'update', 'replace', 'delete');
 CREATE TYPE acl_result_type  AS ENUM ('allow', 'deny');
@@ -191,13 +199,6 @@ CREATE TABLE branches (
 );
 GRANT ALL ON branches TO gwa_gitaccess;
 GRANT ALL ON branches_id_seq TO gwa_gitaccess;
-
-CREATE VIEW mantis_repos AS
-       SELECT r.id, r.name, r.descr,
-              array_to_string(ARRAY(SELECT branch FROM branches AS b WHERE b.rid = r.id), ',') AS branches
-       FROM repos AS r
-       WHERE r.mantis IS TRUE;
-GRANT SELECT ON mantis_repos TO gwa_gitaccess;
 
 --
 -- ### END MANTIS INTEGRATION ###

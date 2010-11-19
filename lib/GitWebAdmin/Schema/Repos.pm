@@ -60,12 +60,6 @@ __PACKAGE__->table("repos");
   default_value: false
   is_nullable: 0
 
-=head2 mantis
-
-  data_type: 'boolean'
-  default_value: false
-  is_nullable: 0
-
 =head2 owner
 
   data_type: 'text'
@@ -116,8 +110,6 @@ __PACKAGE__->add_columns(
   "daemon",
   { data_type => "boolean", default_value => \"false", is_nullable => 0 },
   "gitweb",
-  { data_type => "boolean", default_value => \"false", is_nullable => 0 },
-  "mantis",
   { data_type => "boolean", default_value => \"false", is_nullable => 0 },
   "owner",
   { data_type => "text", is_foreign_key => 1, is_nullable => 0 },
@@ -230,6 +222,21 @@ Related object: L<GitWebAdmin::Schema::Users>
 
 __PACKAGE__->belongs_to("owner", "GitWebAdmin::Schema::Users", { uid => "owner" });
 
+=head2 repo_tags
+
+Type: has_many
+
+Related object: L<GitWebAdmin::Schema::RepoTags>
+
+=cut
+
+__PACKAGE__->has_many(
+  "repo_tags",
+  "GitWebAdmin::Schema::RepoTags",
+  { "foreign.rid" => "self.id" },
+  {},
+);
+
 =head2 repo_triggers
 
 Type: has_many
@@ -276,8 +283,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-08-12 17:07:09
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:RoksWS2hvi2NfmM9AHwUiA
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2010-11-19 17:48:39
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:yRfbIIMWAjmaPqORptr8GA
 
 __PACKAGE__->many_to_many('w_groups' => 'writables', 'gid');
 __PACKAGE__->many_to_many('r_groups' => 'readables', 'gid');
@@ -308,11 +315,17 @@ sub TO_JSON {
            private => json_bool($self->private),
            daemon => json_bool($self->daemon),
            gitweb => json_bool($self->gitweb),
-           mantis => json_bool($self->mantis),
+           tags => [ map { $_->tag } $self->repo_tags ],
            groups_write_access => [ map { $_->gid } $self->w_groups ],
            groups_read_access => [ map { $_->gid } $self->r_groups ],
            @optional
   };
+}
+
+sub has_tag {
+  my( $self, $tag ) = @_;
+
+  return !!$self->search_related_rs('repo_tags', { tag => 'mantis' })->count;
 }
 
 # You can replace this text with custom content, and it will be preserved on regeneration

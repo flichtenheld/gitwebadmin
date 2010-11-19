@@ -230,10 +230,10 @@ sub _check_repo_flags {
   my @flags = split m/,/, $self->repo_flags;
   foreach my $flag (@flags){
     my $negated = ($flag =~ s/^!// ? 1 : 0);
-    if( $flag =~ /^(deleted|private|daemon|gitweb|mantis|mirrorof|forkof)$/ ){
+    if( $flag =~ /^(deleted|private|daemon|gitweb|mirrorof|forkof)$/ ){
       return unless $self->_check_column_flag($repo, $flag, $negated);
     }else{
-      die "Unknown flag\n";
+      return unless $negated xor $repo->has_tag($flag);
     }
   }
   return 1;

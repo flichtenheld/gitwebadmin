@@ -65,8 +65,8 @@ my $schema = GitWebAdmin::Schema->connect(
 my $groups = $schema->resultset("Groups");
 my $owners = $schema->resultset("Users")->search({ active => 1 });
 my $repos = $schema->resultset("Repos");
-my $mantis = $schema->resultset("MantisRepos")->search(
-  undef, { order_by => 'name' });
+my $mantis = $schema->resultset("Repos")->search(
+  { 'repo_tags.tag' => 'mantis' }, { join => 'repo_tags', order_by => 'name' });
 
 my $gitdir = rel2abs($config->{gitosis}{repository}, $GWA);
 my $git = Git->repository($gitdir);
@@ -171,7 +171,8 @@ while( 1 ){
       my @mantis_r;
       while( my $mantis_r = $mantis->next ){
         push @mantis_r, { id => $mantis_r->id, name => $mantis_r->name,
-                          descr => $mantis_r->descr, branches => $mantis_r->branches };
+                          descr => $mantis_r->descr,
+                          branches => join(',', map{ $_->branch } $mantis_r->branches) };
       }
       $mantis->reset;
       my $xml = XMLout( { repo => \@mantis_r }, RootName => 'Repositories' );

@@ -227,7 +227,11 @@ sub do {
     if( $c->is_admin ){
       # these values can only be changed by real admins
       $repo->owner($params->valid('owner'));
-      $repo->mantis($c->get_checkbox_opt('mantis'));
+      if( $c->get_checkbox_opt('mantis') ){
+       $repo->find_or_create_related('repo_tags', { tag => 'mantis' }, { key => 'repo_tags_rid_key' });
+      }else{
+        $repo->delete_related('repo_tags', { tag => 'mantis' });
+      }
       $repo->private($c->get_checkbox_opt('private'));
     }
     if( $repo->is_changed ){
@@ -370,6 +374,10 @@ sub create {
       die "403 Not authorized to fork\n";
     }
   }
+  $opts{repo_tags} = [];
+  if( delete($opts{mantis}) ){
+     push @{$opts{repo_tags}}, { tag => 'mantis' };
+  }
   my $new_repo = $rs->create({ %opts });
 
   return $c->redirect($c->url('repo/' . $new_repo->name));
@@ -388,7 +396,6 @@ sub delete {
   $repo->name("Attic/".time."/".$repo->name);
   $repo->gitweb(0);
   $repo->daemon(0);
-  $repo->mantis(0);
   $repo->set_w_groups([]);
   $repo->set_r_groups([]);
   $repo->update->discard_changes;
