@@ -23,7 +23,7 @@ __PACKAGE__->table("repo_tags");
 
   data_type: 'integer'
   is_foreign_key: 1
-  is_nullable: 1
+  is_nullable: 0
 
 =head2 tag
 
@@ -34,11 +34,11 @@ __PACKAGE__->table("repo_tags");
 
 __PACKAGE__->add_columns(
   "rid",
-  { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
   "tag",
   { data_type => "text", is_nullable => 0 },
 );
-__PACKAGE__->add_unique_constraint("repo_tags_rid_key", ["rid", "tag"]);
+__PACKAGE__->set_primary_key("rid", "tag");
 
 =head1 RELATIONS
 
@@ -53,8 +53,8 @@ Related object: L<GitWebAdmin::Schema::Repos>
 __PACKAGE__->belongs_to("rid", "GitWebAdmin::Schema::Repos", { id => "rid" });
 
 
-# Created by DBIx::Class::Schema::Loader v0.07002 @ 2010-11-19 13:52:48
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:3bqRo/Ddg8cLdgqRaaCynA
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2010-11-19 19:02:59
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:PpKOAbkWYMllaMwv0JFlXg
 
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;

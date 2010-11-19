@@ -98,7 +98,7 @@ CREATE TABLE members (
        uid   TEXT NOT NULL REFERENCES users(uid) ON DELETE CASCADE,
        gid   TEXT NOT NULL REFERENCES groups(gid) ON DELETE CASCADE,
 
-       UNIQUE(uid,gid)
+       PRIMARY KEY(uid,gid)
 );
 GRANT ALL ON members TO gwa_webaccess;
 GRANT SELECT ON members TO gwa_gitaccess;
@@ -121,7 +121,7 @@ CREATE TABLE repos (
        deleted  BOOLEAN NOT NULL DEFAULT FALSE,
 
        CONSTRAINT repos_hidden_deleted CHECK (NOT (deleted AND (gitweb OR daemon))),
-       CONSTRAINT repos_one_parent CHECK (NOT (forkof IS NOT NULL AND mirrorof IS NOT NULL)),
+       CONSTRAINT repos_one_parent CHECK (NOT (forkof IS NOT NULL AND mirrorof IS NOT NULL))
 );
 CREATE INDEX repos_name_idx ON repos (name);
 GRANT SELECT, INSERT, UPDATE ON repos TO gwa_webaccess;
@@ -143,7 +143,7 @@ CREATE TABLE repo_tags (
        rid   INT REFERENCES repos(id) ON DELETE CASCADE,
        tag   TEXT NOT NULL,
 
-       UNIQUE (rid, tag)
+       PRIMARY KEY (rid, tag)
 );
 GRANT ALL ON repo_tags TO gwa_webaccess;
 GRANT SELECT ON repo_tags TO gwa_gitaccess;
@@ -208,7 +208,7 @@ CREATE TABLE writable (
        gid   TEXT NOT NULL REFERENCES groups(gid) ON DELETE CASCADE,
        rid   INT NOT NULL REFERENCES repos(id) ON DELETE CASCADE,
 
-       UNIQUE (gid, rid)
+       PRIMARY KEY (gid, rid)
 );
 GRANT ALL ON writable TO gwa_webaccess;
 INSERT INTO writable VALUES
@@ -218,7 +218,7 @@ CREATE TABLE readable (
        gid   TEXT NOT NULL REFERENCES groups(gid) ON DELETE CASCADE,
        rid   INT NOT NULL REFERENCES repos(id) ON DELETE CASCADE,
 
-       UNIQUE (gid, rid)
+       PRIMARY KEY (gid, rid)
 );
 GRANT ALL ON readable TO gwa_webaccess;
 
@@ -226,7 +226,7 @@ CREATE TABLE subscriptions (
        rid   INT NOT NULL REFERENCES repos(id) ON DELETE CASCADE,
        uid   TEXT NOT NULL REFERENCES users(uid) ON DELETE CASCADE,
 
-       UNIQUE (rid, uid)
+       PRIMARY KEY (rid, uid)
 );
 GRANT ALL ON subscriptions TO gwa_webaccess;
 GRANT SELECT ON subscriptions TO gwa_gitaccess;
@@ -263,7 +263,7 @@ CREATE TABLE repo_triggers (
 	rid  INT NOT NULL REFERENCES repos(id) ON DELETE CASCADE,
         tid  INT NOT NULL REFERENCES external_triggers(id) ON DELETE CASCADE,
 
-        UNIQUE(rid, tid)
+        PRIMARY KEY(rid, tid)
 );
 GRANT ALL ON repo_triggers TO gwa_webaccess;
 GRANT SELECT ON repo_triggers TO gwa_gitaccess;

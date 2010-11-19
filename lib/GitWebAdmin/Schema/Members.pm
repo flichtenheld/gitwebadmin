@@ -39,7 +39,7 @@ __PACKAGE__->add_columns(
   "gid",
   { data_type => "text", is_foreign_key => 1, is_nullable => 0 },
 );
-__PACKAGE__->add_unique_constraint("members_uid_key", ["uid", "gid"]);
+__PACKAGE__->set_primary_key("uid", "gid");
 
 =head1 RELATIONS
 
@@ -64,8 +64,8 @@ Related object: L<GitWebAdmin::Schema::Groups>
 __PACKAGE__->belongs_to("gid", "GitWebAdmin::Schema::Groups", { gid => "gid" });
 
 
-# Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-08-12 17:07:09
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:ETfWhz+1slJV4dGhcRLafQ
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2010-11-19 19:11:47
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:7mmwu55Q09Jxjj+OGnYNzw
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

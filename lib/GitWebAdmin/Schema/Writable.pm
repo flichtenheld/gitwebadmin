@@ -39,7 +39,7 @@ __PACKAGE__->add_columns(
   "rid",
   { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
 );
-__PACKAGE__->add_unique_constraint("writable_gid_key", ["gid", "rid"]);
+__PACKAGE__->set_primary_key("gid", "rid");
 
 =head1 RELATIONS
 
@@ -64,8 +64,8 @@ Related object: L<GitWebAdmin::Schema::Repos>
 __PACKAGE__->belongs_to("rid", "GitWebAdmin::Schema::Repos", { id => "rid" });
 
 
-# Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-08-12 17:07:09
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:vvBYc//ENLxwizHxCaZUnQ
+# Created by DBIx::Class::Schema::Loader v0.07002 @ 2010-11-19 19:11:47
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:E5xuWEdt7vAfIdCv6IcDTg
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration
