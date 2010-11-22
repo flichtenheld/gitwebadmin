@@ -70,6 +70,7 @@ while( my $repo = $repos->next ){
     descr => chop_str($repo->descr, 25, 5),
     owner => $repo->owner->name,
     forklist => [map { $_->name } $repo->repo({ gitweb => 1, deleted => 0 })],
+    ctags => { map { $_ => 1 } $repo->tags },
     );
   utf8::decode($repo{owner});
   $repo{forks} = scalar @{$repo{forklist}};
