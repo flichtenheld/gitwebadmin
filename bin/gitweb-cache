@@ -106,7 +106,7 @@ sub git_get_last_activity {
 
 	my $git_dir = "$config->{gitosis}{repositories}/$path";
         $ENV{GIT_DIR} = $git_dir;
-	CORE::open(my $fd, "-|", '/usr/local/bin/git', 'for-each-ref',
+	CORE::open(my $fd, "-|", '/usr/bin/git', 'for-each-ref',
                    '--format=%(committer)',
                    '--sort=-committerdate',
                    '--count=1',
