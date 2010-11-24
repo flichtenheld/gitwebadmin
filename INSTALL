@@ -36,8 +36,24 @@ INSTALLATION
 This is very basic, but it should give you a first idea where
 to start.
 
+It assumes you want to run gitosis as user git and run the administration
+as user gitadm.
+
+ 0) Create users:
+    a) adduser --system --home /some-directory --shell /bin/sh git
+    b) adduser gitadm
  1) Create a postgres database and initialize it with setup/init.sql
+    Something like:
+    a) createdb gitwebadmin
+    b) createuser git
+    c) createuser gitadm
+    d) psql> \i setup.sql
+    e) psql> GRANT gwa_gitaccess TO git;
  2) Install gitosis
+    See gitosis' README.rst for details. Here the short list:
+    a) ./setup.py build
+    b) ./setup.py install
+    c) sudo -H -u git gitosis-init <some-ssh-public-key.pub
  3) Check out the gitosis-admin repository
  4) Edit gitwebadmin.ini
  5) Start bin/git-adm-daemon. It will edit the gitosis.conf and push
