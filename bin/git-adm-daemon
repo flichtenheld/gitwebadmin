@@ -141,13 +141,15 @@ while( 1 ){
     $git->command_noisy('add', "gitosis.conf");
 
 #    print "Write out public keys\n" unless $quiet;
-    my @old_keys = glob(catfile($gitdir, "keydir", "*.pub"));
+    my $keydir = catfile($gitdir, "keydir");
+    mkdir $keydir unless -d $keydir;
+    my @old_keys = glob(catfile($keydir, "*.pub"));
 #    print "\told_keys = @old_keys\n";
     my %old_keys = map { $_ => 1 } @old_keys;
     while( my $usr = $owners->next ){
       my @keys = map { $_->key."\n" } $usr->keys({}, { order_by => 'name' });
       next unless @keys;
-      my $key_file = catfile($gitdir, "keydir", $usr->uid.".pub");
+      my $key_file = catfile($keydir, $usr->uid.".pub");
       delete $old_keys{$key_file};
 #	print "\twrite $key_file\n" unless $quiet;
       write_file($key_file, \@keys)
