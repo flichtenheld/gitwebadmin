@@ -53,7 +53,7 @@
   [% END %]
 </form>
 [% END %]
-[% IF repo.gitweb %]
+[% IF repo.gitweb && c.cfg('links').gitweb %]
 <h2>Links</h2>
 <ul>
 <li><a href="[% c.cfg('links').gitweb.replace('%name', repo.name) | url %]">gitweb</a></li>
@@ -83,13 +83,13 @@
 [% END %]
 <table id="repometa">
   <tbody>
-    [% IF repo.daemon %]
+    [% IF repo.daemon && c.cfg('links').daemon %]
     <tr>
       <th>git-daemon Access:</th>
       <td><code>[% c.cfg('links').daemon.replace('%name', repo.name) | html %]</code></td>
     </tr>
     [% END %]
-    [% IF c.has_readable(repo) %]
+    [% IF c.has_readable(repo) && c.cfg('links').ssh %]
     <tr>
       <th>SSH Access:</th>
       <td><code>[% c.cfg('links').ssh.replace('%name', repo.name) | html %]</code></td>
