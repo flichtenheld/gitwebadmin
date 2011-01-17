@@ -60,16 +60,18 @@ sub cgiapp_prerun {
     "dbi:$db_cfg->{driver}:dbname=$db_cfg->{name}",
     $db_cfg->{username}, $db_cfg->{password});
   $c->param('db', $schema);
-  $c->param('user', lc($ENV{REMOTE_USER})) if $ENV{REMOTE_USER};
-  $c->param('user_obj', $schema->resultset('Users')->find($c->param('user')));
+  if( $ENV{REMOTE_USER} ){
+    $c->param('user', lc($ENV{REMOTE_USER}));
+    $c->param('user_obj', $schema->resultset('Users')->find($c->param('user')));
+  }
 
   $c->run_modes([qw(do list start delete create create_form)]);
   #fake run mode for easier error reporting
   $c->run_modes([qw(prerun_error)]);
-  if( not $c->param('user_obj') ){
+  if( $c->param('user') and not $c->param('user_obj') ){
     $c->prerun_mode('prerun_error');
     $c->param('prerun_error_str', '500 Login user does not exist in database');
-  }elsif( not $c->param('user_obj')->active ){
+  }elsif( $c->param('user_obj') and not $c->param('user_obj')->active ){
     $c->prerun_mode('prerun_error');
     $c->param('prerun_error_str', '403 Account deactivated');
   }
@@ -178,7 +180,7 @@ sub get_writable_readable {
 sub is_admin {
   my $c = shift;
 
-  return if not $c->param('user_obj')->active;
+  return unless $c->param('user_obj') and $c->param('user_obj')->active;
   return $c->param('user_obj')->admin;
 }
 
@@ -234,10 +236,11 @@ sub has_writable {
 sub has_readable {
   my ($c, $repo) = @_;
 
-  my $user = $c->param('user_obj') or return 0;
-  return 0 unless $user->active;
   return 1 if $repo->daemon;
   return 1 if $repo->gitweb;
+
+  my $user = $c->param('user_obj') or return 0;
+  return 0 unless $user->active;
   return 1 if $c->has_writable($repo);
   return 1 if $c->is_admin;
   foreach my $r ($repo->r_groups){
