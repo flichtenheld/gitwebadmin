@@ -46,6 +46,12 @@ __PACKAGE__->table("users");
   default_value: true
   is_nullable: 0
 
+=head2 directory
+
+  data_type: 'text'
+  default_value: 'local'
+  is_nullable: 0
+
 =cut
 
 __PACKAGE__->add_columns(
@@ -59,6 +65,8 @@ __PACKAGE__->add_columns(
   { data_type => "boolean", default_value => \"false", is_nullable => 0 },
   "active",
   { data_type => "boolean", default_value => \"true", is_nullable => 0 },
+  "directory",
+  { data_type => "text", default_value => "local", is_nullable => 0 },
 );
 __PACKAGE__->set_primary_key("uid");
 
@@ -155,8 +163,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-08-12 17:07:09
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:7eKqtKIp73sDKyaaiiGWHw
+# Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-12-29 14:56:37
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:TL8Y1ychaC27bNA/3LDYLA
 
 __PACKAGE__->many_to_many('groups' => 'members', 'gid');
 __PACKAGE__->many_to_many('subscribed_repos' => 'subscriptions', 'rid');

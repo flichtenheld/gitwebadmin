@@ -83,12 +83,11 @@ foreach my $entry ($mesg->entries){
   $rs->update_or_create({ uid => $uid,
                           name => $entry->get_value('cn'),
                           mail => $entry->get_value('mail'),
+                          directory => 'dc.astaro.com',
                           active => 1 });
   $uids{$uid}++;
 }
-$uids{gitadm}++;
-$uids{gitrobot}++;
-my $actives = $rs->search({ active => 1 });
+my $actives = $rs->search({ active => 1, directory => 'dc.astaro.com' });
 while( my $user = $actives->next ){
   unless( $uids{$user->uid} ){
     $user->active(0);

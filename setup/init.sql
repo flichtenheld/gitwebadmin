@@ -53,6 +53,7 @@ CREATE TABLE users (
        mail  TEXT,
        admin BOOLEAN NOT NULL DEFAULT FALSE,
        active BOOLEAN NOT NULL DEFAULT TRUE,
+       directory TEXT NOT NULL DEFAULT 'local',
 
        CONSTRAINT users_admin_active CHECK (NOT (admin AND NOT active)),
        CONSTRAINT users_gitadm_active CHECK (NOT (uid='gitadm' AND NOT active))
@@ -62,7 +63,7 @@ GRANT SELECT, UPDATE ON users TO gwa_webaccess;
 GRANT SELECT ON users TO gwa_gitaccess;
 GRANT ALL ON users TO gwa_admin;
 
-INSERT INTO users VALUES
+INSERT INTO users (uid, name) VALUES
        ('gitadm', 'Git Administrator');
 
 CREATE TYPE ssh_key_type AS ENUM ('rsa', 'dsa');
