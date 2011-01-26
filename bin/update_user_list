@@ -81,8 +81,8 @@ foreach my $entry ($mesg->entries){
   my $uid = $entry->get_value('sAMAccountName');
   print "\tmember ".$entry->get_value('cn')." (uid=$uid)\n" unless $quiet;
   $rs->update_or_create({ uid => $uid,
-                          name => $entry->get_value('cn'),
-                          mail => $entry->get_value('mail'),
+                          name => $entry->get_value('cn') || '',
+                          mail => $entry->get_value('mail') || '',
                           directory => 'dc.astaro.com',
                           active => 1 });
   $uids{$uid}++;
