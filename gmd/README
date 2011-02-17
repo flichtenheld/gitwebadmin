@@ -1,0 +1,12 @@
+Git Mirror Daemon
+=================
+
+Small daemon which can be fed Git URLs via a network socket and then fetches
+those repositories in mirror mode.
+
+git-mirror-trigger.pl and git-mirror-trigger.sh are two example scripts which
+are intended to be called as GitWebAdmin triggers (usually over SSH) to
+maintain a mirror of git repositories.
+
+Not to be confused with the git-mirror-daemon script which does something similar
+on the GitWebAdmin server.

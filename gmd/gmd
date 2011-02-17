@@ -1,0 +1,277 @@
+#!/usr/bin/perl
+# gmd is the "Git Mirror Daemon"
+#
+#  Copyright (C) 2009-2011 Astaro GmbH & Co. KG  www.astaro.com
+#
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License along
+#  with this program; if not, write to the Free Software Foundation, Inc.,
+#  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+#
+#  Author: Kai Baesler <kbaesler@astaro.com>
+#
+##############################################################################
+
+use strict;
+use warnings;
+use Data::Dumper;
+use File::Basename;
+use Getopt::Long;
+
+use Git;
+
+use IO::Socket;
+use IO::Select;
+use IO::Handle;
+use POSIX  qw( strftime );
+use Socket qw( :DEFAULT :crlf );
+use Time::HiRes qw( sleep );
+
+use threads;
+use threads::shared;
+use Thread::Queue;
+
+use FindBin;
+use lib $FindBin::Bin;
+
+use Dutil;
+
+our $VERSION = '0.02';
+
+use constant {
+    MAX_REQUEST_SIZE    => 1024,
+    LIMIT_REPO          =>   15,
+    CONCURRENCY         =>    3,
+    MAX_WORKER          =>    5,
+    WAKEUP_INTERVAL     =>   20,
+};
+
+GetOptions(
+    'daemon'    =>  \my $daemon,
+    'help'      =>  sub { print "usage: $0 [--daemon]"; exit; },
+) or die $!;
+
+my $re_giturl = qr{^(?:http|git)://([^\s/]+)/([^\s]+\.git)$};
+
+# prepare background operation
+my $base    = '/var/git';
+my $LOCK    = "$base/gmd.lock";
+my $LOGFILE = "$base/gmd.log";
+
+Dutil::singularize( $LOCK );
+if ($daemon) {
+    Dutil::daemonize;
+    Dutil::redirect( $LOGFILE );
+}
+Dutil::install_handlers;
+
+# the whole communication is done with these three queues
+# a request is just a git-url (eg. "git://git.local/foo.git") and it's
+# way is:
+#   $requests -> $jobs -> finished
+my $requests   = Thread::Queue->new;
+my $jobs       = Thread::Queue->new;
+my $finished   = Thread::Queue->new;
+
+# log startup
+STARTUP: {
+    my $script = $0;
+    $0 = basename($0);
+    logmsg("GMD $VERSION starting from $script");
+}
+
+# now start the threads...
+my @threads = (
+    threads->create( \&controller ),
+    threads->create( \&server     ),
+);
+push @threads, map { threads->create( \&worker ) } (1..MAX_WORKER);
+
+# ... and wait for them to finish (ie. forever)
+$_->join for threads->list;
+logmsg("exit");
+exit;
+
+# ---------------------------------------------------------------------
+
+# worker thread(s)
+# gets a git url from the $jobs queue and updates the repository with the
+# latest information from the remote, creates a new repo if neccessary
+# puts the git-url in the $finished queue when done, so the controller
+# thread knows when to unlock etc.
+sub worker {
+    logmsg("worker started");
+    while (my $job = $jobs->dequeue) {
+        logmsg("worker_begin=$job");
+
+        # the filesystem structure is divided in three parts
+        # <BASE DIRECTORY> / <NAME OF THE REMOTE HOST> / <PATH TO REPO>
+        # /var/git         / git.intranet.astaro.de    / axg/core/confd.git
+        my ($host, $path) = $job =~ /$re_giturl/;
+        my $repo = "$base/$host/$path";
+        if (-d $repo) {
+            # if it's already there, fetch latest infos...
+            my $git = Git->repository($repo);
+            $git->command_noisy(qw(config remote.origin.url), $job);
+            $git->command_noisy(qw(fetch --update-head-ok));
+        }
+        else {
+            # ... otherwise just clone it
+            print `git clone --mirror $job $repo`;
+        }
+
+        logmsg("worker_end=$job");
+        $finished->enqueue( $job );
+    }
+    logmsg("worker stopped");
+    return;
+}
+
+
+# controller thread
+# gets the requests from the tcp-server thread via the $requests queue,
+# limits and throttles these requests (see constants above) and puts
+# the requests to the $jobs queue when appropriate
+# also processed the feedback from the workes (given through $finished)
+sub controller {
+    my %server;
+    my %locked;
+    my %updated;
+    my %delayed;
+
+    my $wakeup   = 0;
+
+    logmsg("controller started");
+    while (1) {
+
+        # throttle CPU
+        threads->yield;
+        sleep 0.01;
+
+        # anything done?
+        if (my $done = $finished->dequeue_nb) {
+            my ($host, $path) = $done =~ /$re_giturl/;
+            $server{$host}--;
+            $updated{$done} = time;
+            delete $locked{$done};
+            threads->yield;
+            sleep 0.1;
+            next;
+        }
+
+        # anything delayed?
+        if ($wakeup < time) {
+            foreach my $req (keys %delayed) {
+                delete $delayed{$req};
+                $requests->enqueue( $req );
+                logmsg("requeue=$req");
+            }
+            $wakeup = time + WAKEUP_INTERVAL;
+            threads->yield;
+            sleep 0.1;
+            next;
+        }
+
+        # is there something to do?
+        my $req = $requests->dequeue_nb;
+        next unless $req;
+        last if $req eq 'TERMINATE';
+
+        # process request
+        my ($host, $path) = $req =~ /$re_giturl/;
+        my $is_locked = $locked{$req};
+        my $is_limited = ($updated{$req} and ($updated{$req}+LIMIT_REPO)>time);
+        my $is_throttled = ($server{$host} and ($server{$host}>=CONCURRENCY));
+
+        # delay
+        if ($is_locked or $is_limited or $is_throttled) {
+            logmsg("delay=$req");
+            $delayed{$req}++;
+            threads->yield;
+            sleep 1;
+            next;
+        }
+
+        # give request to worker queue
+        $server{$host}++;
+        $locked{$req} = time;
+        $jobs->enqueue( $req );
+        sleep 0.1;
+    }
+    logmsg("controler terminated");
+    warn "controller status:\n" . Data::Dumper->new(
+        [    \%server, \%locked, \%updated, \%delayed, (time-$^T)  ],
+        [qw(   server    locked    updated    delayed  runtime   )],
+    )->Indent(1)->Dump;
+    return;
+}
+
+
+# tcp server thread
+# handles incomming connections within a select-loop, 
+# and puts valid requests into the controller queue
+sub server {
+    my $listen = IO::Socket::INET->new(
+        LocalAddr => 'localhost:8023',
+        Listen    => 10,
+        ReuseAddr =>  1,
+        TimeOut   => 30,
+    ) or die $!;
+    my $select = IO::Select->new( $listen ) or die $!;
+    logmsg("server started, listening on port ".$listen->sockport);
+    ACCEPT:
+    while (my @ready = $select->can_read) {
+        foreach my $fh (@ready) {
+            if ($fh == $listen) {
+                my $conn = $listen->accept;
+                $select->add( $conn );
+                logmsg("server=connect from ".$conn->peerhost);
+            }
+            else {
+                my $buffer;
+                if ($fh->sysread( $buffer, MAX_REQUEST_SIZE )) {
+                    $buffer =~ s! [\r\n\s] .* \Z !!sx;
+                    logmsg("server=request from ".$fh->peerhost.": $buffer");
+                    if ($buffer=~/$re_giturl/) {
+                        # give request to controller
+                        $requests->enqueue( "\L$buffer" );
+                    }
+                    elsif ($buffer =~ /^(?:quit|exit|bye|terminate)$/i) {
+                        # shutdown everything
+                        $requests->enqueue('TERMINATE');
+                        $jobs->enqueue(undef) foreach threads->list;
+                        last ACCEPT;
+                    }
+                    else {
+                        # ignore
+                    }
+                }
+                $select->remove( $fh );
+                $fh->close;
+            }
+        }
+    }
+    $listen->shutdown(2);
+    logmsg("server shutdown");
+    return;
+}
+
+# helper function
+# putting timestamp, process- and thread-id into one cute logging line
+sub logmsg {
+    my $ts = strftime("%Y-%m-%d %H:%M:%S", localtime);
+    printf "%s %s\[%d:%d\]: %s\n", $ts, $0, $$, threads->tid, @_ ;
+}
+
+
+# vim: set ft=perl ts=8 sts=4 sw=4 et ai
+__END__
