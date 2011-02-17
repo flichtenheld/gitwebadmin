@@ -60,7 +60,7 @@ GetOptions(
     'help'      =>  sub { print "usage: $0 [--daemon]"; exit; },
 ) or die $!;
 
-my $re_giturl = qr{^(?:http|git)://([^\s/]+)/([^\s]+\.git)$};
+my $re_giturl = qr{^(?:http|git|ssh)://([^\s/]+)/([^\s]+\.git)$};
 
 # prepare background operation
 my $base    = '/var/git';
