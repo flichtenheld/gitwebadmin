@@ -123,6 +123,7 @@ sub worker {
             my $git = Git->repository($repo);
             $git->command_noisy(qw(config remote.origin.url), $job);
             $git->command_noisy(qw(fetch --update-head-ok));
+            $git->command_noisy(qw(remote prune origin));
         }
         else {
             # ... otherwise just clone it
