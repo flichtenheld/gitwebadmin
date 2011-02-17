@@ -244,7 +244,7 @@ sub server {
                     logmsg("server=request from ".$fh->peerhost.": $buffer");
                     if ($buffer=~/$re_giturl/) {
                         # give request to controller
-                        $requests->enqueue( "\L$buffer" );
+                        $requests->enqueue( $buffer );
                     }
                     elsif ($buffer =~ /^(?:quit|exit|bye|terminate)$/i) {
                         # shutdown everything
