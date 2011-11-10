@@ -40,6 +40,7 @@ use GitWebAdmin::Utils;
 my $GIT      = "/srv/git";
 my $LOG      = "$GIT/mirror.log";
 my $LOCK     = "$GIT/mirror.lock";
+my $TIMEOUT  = 600; # 10 minutes
 
 Dutil::singularize( $LOCK );
 Dutil::daemonize;
@@ -93,7 +94,17 @@ while( 1 ){
       my $git = Git->repository($path);
       # update the mirror URI in case it has changed
       $git->command_noisy(qw(config remote.origin.url), $repo->mirrorof);
-      $git->command_noisy(qw(fetch --update-head-ok));
+      eval {
+        local $SIG{ALRM} = sub { die "Timeout\n" };
+        alarm $TIMEOUT;
+        $git->command_noisy(qw(fetch --update-head-ok));
+        alarm 0;
+      };
+      if ($@) {
+        die unless $@ eq "Timeout\n";
+        Dutil::log("git fetch timed out");
+        next;
+      }
       write_file($ts_file, time());
       Dutil::log("update branch data");
       GitWebAdmin::Utils::update_branch_data($git, $repo, 'gitadm');
@@ -102,8 +113,18 @@ while( 1 ){
     }
 
     Dutil::log("create mirror $path");
-    system(qw(git clone --mirror), $repo->mirrorof, $path)
-      and die "clone failed: $!\n";
+    eval {
+      local $SIG{ALRM} = sub { die "Timeout\n" };
+      alarm $TIMEOUT;
+      system(qw(git clone --mirror), $repo->mirrorof, $path)
+        and die "clone failed: $!\n";
+      alarm 0;
+    };
+    if ($@) {
+      die unless $@ eq "Timeout\n";
+      Dutil::log("git clone timed out");
+      next;
+    }
     write_file($ts_file, time());
     Dutil::log("run gitosis post-update hook");
     my $gitdir = '/srv/git/repositories/gitosis-admin.git';
