@@ -34,7 +34,7 @@ __PACKAGE__->table("logs_push");
 
 =head2 uid
 
-  data_type: 'text'
+  data_type: 'integer'
   is_foreign_key: 1
   is_nullable: 0
 
@@ -79,7 +79,7 @@ __PACKAGE__->add_columns(
   "rid",
   { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
   "uid",
-  { data_type => "text", is_foreign_key => 1, is_nullable => 0 },
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
   "date",
   {
     data_type     => "timestamp",
@@ -118,11 +118,11 @@ Related object: L<GitWebAdmin::Schema::Users>
 
 =cut
 
-__PACKAGE__->belongs_to("uid", "GitWebAdmin::Schema::Users", { uid => "uid" });
+__PACKAGE__->belongs_to("uid", "GitWebAdmin::Schema::Users", { id => "uid" });
 
 
-# Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-08-12 17:07:09
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:f/1dJ7Usf09iZo2dF1e0Iw
+# Created by DBIx::Class::Schema::Loader v0.07010 @ 2011-11-10 18:32:16
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:gAE02Ldc0YaacEAswlKQsA
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

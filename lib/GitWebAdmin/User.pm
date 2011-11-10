@@ -37,7 +37,7 @@ sub find_user {
 
   my $db = $c->param('db');
   my $uid = $c->param('id');
-  my $user = $db->resultset('Users')->find($uid);
+  my $user = $db->resultset('Users')->find($uid, { key => 'users_uid_key' });
 
   return $user;
 }

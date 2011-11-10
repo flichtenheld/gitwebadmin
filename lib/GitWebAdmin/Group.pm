@@ -67,7 +67,7 @@ sub create {
     name => $c->query->param('name') || '',
     );
 
-  my $members = $c->get_obj_list('Users', 'members');
+  my $members = $c->get_obj_list('Users', 'members', { key => 'users_uid_key' });
   my ($w_repos, $r_repos) =
     $c->get_writable_readable('Repos', 'writable', 'readable');
 
@@ -108,7 +108,7 @@ sub do {
 
     $group->name($c->query->param('name'));
     $group->descr($c->query->param('description'));
-    my $members = $c->get_obj_list('Users', 'members');
+    my $members = $c->get_obj_list('Users', 'members', { key => 'users_uid_key' });
     my ($w_repos, $r_repos) =
       $c->get_writable_readable('Repos', 'writable', 'readable');
 

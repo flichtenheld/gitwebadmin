@@ -33,7 +33,7 @@ __PACKAGE__->table("push_acl");
 
 =head2 user
 
-  data_type: 'text'
+  data_type: 'integer'
   is_foreign_key: 1
   is_nullable: 1
 
@@ -66,16 +66,16 @@ __PACKAGE__->table("push_acl");
 
 =head2 action
 
-  data_type: 'push_action_type'
+  data_type: 'enum'
+  extra: {custom_type_name => "push_action_type",list => ["create","update","replace","delete"]}
   is_nullable: 1
-  size: 4
 
 =head2 result
 
-  data_type: 'acl_result_type'
+  data_type: 'enum'
   default_value: 'deny'
+  extra: {custom_type_name => "acl_result_type",list => ["allow","deny"]}
   is_nullable: 0
-  size: 4
 
 =head2 comment
 
@@ -95,7 +95,7 @@ __PACKAGE__->add_columns(
   "priority",
   { data_type => "integer", is_nullable => 0 },
   "user",
-  { data_type => "text", is_foreign_key => 1, is_nullable => 1 },
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
   "group",
   { data_type => "text", is_foreign_key => 1, is_nullable => 1 },
   "repo",
@@ -107,13 +107,20 @@ __PACKAGE__->add_columns(
   "ref",
   { data_type => "text", is_nullable => 1 },
   "action",
-  { data_type => "push_action_type", is_nullable => 1, size => 4 },
+  {
+    data_type => "enum",
+    extra => {
+      custom_type_name => "push_action_type",
+      list => ["create", "update", "replace", "delete"],
+    },
+    is_nullable => 1,
+  },
   "result",
   {
-    data_type => "acl_result_type",
+    data_type => "enum",
     default_value => "deny",
+    extra => { custom_type_name => "acl_result_type", list => ["allow", "deny"] },
     is_nullable => 0,
-    size => 4,
   },
   "comment",
   { data_type => "text", is_nullable => 1 },
@@ -141,7 +148,7 @@ Related object: L<GitWebAdmin::Schema::Users>
 
 =cut
 
-__PACKAGE__->belongs_to("user", "GitWebAdmin::Schema::Users", { uid => "user" });
+__PACKAGE__->belongs_to("user", "GitWebAdmin::Schema::Users", { id => "user" });
 
 =head2 repo
 
@@ -154,8 +161,8 @@ Related object: L<GitWebAdmin::Schema::Repos>
 __PACKAGE__->belongs_to("repo", "GitWebAdmin::Schema::Repos", { id => "repo" });
 
 
-# Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-08-12 17:07:09
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:jkUaioBRe0PtI6EVvqOICw
+# Created by DBIx::Class::Schema::Loader v0.07010 @ 2011-11-10 18:32:16
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:xeP1naGfin2nB9vSRI9yUA
 
 use List::MoreUtils qw(none);
 use Data::Dumper;

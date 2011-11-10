@@ -48,7 +48,8 @@ GRANT gwa_webaccess TO gwa_admin;
 GRANT gwa_gitaccess TO gwa_admin;
 
 CREATE TABLE users (
-       uid   TEXT PRIMARY KEY,
+       id    SERIAL PRIMARY KEY,
+       uid   TEXT NOT NULL UNIQUE,
        name  TEXT,
        mail  TEXT,
        admin BOOLEAN NOT NULL DEFAULT FALSE,
@@ -63,6 +64,9 @@ GRANT SELECT, UPDATE ON users TO gwa_webaccess;
 GRANT SELECT ON users TO gwa_gitaccess;
 GRANT ALL ON users TO gwa_admin;
 
+CREATE OR REPLACE FUNCTION user_id (text) RETURNS int AS $$
+       SELECT id FROM users u WHERE u.uid = $1
+$$ LANGUAGE SQL STABLE STRICT;
 INSERT INTO users (uid, name) VALUES
        ('gitadm', 'Git Administrator');
 
@@ -70,7 +74,7 @@ CREATE TYPE ssh_key_type AS ENUM ('rsa', 'dsa');
 
 CREATE TABLE keys (
        id    SERIAL PRIMARY KEY,
-       uid   TEXT NOT NULL REFERENCES users(uid) ON DELETE CASCADE,
+       uid   INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
        name  TEXT NOT NULL,
        bits  INT NOT NULL CHECK (floor(log(2,bits)) = log(2,bits)),
        type  ssh_key_type,
@@ -96,7 +100,7 @@ INSERT INTO groups VALUES
        ('gitosis-admin', 'Gitosis Adminstrators');
 
 CREATE TABLE members (
-       uid   TEXT NOT NULL REFERENCES users(uid) ON DELETE CASCADE,
+       uid   INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
        gid   TEXT NOT NULL REFERENCES groups(gid) ON DELETE CASCADE,
 
        PRIMARY KEY(uid,gid)
@@ -105,7 +109,7 @@ GRANT ALL ON members TO gwa_webaccess;
 GRANT SELECT ON members TO gwa_gitaccess;
 
 INSERT INTO members VALUES
-       ('gitadm', 'gitosis-admin');
+       (user_id('gitadm'), 'gitosis-admin');
 
 CREATE TABLE repos (
        id    SERIAL PRIMARY KEY,
@@ -115,7 +119,7 @@ CREATE TABLE repos (
        private  BOOLEAN NOT NULL DEFAULT FALSE,
        daemon   BOOLEAN NOT NULL DEFAULT FALSE,
        gitweb   BOOLEAN NOT NULL DEFAULT FALSE,
-       owner    TEXT NOT NULL REFERENCES users(uid) ON DELETE RESTRICT,
+       owner    INT NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
        forkof   INT REFERENCES repos(id) ON DELETE RESTRICT,
        mirrorof TEXT,
        mirrorupd INT DEFAULT 86400 CHECK ((mirrorupd >= 600) AND (mirrorupd <= 604800)),
@@ -138,7 +142,7 @@ CREATE OR REPLACE FUNCTION repo_id (text) RETURNS int AS $$
        SELECT id FROM repos r WHERE r.name = $1
 $$ LANGUAGE SQL STABLE STRICT;
 INSERT INTO repos (name, owner) VALUES
-       ('gitosis-admin.git', 'gitadm');
+       ('gitosis-admin.git', user_id('gitadm'));
 
 CREATE TABLE repo_tags (
        rid   INT REFERENCES repos(id) ON DELETE CASCADE,
@@ -155,7 +159,7 @@ CREATE TYPE acl_result_type  AS ENUM ('allow', 'deny');
 CREATE TABLE push_acl (
        id       SERIAL PRIMARY KEY,
        priority INT UNIQUE NOT NULL,
-       "user"   TEXT REFERENCES users(uid) ON DELETE CASCADE,
+       "user"   INT REFERENCES users(id) ON DELETE CASCADE,
        "group"  TEXT REFERENCES groups(gid) ON DELETE CASCADE,
        repo     INT REFERENCES repos(id) ON DELETE CASCADE,
        user_flags   TEXT,
@@ -225,7 +229,7 @@ GRANT ALL ON readable TO gwa_webaccess;
 
 CREATE TABLE subscriptions (
        rid   INT NOT NULL REFERENCES repos(id) ON DELETE CASCADE,
-       uid   TEXT NOT NULL REFERENCES users(uid) ON DELETE CASCADE,
+       uid   INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
 
        PRIMARY KEY (rid, uid)
 );
@@ -235,7 +239,7 @@ GRANT SELECT ON subscriptions TO gwa_gitaccess;
 CREATE TABLE logs_push (
        logid BIGSERIAL PRIMARY KEY,
        rid   INT NOT NULL REFERENCES repos(id) ON DELETE RESTRICT,
-       uid   TEXT NOT NULL REFERENCES users(uid) ON DELETE RESTRICT,
+       uid   INT NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
        date  TIMESTAMP NOT NULL DEFAULT now(),
        old_id TEXT NOT NULL CHECK (char_length(old_id) = 40),
        new_id TEXT NOT NULL CHECK (char_length(new_id) = 40),

@@ -364,8 +364,8 @@ sub create {
       die "403 Not authorized\n";
     }
     $opts{private} = 1;
-    $opts{owner} = $username;
   }
+  $opts{owner} = $c->param('user_obj')->id;
   my $rs = $c->param('db')->resultset('Repos');
   if( $opts{forkof} ){
     my $forked = $rs->find($opts{forkof})

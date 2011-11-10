@@ -57,10 +57,12 @@ my $rs = $schema->resultset('Repos')->search({ deleted => 0 });
 
 my $lp = $schema->resultset('LogsPush');
 # fake data, we don't know what changed
+my $user = $schema->resultset('Users')->find('gitadm', {key => 'users_uid_key'})
+  or die "User gitadm not found in database\n";
 my $upd = $lp->new({ ref => 'refs/head/master',
                      old_id => '0'x40,
                      new_id => '0'x40,
-                     uid => 'gitadm' });
+                     uid => $user->id });
 
 
 my $started = time();
@@ -107,7 +109,7 @@ while( 1 ){
       }
       write_file($ts_file, time());
       Dutil::log("update branch data");
-      GitWebAdmin::Utils::update_branch_data($git, $repo, 'gitadm');
+      GitWebAdmin::Utils::update_branch_data($git, $repo, $user->id);
       Dutil::log("update complete");
       next;
     }

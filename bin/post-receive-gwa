@@ -45,6 +45,11 @@ $reponame =~ s;/+$;;;
 my $repo = $schema->resultset('Repos')->find($reponame, {key => 'repos_name_key'})
     or die "Repository $gitdir not found in database\n";
 my $gituser = $ENV{GITOSIS_USER};
+my $user;
+if( $gituser ){
+  $user = $schema->resultset('Users')->find($gituser, {key => 'users_uid_key'})
+    or die "User $gituser not found in database\n";
+}
 
 # Read all data from STDIN
 ##
@@ -56,7 +61,7 @@ while( <> ){
   ##
   $logs->create({
     rid => $repo->id,
-    uid => $gituser,
+    uid => $user->id,
     old_id => $oldrev,
     new_id => $newrev,
     ref => $ref,

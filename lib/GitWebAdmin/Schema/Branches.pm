@@ -75,8 +75,8 @@ Related object: L<GitWebAdmin::Schema::Repos>
 __PACKAGE__->belongs_to("rid", "GitWebAdmin::Schema::Repos", { id => "rid" });
 
 
-# Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-08-12 17:07:09
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:KE7WYrhDAVd6NZzhAWQUSw
+# Created by DBIx::Class::Schema::Loader v0.07010 @ 2011-11-10 18:32:16
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:bSyebEtU4wrhhRL9C9Sf0w
 
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;

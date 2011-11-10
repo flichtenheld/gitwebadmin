@@ -19,6 +19,13 @@ __PACKAGE__->table("users");
 
 =head1 ACCESSORS
 
+=head2 id
+
+  data_type: 'integer'
+  is_auto_increment: 1
+  is_nullable: 0
+  sequence: 'users_id_seq'
+
 =head2 uid
 
   data_type: 'text'
@@ -55,6 +62,13 @@ __PACKAGE__->table("users");
 =cut
 
 __PACKAGE__->add_columns(
+  "id",
+  {
+    data_type         => "integer",
+    is_auto_increment => 1,
+    is_nullable       => 0,
+    sequence          => "users_id_seq",
+  },
   "uid",
   { data_type => "text", is_nullable => 0 },
   "name",
@@ -68,7 +82,8 @@ __PACKAGE__->add_columns(
   "directory",
   { data_type => "text", default_value => "local", is_nullable => 0 },
 );
-__PACKAGE__->set_primary_key("uid");
+__PACKAGE__->set_primary_key("id");
+__PACKAGE__->add_unique_constraint("users_uid_key", ["uid"]);
 
 =head1 RELATIONS
 
@@ -83,7 +98,7 @@ Related object: L<GitWebAdmin::Schema::Keys>
 __PACKAGE__->has_many(
   "keys",
   "GitWebAdmin::Schema::Keys",
-  { "foreign.uid" => "self.uid" },
+  { "foreign.uid" => "self.id" },
   {},
 );
 
@@ -98,7 +113,7 @@ Related object: L<GitWebAdmin::Schema::LogsPush>
 __PACKAGE__->has_many(
   "logs_pushes",
   "GitWebAdmin::Schema::LogsPush",
-  { "foreign.uid" => "self.uid" },
+  { "foreign.uid" => "self.id" },
   {},
 );
 
@@ -113,7 +128,7 @@ Related object: L<GitWebAdmin::Schema::Members>
 __PACKAGE__->has_many(
   "members",
   "GitWebAdmin::Schema::Members",
-  { "foreign.uid" => "self.uid" },
+  { "foreign.uid" => "self.id" },
   {},
 );
 
@@ -128,7 +143,7 @@ Related object: L<GitWebAdmin::Schema::PushAcl>
 __PACKAGE__->has_many(
   "push_acls",
   "GitWebAdmin::Schema::PushAcl",
-  { "foreign.user" => "self.uid" },
+  { "foreign.user" => "self.id" },
   {},
 );
 
@@ -143,7 +158,7 @@ Related object: L<GitWebAdmin::Schema::Repos>
 __PACKAGE__->has_many(
   "repo",
   "GitWebAdmin::Schema::Repos",
-  { "foreign.owner" => "self.uid" },
+  { "foreign.owner" => "self.id" },
   {},
 );
 
@@ -158,13 +173,13 @@ Related object: L<GitWebAdmin::Schema::Subscriptions>
 __PACKAGE__->has_many(
   "subscriptions",
   "GitWebAdmin::Schema::Subscriptions",
-  { "foreign.uid" => "self.uid" },
+  { "foreign.uid" => "self.id" },
   {},
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-12-29 14:56:37
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:TL8Y1ychaC27bNA/3LDYLA
+# Created by DBIx::Class::Schema::Loader v0.07010 @ 2011-11-10 18:39:04
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:IU5k36LFQkLCg5Yi7QrYIQ
 
 __PACKAGE__->many_to_many('groups' => 'members', 'gid');
 __PACKAGE__->many_to_many('subscribed_repos' => 'subscriptions', 'rid');

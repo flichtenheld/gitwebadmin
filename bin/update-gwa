@@ -44,7 +44,7 @@ my $gituser = $ENV{GITOSIS_USER};
 
 my $user;
 if( $gituser ){
-  $user = $schema->resultset('Users')->find($gituser)
+  $user = $schema->resultset('Users')->find($gituser, {key => 'users_uid_key'})
     or die "User $gituser not found in database\n";
 }else{
   # We do not limit local pushes

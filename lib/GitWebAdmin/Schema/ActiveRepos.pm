@@ -56,7 +56,7 @@ __PACKAGE__->table("active_repos");
 
 =head2 owner
 
-  data_type: 'text'
+  data_type: 'integer'
   is_nullable: 1
 
 =head2 forkof
@@ -97,7 +97,7 @@ __PACKAGE__->add_columns(
   "gitweb",
   { data_type => "boolean", is_nullable => 1 },
   "owner",
-  { data_type => "text", is_nullable => 1 },
+  { data_type => "integer", is_nullable => 1 },
   "forkof",
   { data_type => "integer", is_nullable => 1 },
   "mirrorof",
@@ -109,8 +109,8 @@ __PACKAGE__->add_columns(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07002 @ 2010-11-19 17:48:39
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:5Av/SZCgcADbki8CH63CcA
+# Created by DBIx::Class::Schema::Loader v0.07010 @ 2011-11-10 18:32:16
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:EqNz+Xon2bUdJmWd0PIF+w
 
 __PACKAGE__->has_many(
   "logs_pushes",

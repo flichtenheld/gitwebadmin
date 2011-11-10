@@ -28,7 +28,7 @@ __PACKAGE__->table("keys");
 
 =head2 uid
 
-  data_type: 'text'
+  data_type: 'integer'
   is_foreign_key: 1
   is_nullable: 0
 
@@ -44,9 +44,9 @@ __PACKAGE__->table("keys");
 
 =head2 type
 
-  data_type: 'ssh_key_type'
+  data_type: 'enum'
+  extra: {custom_type_name => "ssh_key_type",list => ["rsa","dsa"]}
   is_nullable: 1
-  size: 4
 
 =head2 fingerprint
 
@@ -69,13 +69,17 @@ __PACKAGE__->add_columns(
     sequence          => "keys_id_seq",
   },
   "uid",
-  { data_type => "text", is_foreign_key => 1, is_nullable => 0 },
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
   "name",
   { data_type => "text", is_nullable => 0 },
   "bits",
   { data_type => "integer", is_nullable => 0 },
   "type",
-  { data_type => "ssh_key_type", is_nullable => 1, size => 4 },
+  {
+    data_type => "enum",
+    extra => { custom_type_name => "ssh_key_type", list => ["rsa", "dsa"] },
+    is_nullable => 1,
+  },
   "fingerprint",
   { data_type => "text", is_nullable => 0 },
   "key",
@@ -95,11 +99,11 @@ Related object: L<GitWebAdmin::Schema::Users>
 
 =cut
 
-__PACKAGE__->belongs_to("uid", "GitWebAdmin::Schema::Users", { uid => "uid" });
+__PACKAGE__->belongs_to("uid", "GitWebAdmin::Schema::Users", { id => "uid" });
 
 
-# Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-08-12 17:07:09
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:WmjTXkB4zij/yl5D9BqR/w
+# Created by DBIx::Class::Schema::Loader v0.07010 @ 2011-11-10 18:32:16
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:hPDVL/+lQytXtKL4T2asTw
 
 use GitWebAdmin::Utils qw(json_bool);
 sub TO_JSON {

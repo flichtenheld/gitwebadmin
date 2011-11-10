@@ -62,7 +62,7 @@ sub cgiapp_prerun {
   $c->param('db', $schema);
   if( $ENV{REMOTE_USER} ){
     $c->param('user', lc($ENV{REMOTE_USER}));
-    $c->param('user_obj', $schema->resultset('Users')->find($c->param('user')));
+    $c->param('user_obj', $schema->resultset('Users')->find($c->param('user'), { key => 'users_uid_key'}));
   }
 
   $c->run_modes([qw(do list start delete create create_form)]);
@@ -150,12 +150,13 @@ sub get_checkbox_opt {
 }
 
 sub get_obj_list {
-  my ($c, $table, $param) = @_;
+  my ($c, $table, $param, $find_params) = @_;
 
   my %objs = map { $_ => 1 } $c->query->param($param);
   delete $objs{none};
   my $rs = $c->param('db')->resultset($table);
-  my @objs = map { $rs->find($_) } keys %objs;
+  $find_params ||= {};
+  my @objs = map { $rs->find($_, $find_params) } keys %objs;
 
   return \@objs;
 }
@@ -255,7 +256,7 @@ sub is_subscribed {
   my ($c, $repo) = @_;
 
   my $user = $c->param('user_obj') or return 0;
-  my @res = $repo->subscriptions({ uid => $user->uid });
+  my @res = $repo->subscriptions({ uid => $user->id });
   return scalar @res;
 }
 

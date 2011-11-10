@@ -31,7 +31,7 @@ __PACKAGE__->table("show_push_acl");
 
 =head2 user
 
-  data_type: 'text'
+  data_type: 'integer'
   is_nullable: 1
 
 =head2 group
@@ -61,15 +61,15 @@ __PACKAGE__->table("show_push_acl");
 
 =head2 action
 
-  data_type: 'push_action_type'
+  data_type: 'enum'
+  extra: {custom_type_name => "push_action_type",list => ["create","update","replace","delete"]}
   is_nullable: 1
-  size: 4
 
 =head2 result
 
-  data_type: 'acl_result_type'
+  data_type: 'enum'
+  extra: {custom_type_name => "acl_result_type",list => ["allow","deny"]}
   is_nullable: 1
-  size: 4
 
 =head2 comment
 
@@ -84,7 +84,7 @@ __PACKAGE__->add_columns(
   "priority",
   { data_type => "integer", is_nullable => 1 },
   "user",
-  { data_type => "text", is_nullable => 1 },
+  { data_type => "integer", is_nullable => 1 },
   "group",
   { data_type => "text", is_nullable => 1 },
   "repository",
@@ -96,16 +96,27 @@ __PACKAGE__->add_columns(
   "ref",
   { data_type => "text", is_nullable => 1 },
   "action",
-  { data_type => "push_action_type", is_nullable => 1, size => 4 },
+  {
+    data_type => "enum",
+    extra => {
+      custom_type_name => "push_action_type",
+      list => ["create", "update", "replace", "delete"],
+    },
+    is_nullable => 1,
+  },
   "result",
-  { data_type => "acl_result_type", is_nullable => 1, size => 4 },
+  {
+    data_type => "enum",
+    extra => { custom_type_name => "acl_result_type", list => ["allow", "deny"] },
+    is_nullable => 1,
+  },
   "comment",
   { data_type => "text", is_nullable => 1 },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-08-12 17:07:09
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:4pd9OYn0vbNRpBP1vVVsgw
+# Created by DBIx::Class::Schema::Loader v0.07010 @ 2011-11-10 18:32:16
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:tIvyl7Ryb3FghInjcdD2SQ
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

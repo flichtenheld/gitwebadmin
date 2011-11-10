@@ -21,7 +21,7 @@ __PACKAGE__->table("members");
 
 =head2 uid
 
-  data_type: 'text'
+  data_type: 'integer'
   is_foreign_key: 1
   is_nullable: 0
 
@@ -35,7 +35,7 @@ __PACKAGE__->table("members");
 
 __PACKAGE__->add_columns(
   "uid",
-  { data_type => "text", is_foreign_key => 1, is_nullable => 0 },
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
   "gid",
   { data_type => "text", is_foreign_key => 1, is_nullable => 0 },
 );
@@ -51,7 +51,7 @@ Related object: L<GitWebAdmin::Schema::Users>
 
 =cut
 
-__PACKAGE__->belongs_to("uid", "GitWebAdmin::Schema::Users", { uid => "uid" });
+__PACKAGE__->belongs_to("uid", "GitWebAdmin::Schema::Users", { id => "uid" });
 
 =head2 gid
 
@@ -64,8 +64,8 @@ Related object: L<GitWebAdmin::Schema::Groups>
 __PACKAGE__->belongs_to("gid", "GitWebAdmin::Schema::Groups", { gid => "gid" });
 
 
-# Created by DBIx::Class::Schema::Loader v0.07002 @ 2010-11-19 19:11:47
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:7mmwu55Q09Jxjj+OGnYNzw
+# Created by DBIx::Class::Schema::Loader v0.07010 @ 2011-11-10 18:32:16
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:gHpRZS/3wfOp1KgDo7m2TQ
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

@@ -62,7 +62,7 @@ __PACKAGE__->table("repos");
 
 =head2 owner
 
-  data_type: 'text'
+  data_type: 'integer'
   is_foreign_key: 1
   is_nullable: 0
 
@@ -112,7 +112,7 @@ __PACKAGE__->add_columns(
   "gitweb",
   { data_type => "boolean", default_value => \"false", is_nullable => 0 },
   "owner",
-  { data_type => "text", is_foreign_key => 1, is_nullable => 0 },
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
   "forkof",
   { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
   "mirrorof",
@@ -220,7 +220,7 @@ Related object: L<GitWebAdmin::Schema::Users>
 
 =cut
 
-__PACKAGE__->belongs_to("owner", "GitWebAdmin::Schema::Users", { uid => "owner" });
+__PACKAGE__->belongs_to("owner", "GitWebAdmin::Schema::Users", { id => "owner" });
 
 =head2 repo_tags
 
@@ -283,8 +283,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07002 @ 2010-11-19 17:48:39
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:yRfbIIMWAjmaPqORptr8GA
+# Created by DBIx::Class::Schema::Loader v0.07010 @ 2011-11-10 18:32:16
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:WpCIjOkXrlUyudYUqLdNYg
 
 __PACKAGE__->many_to_many('w_groups' => 'writables', 'gid');
 __PACKAGE__->many_to_many('r_groups' => 'readables', 'gid');

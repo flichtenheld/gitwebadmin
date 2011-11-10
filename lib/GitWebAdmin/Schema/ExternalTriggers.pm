@@ -33,10 +33,10 @@ __PACKAGE__->table("external_triggers");
 
 =head2 method
 
-  data_type: 'trigger_method_type'
+  data_type: 'enum'
   default_value: 'ssh'
+  extra: {custom_type_name => "trigger_method_type",list => ["ssh","http","local"]}
   is_nullable: 0
-  size: 4
 
 =head2 uri
 
@@ -57,10 +57,13 @@ __PACKAGE__->add_columns(
   { data_type => "text", is_nullable => 0 },
   "method",
   {
-    data_type => "trigger_method_type",
+    data_type => "enum",
     default_value => "ssh",
+    extra => {
+      custom_type_name => "trigger_method_type",
+      list => ["ssh", "http", "local"],
+    },
     is_nullable => 0,
-    size => 4,
   },
   "uri",
   { data_type => "text", is_nullable => 0 },
@@ -87,8 +90,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-08-12 17:07:09
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:5kyGgrPzjocL+/dH7snS7A
+# Created by DBIx::Class::Schema::Loader v0.07010 @ 2011-11-10 18:32:16
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:RycCb54aHjdkgU3KsIHtZg
 
 __PACKAGE__->many_to_many('repos' => 'repo_triggers', 'rid');
 
