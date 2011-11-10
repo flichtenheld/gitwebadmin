@@ -61,5 +61,4 @@ while( my $rt_row = $rt->next ){
 
   print "Call trigger ".$trigger->name." on repo ".$repo->name."\n";
   GitWebAdmin::Utils::call_trigger($config, $repo, $upd, $trigger);
-  sleep 5;
 }
