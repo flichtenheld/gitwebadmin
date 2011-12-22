@@ -34,12 +34,12 @@ our $timestamp = "%Y-%m-%d %H:%M:%S"; # how to format the time in output
 
 sub singularize {
     my $filename = shift;
-    
+
     # open the file in read+write mode. this succeeds even when the file
     # is locked, because locking is merely advisory.
     # we use a global filehandle here, because we want this handle to
     # be there for the whole lifetime of the process.
-    open LOCK_FH, '+>', $filename or croak "can't open $filename: $!";
+    open LOCK_FH, '+<', $filename or croak "can't open $filename: $!";
 
     local $@;
     eval {
@@ -49,6 +49,7 @@ sub singularize {
         local $SIG{ALRM} = sub { die "Timeout\n" };
         alarm $timeout;
         flock(LOCK_FH, LOCK_EX);
+        autoflush LOCK_FH 1;
         alarm 0;
     };
     if ($@) {
@@ -75,6 +76,7 @@ sub daemonize {
     exit if $pid;
     setsid                      or croak "can't start new session: $!";
 
+    print LOCK_FH "$$\n"        or warn  "can't write pid file: $!";
     open STDERR, '>&STDOUT'     or croak "can't dup STDOUT: $!";
 }
 
