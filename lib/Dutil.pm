@@ -23,6 +23,7 @@ use strict;
 use warnings;
 
 use Carp;
+use File::Touch;
 use Fcntl qw( :flock );
 use POSIX qw( setsid strftime );
 use IO::File;
@@ -35,6 +36,8 @@ our $timestamp = "%Y-%m-%d %H:%M:%S"; # how to format the time in output
 sub singularize {
     my $filename = shift;
 
+    # open '+<' doesn't work on non-existent files
+    touch($filename);
     # open the file in read+write mode. this succeeds even when the file
     # is locked, because locking is merely advisory.
     # we use a global filehandle here, because we want this handle to
