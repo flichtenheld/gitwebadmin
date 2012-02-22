@@ -397,6 +397,7 @@ sub delete {
   $repo->daemon(0);
   $repo->set_w_groups([]);
   $repo->set_r_groups([]);
+  $repo->set_triggers([]);
   $repo->update->discard_changes;
 
   return $c->tt_process({ repo => $repo });

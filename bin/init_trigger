@@ -55,6 +55,7 @@ my $upd = $lp->new({ ref => 'refs/head/master',
 
 while( my $rt_row = $rt->next ){
   my $repo = $rt_row->rid;
+  next if $repo->deleted;
   my $path = catfile('/srv/git/repositories', $repo->name);
 
   $ENV{GIT_DIR} = $path;
