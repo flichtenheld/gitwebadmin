@@ -44,11 +44,17 @@ use FindBin;
 use Cwd qw(realpath);
 use lib "$FindBin::Bin/../lib";
 
+use Dutil;
 use GitWebAdmin::Schema;
 
 my $GWA      = realpath("$FindBin::Bin/../");
 
 my $config = Config::Auto::parse("$GWA/gitwebadmin.ini");
+my $cachefile = $config->{gitweb}{cache};
+my $lockfile = "$cachefile.lock";
+
+$Dutil::silent = 0;
+Dutil::singularize( $lockfile );
 
 my $db_cfg = $config->{database};
 my $schema = GitWebAdmin::Schema->connect(
@@ -83,7 +89,6 @@ while( my $repo = $repos->next ){
 
 #print Dumper(\@data);
 
-my $cachefile = $config->{gitweb}{cache};
 my ($fh, $outfile) = tempfile( 'gitweb.index.cache.XXXXXX',
                                DIR => dirname($cachefile),
                                UNLINK => 0 );
