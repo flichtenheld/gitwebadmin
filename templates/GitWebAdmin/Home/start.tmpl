@@ -26,9 +26,9 @@ from your <a href="[% c.url('user/' _ c.param('user')) %]">User Page</a>.
   <tbody>
   [% FOREACH r IN DBIxRel(repos.all) %]
   <tr>
-    <td><a href="[% c.url('repo/' _ r.name()) | html %]">[% r.name() | html %]</a></td>
-    <td><a href="[% c.url('user/' _ r.owner().uid()) %]">[% r.owner().name() | html %]</td>
-    <td>[% r.descr() | html %]</td>
+    <td><a href="[% c.url('repo/' _ r.name) | html %]">[% r.name | html %]</a></td>
+    <td><a href="[% c.url('user/' _ r.owner.uid) %]">[% r.owner.name | html %]</td>
+    <td>[% r.descr | html %]</td>
   </tr>
   [% END %]
   </tbody>

@@ -109,3 +109,11 @@
 [% END %]
 </ul>
 [% END %]
+
+[% BLOCK gitweb_commit -%]
+<a title="This commit in gitweb" href="[% c.cfg('gitweb').link _ repo _ '/commit/' _ commit %]">[% commit.substr(0, 7) %]</a>
+[%- END %]
+
+[% BLOCK gitweb_branch -%]
+<a title="This branch in gitweb" href="[% c.cfg('gitweb').link _ repo _ '/refs/heads/' _ branch %]">[% branch %]</a>
+[%- END %]

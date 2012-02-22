@@ -78,6 +78,7 @@
 <p>No Changes.</p>
 [% END %]
 
+[% SET default_branch = c.param('db').resultset('Branches').find({ rid => repo.id, branch => repo.branch },{ key => 'branches_rid_key' }) %]
 [% IF c.has_change(repo) %]
 <form action="[% c.url('repo/' _ repo.name) %]" method="post">
 [% END %]
@@ -129,13 +130,23 @@
     </tr>
     [% END %]
     <tr>
-      [% IF c.has_admin(repo) %]
+      [% IF c.has_admin(repo) -%]
       <th><label for="branch">Default Branch:</label></th>
-      <td><input type="text" name="branch" size="40" value="[% repo.branch | html %]"></td>
-      [% ELSE %]
+      <td><input type="text" name="branch" size="40" value="[% repo.branch | html %]">
+      [%- IF default_branch;
+           ' (gitweb:'; INCLUDE gitweb_branch repo=repo.name branch=repo.branch; ')';
+         ELSE;
+           ' (Does not exist in repository)';
+         END -%]</td>
+      [% ELSE -%]
       <th>Default Branch:</th>
-      <td><code>[% repo.branch | html %]</code></td>
-      [% END %]
+      <td>
+      [%- IF default_branch;
+           INCLUDE gitweb_branch repo=repo.name branch=repo.branch;
+         ELSE;
+           repo.branch | html;
+         END -%]</td>
+      [%- END %]
     </tr>
     [% IF c.is_admin %]
     <tr>
