@@ -233,7 +233,9 @@ sub do {
     }
     if( $c->is_admin ){
       # these values can only be changed by real admins
-      $repo->owner($params->valid('owner'));
+      my $db = $c->param('db');
+      my $owner = $db->resultset('Users')->find($params->valid('owner'), { key => 'users_uid_key' });
+      $repo->owner($owner);
       $repo->private($c->get_checkbox_opt('private'));
     }
     if( $repo->is_changed ){
@@ -358,14 +360,18 @@ sub create {
   if( $abs =~ m;(/|^)\.\.(/|$); ){
     die "400 Malformed path\n";
   }
-  unless( $c->is_admin ){
+  if( $c->is_admin ){
+    $opts{owner} = $c->param('db')->resultset('Users')->find(
+      $opts{owner},{ key => 'users_uid_key' })->id
+      or die "400 Invalid owner\n";
+  }else{
     my $username = $c->param('user');
     unless( $opts{name} =~ m;^\Quser/$username/\E; ){
       die "403 Not authorized\n";
     }
     $opts{private} = 1;
+    $opts{owner} = $c->param('user_obj')->id;
   }
-  $opts{owner} = $c->param('user_obj')->id;
   my $rs = $c->param('db')->resultset('Repos');
   if( $opts{forkof} ){
     my $forked = $rs->find($opts{forkof})

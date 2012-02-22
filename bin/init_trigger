@@ -51,7 +51,7 @@ my $lp = $schema->resultset('LogsPush');
 my $upd = $lp->new({ ref => 'refs/head/master',
                      old_id => '0'x40,
                      new_id => '0'x40,
-                     uid => 'flichtenheld' });
+                     uid => 76 });
 
 while( my $rt_row = $rt->next ){
   my $repo = $rt_row->rid;

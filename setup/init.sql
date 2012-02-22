@@ -63,6 +63,7 @@ CREATE INDEX users_name_idx ON users (name);
 GRANT SELECT, UPDATE ON users TO gwa_webaccess;
 GRANT SELECT ON users TO gwa_gitaccess;
 GRANT ALL ON users TO gwa_admin;
+GRANT ALL ON users_id_seq TO gwa_admin;
 
 CREATE OR REPLACE FUNCTION user_id (text) RETURNS int AS $$
        SELECT id FROM users u WHERE u.uid = $1

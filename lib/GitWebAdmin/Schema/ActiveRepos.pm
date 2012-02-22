@@ -128,7 +128,7 @@ __PACKAGE__->has_many(
   "GitWebAdmin::Schema::Repos",
   { "foreign.forkof" => "self.id" },
 );
-__PACKAGE__->belongs_to("owner", "GitWebAdmin::Schema::Users", { uid => "owner" });
+__PACKAGE__->belongs_to("owner", "GitWebAdmin::Schema::Users", { id => "owner" });
 __PACKAGE__->has_many(
   "repo_tags",
   "GitWebAdmin::Schema::RepoTags",
