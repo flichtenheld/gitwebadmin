@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 # gmd is the "Git Mirror Daemon"
 #
 #  Copyright (C) 2009-2011 Astaro GmbH & Co. KG  www.astaro.com
@@ -35,6 +35,7 @@ use IO::Handle;
 use POSIX  qw( strftime );
 use Socket qw( :DEFAULT :crlf );
 use Time::HiRes qw( sleep );
+use Try::Tiny;
 
 use threads;
 use threads::shared;
@@ -120,10 +121,15 @@ sub worker {
         my $repo = "$base/$host/$path";
         if (-d $repo) {
             # if it's already there, fetch latest infos...
-            my $git = Git->repository($repo);
-            $git->command_noisy(qw(config remote.origin.url), $job);
-            $git->command_noisy(qw(fetch --update-head-ok));
-            $git->command_noisy(qw(remote prune origin));
+	    try {
+		local $SIG{__DIE__};
+		my $git = Git->repository($repo);
+		$git->command_noisy(qw(config remote.origin.url), $job);
+		$git->command_noisy(qw(fetch --update-head-ok));
+		$git->command_noisy(qw(remote prune origin));
+	    } catch {
+		logmsg("git failed: $_");
+	    };
         }
         else {
             # ... otherwise just clone it
