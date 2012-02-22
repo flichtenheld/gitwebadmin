@@ -70,6 +70,12 @@ while( 1 ){
 
         my $update_id = $row->ref." (".$row->old_id."->".$row->new_id.")";
 
+        if( $row->old_id eq $row->new_id
+           and $row->old_id eq '0'x40 ){
+          Dutil::log($repo->name.": ignoring deletion of non-existant branch");
+          goto FINISHED;
+        }
+
         my @triggers = $repo->triggers;
         foreach my $trigger (@triggers){
           Dutil::log($repo->name.": Calling trigger ".$trigger->name);
