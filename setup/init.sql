@@ -204,6 +204,7 @@ CREATE TABLE branches (
        UNIQUE (rid, branch)
 );
 GRANT ALL ON branches TO gwa_gitaccess;
+GRANT SELECT ON branches TO gwa_webaccess;
 GRANT ALL ON branches_id_seq TO gwa_gitaccess;
 
 --
