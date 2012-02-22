@@ -1,0 +1,41 @@
+[% PROCESS methods.tmpl %]
+[% SET nav = [ { url => 'branch/', name => 'Branches' } ];
+   nav.push({ name => repo.name }) IF repo;
+   INCLUDE header.tmpl page_title="Branch List"
+   navigation=nav
+%]
+
+<div id="actions">
+[% INCLUDE admin_actions %]
+</div> <!-- end actions -->
+
+<h1>Branches[% ' in ' _ repo.name | html IF repo %]</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Repository</th>
+      <th>Branch</th>
+      <th>Commit</th>
+    </tr>
+  </thead>
+  <tbody>
+[% FOREACH b IN DBIxRel(branches.all) %]
+    <tr>
+      <td><a href="[% c.url('repo/' _ b.rid.name) | html %]">[% b.rid.name | html %]</a>
+        [% IF !repo %]
+        <a class="filter_link" href="[% c.url('branch/repo/' _ b.rid.id) %]">[F]</a>
+        [% END %]
+      </td>
+      [% IF !repo %]
+      <td><a href="[% c.url('branch/' _ b.branch) | html %]">[% b.branch %]</td>
+      [% ELSE %]
+      <td><a href="[% c.url('branch/' _ b.branch _ '/repo/' _ repo.id) | html %]">[% b.branch %]</td>
+      [% END %]
+      <td>[% INCLUDE gitweb_commit repo=b.rid.name commit=b.commit %]</td>
+[% END %]
+  </tbody>
+</table>
+
+
+[% INCLUDE footer.tmpl %]

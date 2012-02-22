@@ -96,6 +96,10 @@ a:hover, a:visited, a:active {
     text-decoration: line-through;
 }
 
+.filter_link {
+    font-size: 80%;
+}
+
 #userlogin {
     font-size: 90%;
     text-align: right;

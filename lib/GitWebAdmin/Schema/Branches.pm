@@ -78,5 +78,15 @@ __PACKAGE__->belongs_to("rid", "GitWebAdmin::Schema::Repos", { id => "rid" });
 # Created by DBIx::Class::Schema::Loader v0.07010 @ 2011-11-10 18:32:16
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:bSyebEtU4wrhhRL9C9Sf0w
 
+use GitWebAdmin::Utils qw(json_bool);
+sub TO_JSON {
+  my ($self) = @_;
+
+  return { id => int($self->id),
+           rid => int($self->rid->id),
+           branch => $self->branch,
+           repository => $self->rid->name,
+  };
+}
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;
