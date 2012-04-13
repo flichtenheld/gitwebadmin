@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 #
 #  Copyright (C) 2009,2010 Astaro GmbH & Co. KG  www.astaro.com
 #
@@ -27,6 +27,7 @@ use Net::LDAP;
 use Config::Auto;
 use Data::Dumper;
 use Getopt::Long;
+use List::MoreUtils qw(uniq);
 
 use FindBin;
 use lib "$FindBin::Bin/../lib";
@@ -66,6 +67,23 @@ die "Group not unique\n" if $mesg->entries > 1;
 
 my @members = map { s/^(CN=.*?),.*/$1/i; $_ } ($mesg->entries)[0]->get_value('member');
 print "\tmembers = @members\n" unless $quiet;
+
+# get members of group members
+#XXX: Make recursive
+$mesg = $ldap->search(
+  base   => "DC=intranet,DC=astaro,DC=de",
+  filter => "(&(ObjectClass=group)(|".join(' ', map { "($_)" } @members)."))",
+  attrs  => [qw(cn member)],
+  );
+$mesg->code && die $mesg->error;
+
+foreach my $group ($mesg->entries){
+  my @add_members = map { s/^(CN=.*?),.*/$1/i; $_ } $group->get_value('member');
+  print "add members from group ".$group->get_value('cn')."\n" unless $quiet;
+  print "\tadd_members = @add_members\n" unless $quiet;
+  @members = uniq @members, @add_members;
+}
+
 print "Get member data\n"      unless $quiet;
 $mesg = $ldap->search(
   base   => "DC=intranet,DC=astaro,DC=de",
@@ -78,13 +96,14 @@ $mesg->code && die $mesg->error;
 my $rs = $schema->resultset('Users');
 my %uids = ();
 foreach my $entry ($mesg->entries){
-  my $uid = $entry->get_value('sAMAccountName');
+  my $uid = lc $entry->get_value('sAMAccountName');
   print "\tmember ".$entry->get_value('cn')." (uid=$uid)\n" unless $quiet;
   $rs->update_or_create({ uid => $uid,
                           name => $entry->get_value('cn') || '',
                           mail => $entry->get_value('mail') || '',
                           directory => 'dc.astaro.com',
-                          active => 1 });
+                          active => 1 },
+                        { key => 'users_uid_key' });
   $uids{$uid}++;
 }
 my $actives = $rs->search({ active => 1, directory => 'dc.astaro.com' });
