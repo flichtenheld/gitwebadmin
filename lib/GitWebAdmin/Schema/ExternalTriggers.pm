@@ -8,6 +8,7 @@ use warnings;
 
 use base 'DBIx::Class::Core';
 
+__PACKAGE__->load_components("InflateColumn::DateTime");
 
 =head1 NAME
 
@@ -33,9 +34,8 @@ __PACKAGE__->table("external_triggers");
 
 =head2 method
 
-  data_type: 'enum'
+  data_type: 'text'
   default_value: 'ssh'
-  extra: {custom_type_name => "trigger_method_type",list => ["ssh","http","local"]}
   is_nullable: 0
 
 =head2 uri
@@ -56,15 +56,7 @@ __PACKAGE__->add_columns(
   "name",
   { data_type => "text", is_nullable => 0 },
   "method",
-  {
-    data_type => "enum",
-    default_value => "ssh",
-    extra => {
-      custom_type_name => "trigger_method_type",
-      list => ["ssh", "http", "local"],
-    },
-    is_nullable => 0,
-  },
+  { data_type => "text", default_value => "ssh", is_nullable => 0 },
   "uri",
   { data_type => "text", is_nullable => 0 },
 );
@@ -90,8 +82,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07010 @ 2011-11-10 18:32:16
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:RycCb54aHjdkgU3KsIHtZg
+# Created by DBIx::Class::Schema::Loader v0.07000 @ 2012-03-31 15:57:37
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:WgKcRJjykFtjqtk5gfdaYw
 
 __PACKAGE__->many_to_many('repos' => 'repo_triggers', 'rid');
 

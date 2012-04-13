@@ -206,17 +206,30 @@ sub do {
     # owner can always change description
     $repo->descr($params->valid('description'));
 
+    my $mirror = $repo->mirror;
+    my $new_mirror;
     if( $c->has_admin($repo) ) {
       # the following things can only be changed
       # by admins and owners in private repositories
       $repo->branch($params->valid('branch'));
 
       if( $params->valid('mirrorof') ){
-        $repo->mirrorof($params->valid('mirrorof'));
-      }elsif( $repo->mirrorof ){
-        $repo->mirrorof('');
+        if( $mirror ){
+          $mirror->mirrorof($params->valid('mirrorof'));
+          $mirror->mirrorupd($params->valid('mirrorupd'));
+        }else{
+          $repo->create_related('mirrors', {
+            mirrorof => $params->valid('mirrorof'),
+            mirrorupd => $params->valid('mirrorupd'),
+                                })
+            or die "500 Couldn't create mirror object\n";
+          $mirror = $repo->mirror;
+          $new_mirror = 1;
+        }
+      }elsif( $mirror ){
+        $mirror->delete;
+        $new_mirror = -1;
       }
-      $repo->mirrorupd($params->valid('mirrorupd'));
       foreach my $opt (qw(gitweb daemon)){
         $repo->set_column(
           $opt,
@@ -244,15 +257,21 @@ sub do {
     }else{
       $changed = 0;
     }
+    if( $mirror and $mirror->is_changed ){
+      $mirror->update->discard_changes;
+      $changed = 1;
+    }elsif( $new_mirror ){
+      $changed = 1;
+    }
   }
   my $form = $c->query->param('_form') || '';
   if( $form =~ /^\w+$/){
     return $c->tt_process("GitWebAdmin/Repository/$form.tmpl",
-                          { repo => $repo, changed => $changed });
+                          { repo => $repo, changed => $changed, now => time });
   }
 
   return $c->json_output($repo) if $c->want_json;
-  return $c->tt_process({ repo => $repo, changed => $changed });
+  return $c->tt_process({ repo => $repo, changed => $changed, now => time });
 }
 
 sub create_form {
@@ -346,8 +365,13 @@ sub create {
   foreach my $opt (qw(private daemon gitweb)){
     $opts{$opt} = $c->get_checkbox_opt($opt);
   }
-  foreach my $opt (qw(forkof mirrorof mirrorupd branch)){
+  foreach my $opt (qw(forkof branch)){
     $opts{$opt} = $params->valid($opt)
+      if $params->valid($opt);
+  }
+  my %mirror_opts = ();
+  foreach my $opt (qw(mirrorof mirrorupd)){
+    $mirror_opts{$opt} = $params->valid($opt)
       if $params->valid($opt);
   }
 
@@ -384,6 +408,10 @@ sub create {
   $opts{repo_tags} = [
     map { { tag => $_ } } split m/\s*,\s*/, $params->valid('tags') ];
   my $new_repo = $rs->create({ %opts });
+  if( %mirror_opts ){
+    $new_repo->create_related('mirrors', { %mirror_opts })
+      or die "500 Couldn't create mirror object\n";
+  }
 
   return $c->redirect($c->url('repo/' . $new_repo->name));
 }

@@ -8,6 +8,7 @@ use warnings;
 
 use base 'DBIx::Class::Core';
 
+__PACKAGE__->load_components("InflateColumn::DateTime");
 
 =head1 NAME
 
@@ -19,20 +20,7 @@ __PACKAGE__->table("logs_push");
 
 =head1 ACCESSORS
 
-=head2 logid
-
-  data_type: 'bigint'
-  is_auto_increment: 1
-  is_nullable: 0
-  sequence: 'logs_push_logid_seq'
-
 =head2 rid
-
-  data_type: 'integer'
-  is_foreign_key: 1
-  is_nullable: 0
-
-=head2 uid
 
   data_type: 'integer'
   is_foreign_key: 1
@@ -66,19 +54,23 @@ __PACKAGE__->table("logs_push");
   default_value: false
   is_nullable: 0
 
+=head2 logid
+
+  data_type: 'bigint'
+  is_auto_increment: 1
+  is_nullable: 0
+  sequence: 'logs_push_logid_seq'
+
+=head2 uid
+
+  data_type: 'integer'
+  is_foreign_key: 1
+  is_nullable: 0
+
 =cut
 
 __PACKAGE__->add_columns(
-  "logid",
-  {
-    data_type         => "bigint",
-    is_auto_increment => 1,
-    is_nullable       => 0,
-    sequence          => "logs_push_logid_seq",
-  },
   "rid",
-  { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
-  "uid",
   { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
   "date",
   {
@@ -95,6 +87,15 @@ __PACKAGE__->add_columns(
   { data_type => "text", is_nullable => 0 },
   "notified",
   { data_type => "boolean", default_value => \"false", is_nullable => 0 },
+  "logid",
+  {
+    data_type         => "bigint",
+    is_auto_increment => 1,
+    is_nullable       => 0,
+    sequence          => "logs_push_logid_seq",
+  },
+  "uid",
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
 );
 __PACKAGE__->set_primary_key("logid");
 
@@ -121,8 +122,8 @@ Related object: L<GitWebAdmin::Schema::Users>
 __PACKAGE__->belongs_to("uid", "GitWebAdmin::Schema::Users", { id => "uid" });
 
 
-# Created by DBIx::Class::Schema::Loader v0.07010 @ 2011-11-10 18:32:16
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:gAE02Ldc0YaacEAswlKQsA
+# Created by DBIx::Class::Schema::Loader v0.07000 @ 2012-03-31 15:57:37
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:1+cpEfVmU4F/Zt8TBODelA
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

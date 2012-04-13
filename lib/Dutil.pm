@@ -109,11 +109,11 @@ sub install_handlers {
         warn "$ts $0\[$$\]: $msg\n";
     };
 
-    $SIG{__DIE__} = sub {
-        my $msg = shift;
-        my $ts = strftime($timestamp, localtime);
-        die "$ts $0\[$$\]: $msg\n";
-    };
+#     $SIG{__DIE__} = sub {
+#         my $msg = shift;
+#         my $ts = strftime($timestamp, localtime);
+#         die "$ts $0\[$$\]: $msg\n";
+#     };
 }
 
 sub log {

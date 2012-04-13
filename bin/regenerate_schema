@@ -1,5 +1,10 @@
 #!/usr/bin/env perl
 
 use DBIx::Class::Schema::Loader qw(make_schema_at dump_to_dir:./lib);
-make_schema_at("GitWebAdmin::Schema", { debug => 1 },
+make_schema_at("GitWebAdmin::Schema",
+               {
+                 components => 'InflateColumn::DateTime',
+                 skip_load_external => 1,
+                 debug => 1,
+               },
                [ "dbi:Pg:dbname=gitwebadmin" ]);

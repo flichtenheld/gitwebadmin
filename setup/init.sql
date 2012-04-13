@@ -122,8 +122,6 @@ CREATE TABLE repos (
        gitweb   BOOLEAN NOT NULL DEFAULT FALSE,
        owner    INT NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
        forkof   INT REFERENCES repos(id) ON DELETE RESTRICT,
-       mirrorof TEXT,
-       mirrorupd INT DEFAULT 86400 CHECK ((mirrorupd >= 600) AND (mirrorupd <= 604800)),
        deleted  BOOLEAN NOT NULL DEFAULT FALSE,
 
        CONSTRAINT repos_hidden_deleted CHECK (NOT (deleted AND (gitweb OR daemon))),
@@ -153,6 +151,22 @@ CREATE TABLE repo_tags (
 );
 GRANT ALL ON repo_tags TO gwa_webaccess;
 GRANT SELECT ON repo_tags TO gwa_gitaccess;
+
+CREATE TABLE mirrors (
+       repo          INT PRIMARY KEY REFERENCES repos(id) ON DELETE CASCADE,
+       enabled       BOOLEAN NOT NULL DEFAULT TRUE,
+       mirrorof      TEXT,
+       mirrorupd     INT DEFAULT 86400 CHECK ((mirrorupd >= 600) AND (mirrorupd <= 604800)),
+       last_check    TIMESTAMP WITH TIME ZONE,
+       last_updated  TIMESTAMP WITH TIME ZONE,
+       last_error    TEXT NOT NULL DEFAULT '',
+       last_error_change TIMESTAMP WITH TIME ZONE,
+
+       CONSTRAINT timesanity_upd CHECK (last_updated IS NULL OR last_check >= last_updated),
+       CONSTRAINT timesanity_err CHECK (last_error_change IS NULL OR last_check >= last_error_change)
+);
+GRANT ALL ON mirrors TO gwa_webaccess;
+GRANT SELECT, INSERT, UPDATE ON mirrors TO gwa_gitaccess;
 
 CREATE TYPE push_action_type AS ENUM ('create', 'update', 'replace', 'delete');
 CREATE TYPE acl_result_type  AS ENUM ('allow', 'deny');

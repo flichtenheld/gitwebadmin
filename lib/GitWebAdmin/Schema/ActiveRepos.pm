@@ -8,6 +8,7 @@ use warnings;
 
 use base 'DBIx::Class::Core';
 
+__PACKAGE__->load_components("InflateColumn::DateTime");
 
 =head1 NAME
 
@@ -34,11 +35,6 @@ __PACKAGE__->table("active_repos");
   data_type: 'text'
   is_nullable: 1
 
-=head2 branch
-
-  data_type: 'text'
-  is_nullable: 1
-
 =head2 private
 
   data_type: 'boolean'
@@ -54,22 +50,7 @@ __PACKAGE__->table("active_repos");
   data_type: 'boolean'
   is_nullable: 1
 
-=head2 owner
-
-  data_type: 'integer'
-  is_nullable: 1
-
 =head2 forkof
-
-  data_type: 'integer'
-  is_nullable: 1
-
-=head2 mirrorof
-
-  data_type: 'text'
-  is_nullable: 1
-
-=head2 mirrorupd
 
   data_type: 'integer'
   is_nullable: 1
@@ -77,6 +58,16 @@ __PACKAGE__->table("active_repos");
 =head2 deleted
 
   data_type: 'boolean'
+  is_nullable: 1
+
+=head2 branch
+
+  data_type: 'text'
+  is_nullable: 1
+
+=head2 owner
+
+  data_type: 'integer'
   is_nullable: 1
 
 =cut
@@ -88,29 +79,25 @@ __PACKAGE__->add_columns(
   { data_type => "text", is_nullable => 1 },
   "descr",
   { data_type => "text", is_nullable => 1 },
-  "branch",
-  { data_type => "text", is_nullable => 1 },
   "private",
   { data_type => "boolean", is_nullable => 1 },
   "daemon",
   { data_type => "boolean", is_nullable => 1 },
   "gitweb",
   { data_type => "boolean", is_nullable => 1 },
-  "owner",
-  { data_type => "integer", is_nullable => 1 },
   "forkof",
-  { data_type => "integer", is_nullable => 1 },
-  "mirrorof",
-  { data_type => "text", is_nullable => 1 },
-  "mirrorupd",
   { data_type => "integer", is_nullable => 1 },
   "deleted",
   { data_type => "boolean", is_nullable => 1 },
+  "branch",
+  { data_type => "text", is_nullable => 1 },
+  "owner",
+  { data_type => "integer", is_nullable => 1 },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07010 @ 2011-11-10 18:32:16
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:EqNz+Xon2bUdJmWd0PIF+w
+# Created by DBIx::Class::Schema::Loader v0.07000 @ 2012-04-12 14:39:03
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:k6Hy/1zGYe32H/VJDZ/Hww
 
 __PACKAGE__->has_many(
   "logs_pushes",

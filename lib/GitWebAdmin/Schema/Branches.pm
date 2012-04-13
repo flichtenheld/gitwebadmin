@@ -8,6 +8,7 @@ use warnings;
 
 use base 'DBIx::Class::Core';
 
+__PACKAGE__->load_components("InflateColumn::DateTime");
 
 =head1 NAME
 
@@ -74,9 +75,24 @@ Related object: L<GitWebAdmin::Schema::Repos>
 
 __PACKAGE__->belongs_to("rid", "GitWebAdmin::Schema::Repos", { id => "rid" });
 
+=head2 commit_to_branches
 
-# Created by DBIx::Class::Schema::Loader v0.07010 @ 2011-11-10 18:32:16
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:bSyebEtU4wrhhRL9C9Sf0w
+Type: has_many
+
+Related object: L<GitWebAdmin::Schema::CommitToBranch>
+
+=cut
+
+__PACKAGE__->has_many(
+  "commit_to_branches",
+  "GitWebAdmin::Schema::CommitToBranch",
+  { "foreign.bid" => "self.id" },
+  {},
+);
+
+
+# Created by DBIx::Class::Schema::Loader v0.07000 @ 2012-03-31 15:57:37
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:naWXDhtvwT0H9wGzFRcuzA
 
 use GitWebAdmin::Utils qw(json_bool);
 sub TO_JSON {

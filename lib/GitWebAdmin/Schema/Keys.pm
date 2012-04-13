@@ -8,6 +8,7 @@ use warnings;
 
 use base 'DBIx::Class::Core';
 
+__PACKAGE__->load_components("InflateColumn::DateTime");
 
 =head1 NAME
 
@@ -26,12 +27,6 @@ __PACKAGE__->table("keys");
   is_nullable: 0
   sequence: 'keys_id_seq'
 
-=head2 uid
-
-  data_type: 'integer'
-  is_foreign_key: 1
-  is_nullable: 0
-
 =head2 name
 
   data_type: 'text'
@@ -44,9 +39,9 @@ __PACKAGE__->table("keys");
 
 =head2 type
 
-  data_type: 'enum'
-  extra: {custom_type_name => "ssh_key_type",list => ["rsa","dsa"]}
+  data_type: 'ssh_key_type'
   is_nullable: 1
+  size: 4
 
 =head2 fingerprint
 
@@ -56,6 +51,12 @@ __PACKAGE__->table("keys");
 =head2 key
 
   data_type: 'text'
+  is_nullable: 0
+
+=head2 uid
+
+  data_type: 'integer'
+  is_foreign_key: 1
   is_nullable: 0
 
 =cut
@@ -68,22 +69,18 @@ __PACKAGE__->add_columns(
     is_nullable       => 0,
     sequence          => "keys_id_seq",
   },
-  "uid",
-  { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
   "name",
   { data_type => "text", is_nullable => 0 },
   "bits",
   { data_type => "integer", is_nullable => 0 },
   "type",
-  {
-    data_type => "enum",
-    extra => { custom_type_name => "ssh_key_type", list => ["rsa", "dsa"] },
-    is_nullable => 1,
-  },
+  { data_type => "ssh_key_type", is_nullable => 1, size => 4 },
   "fingerprint",
   { data_type => "text", is_nullable => 0 },
   "key",
   { data_type => "text", is_nullable => 0 },
+  "uid",
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
 );
 __PACKAGE__->set_primary_key("id");
 __PACKAGE__->add_unique_constraint("keys_uid_key1", ["uid", "name"]);
@@ -102,8 +99,8 @@ Related object: L<GitWebAdmin::Schema::Users>
 __PACKAGE__->belongs_to("uid", "GitWebAdmin::Schema::Users", { id => "uid" });
 
 
-# Created by DBIx::Class::Schema::Loader v0.07010 @ 2011-11-10 18:32:16
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:hPDVL/+lQytXtKL4T2asTw
+# Created by DBIx::Class::Schema::Loader v0.07000 @ 2012-03-31 15:57:37
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:qgJmx+hbkOvWrgkPRkR2dw
 
 use GitWebAdmin::Utils qw(json_bool);
 sub TO_JSON {

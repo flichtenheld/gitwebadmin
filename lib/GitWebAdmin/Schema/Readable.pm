@@ -8,6 +8,7 @@ use warnings;
 
 use base 'DBIx::Class::Core';
 
+__PACKAGE__->load_components("InflateColumn::DateTime");
 
 =head1 NAME
 
@@ -39,7 +40,7 @@ __PACKAGE__->add_columns(
   "rid",
   { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
 );
-__PACKAGE__->set_primary_key("gid", "rid");
+__PACKAGE__->add_unique_constraint("readable_gid_key", ["gid", "rid"]);
 
 =head1 RELATIONS
 
@@ -64,8 +65,8 @@ Related object: L<GitWebAdmin::Schema::Groups>
 __PACKAGE__->belongs_to("gid", "GitWebAdmin::Schema::Groups", { gid => "gid" });
 
 
-# Created by DBIx::Class::Schema::Loader v0.07010 @ 2011-11-10 18:32:16
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:yyLUPfrBHgqui2He0od4Sw
+# Created by DBIx::Class::Schema::Loader v0.07000 @ 2012-03-31 15:57:37
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:68e8olYQyKRtiUvNy3yn5Q
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

@@ -8,6 +8,7 @@ use warnings;
 
 use base 'DBIx::Class::Core';
 
+__PACKAGE__->load_components("InflateColumn::DateTime");
 
 =head1 NAME
 
@@ -18,13 +19,6 @@ GitWebAdmin::Schema::Users
 __PACKAGE__->table("users");
 
 =head1 ACCESSORS
-
-=head2 id
-
-  data_type: 'integer'
-  is_auto_increment: 1
-  is_nullable: 0
-  sequence: 'users_id_seq'
 
 =head2 uid
 
@@ -59,16 +53,16 @@ __PACKAGE__->table("users");
   default_value: 'local'
   is_nullable: 0
 
+=head2 id
+
+  data_type: 'integer'
+  is_auto_increment: 1
+  is_nullable: 0
+  sequence: 'users_id_seq'
+
 =cut
 
 __PACKAGE__->add_columns(
-  "id",
-  {
-    data_type         => "integer",
-    is_auto_increment => 1,
-    is_nullable       => 0,
-    sequence          => "users_id_seq",
-  },
   "uid",
   { data_type => "text", is_nullable => 0 },
   "name",
@@ -81,6 +75,13 @@ __PACKAGE__->add_columns(
   { data_type => "boolean", default_value => \"true", is_nullable => 0 },
   "directory",
   { data_type => "text", default_value => "local", is_nullable => 0 },
+  "id",
+  {
+    data_type         => "integer",
+    is_auto_increment => 1,
+    is_nullable       => 0,
+    sequence          => "users_id_seq",
+  },
 );
 __PACKAGE__->set_primary_key("id");
 __PACKAGE__->add_unique_constraint("users_uid_key", ["uid"]);
@@ -178,8 +179,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07010 @ 2011-11-10 18:39:04
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:IU5k36LFQkLCg5Yi7QrYIQ
+# Created by DBIx::Class::Schema::Loader v0.07000 @ 2012-03-31 15:57:37
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Eb0jHmQWF1L0v71EdmvU2A
 
 __PACKAGE__->many_to_many('groups' => 'members', 'gid');
 __PACKAGE__->many_to_many('subscribed_repos' => 'subscriptions', 'rid');

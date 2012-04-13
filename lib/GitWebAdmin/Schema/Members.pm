@@ -8,6 +8,7 @@ use warnings;
 
 use base 'DBIx::Class::Core';
 
+__PACKAGE__->load_components("InflateColumn::DateTime");
 
 =head1 NAME
 
@@ -19,27 +20,26 @@ __PACKAGE__->table("members");
 
 =head1 ACCESSORS
 
-=head2 uid
-
-  data_type: 'integer'
-  is_foreign_key: 1
-  is_nullable: 0
-
 =head2 gid
 
   data_type: 'text'
   is_foreign_key: 1
   is_nullable: 0
 
+=head2 uid
+
+  data_type: 'integer'
+  is_foreign_key: 1
+  is_nullable: 0
+
 =cut
 
 __PACKAGE__->add_columns(
-  "uid",
-  { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
   "gid",
   { data_type => "text", is_foreign_key => 1, is_nullable => 0 },
+  "uid",
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
 );
-__PACKAGE__->set_primary_key("uid", "gid");
 
 =head1 RELATIONS
 
@@ -64,8 +64,8 @@ Related object: L<GitWebAdmin::Schema::Groups>
 __PACKAGE__->belongs_to("gid", "GitWebAdmin::Schema::Groups", { gid => "gid" });
 
 
-# Created by DBIx::Class::Schema::Loader v0.07010 @ 2011-11-10 18:32:16
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:gHpRZS/3wfOp1KgDo7m2TQ
+# Created by DBIx::Class::Schema::Loader v0.07000 @ 2012-03-31 15:57:37
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:rx++uQuR4cOoimj9jCNVjQ
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

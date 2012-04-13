@@ -27,7 +27,10 @@ use autodie;
 use File::Spec::Functions;
 use File::Slurp;
 use Git;
+use IPC::Run qw(run timeout);
+use List::Util qw(min);
 use Config::Auto;
+use Try::Tiny;
 
 use FindBin;
 use Cwd qw(realpath);
@@ -41,6 +44,7 @@ my $GIT      = "/srv/git";
 my $LOG      = "$GIT/mirror.log";
 my $LOCK     = "$GIT/mirror.lock";
 my $TIMEOUT  = 600; # 10 minutes
+my $ERROR_RETRY = 600;
 
 Dutil::singularize( $LOCK );
 Dutil::daemonize;
@@ -65,6 +69,7 @@ my $upd = $lp->new({ ref => 'refs/head/master',
                      uid => $user->id });
 
 
+my $now = 'NOW()';
 my $started = time();
 while( 1 ){
 
@@ -76,58 +81,76 @@ while( 1 ){
 
   $rs->reset;
   while( my $repo = $rs->next ){
-    next unless $repo->mirrorof;
+    my $mirror = $repo->mirror;
+    next unless $mirror;
 
     my $path = catfile('/srv/git/repositories', $repo->name);
-    my $ts_file = catfile( $path, 'mirror_ts' );
 
     if( -d $path ){
-      my $timestamp = '';
-      if( -f $ts_file ){
-        $timestamp = read_file($ts_file) || '';
-        if( $timestamp
-            and ($timestamp =~ /^\d+$/)
-            and (($time - $timestamp) < $repo->mirrorupd) ){
-          next;
-        }
+      my $db_time = $mirror->last_check;
+      my $timestamp;
+      if( $db_time ){
+        $timestamp = $db_time->epoch;
+      }else{
+        Dutil::log("no database timestamp, force update");
+        $timestamp = 0;
+      }
+      my $intervall = $mirror->mirrorupd;
+      $intervall = $ERROR_RETRY if $mirror->last_error;
+      if( $timestamp
+          and ($timestamp =~ /^\d+$/)
+          and (($time - $timestamp) < $intervall) ){
+        next;
       }
 
       Dutil::log("update mirror $path (ts=$timestamp)");
-      my $git = Git->repository($path);
-      # update the mirror URI in case it has changed
-      $git->command_noisy(qw(config remote.origin.url), $repo->mirrorof);
-      eval {
-        local $SIG{ALRM} = sub { die "Timeout\n" };
-        alarm $TIMEOUT;
-        $git->command_noisy(qw(fetch --update-head-ok));
-        alarm 0;
-      };
-      if ($@) {
-        die unless $@ eq "Timeout\n";
-        Dutil::log("git fetch timed out");
+      chdir $path or do {
+        Dutil::log("chdir failed: $!");
         next;
-      }
-      write_file($ts_file, time());
+      };
+      # update the mirror URI in case it has changed
+      my $output;
+      try {
+        run [qw(git config remote.origin.url), $mirror->mirrorof], '>&', \$output
+          or die "git config failed (exitcode $?)\n$output\n";
+        run [qw(git fetch --update-head-ok)], '>&', \$output, timeout($TIMEOUT)
+          or die "git fetch failed (exitcode $?)\n$output\n";
+      } catch {
+        #XXX: send error mail
+        Dutil::log($_);
+        $mirror->last_error($_);
+        $mirror->last_check(\$now);
+        $mirror->update;
+        return;
+      } or next;
+      $mirror->last_error('');
+      $mirror->last_check(\$now);
       Dutil::log("update branch data");
-      GitWebAdmin::Utils::update_branch_data($git, $repo, $user->id);
+      my $git = Git->repository($path);
+      if( GitWebAdmin::Utils::update_branch_data($git, $repo, $user->id) ){
+        $mirror->last_updated(\$now);
+      }
+      $mirror->update;
       Dutil::log("update complete");
       next;
     }
 
     Dutil::log("create mirror $path");
-    eval {
-      local $SIG{ALRM} = sub { die "Timeout\n" };
-      alarm $TIMEOUT;
-      system(qw(git clone --mirror), $repo->mirrorof, $path)
-        and die "clone failed: $!\n";
-      alarm 0;
-    };
-    if ($@) {
-      die unless $@ eq "Timeout\n";
-      Dutil::log("git clone timed out");
-      next;
-    }
-    write_file($ts_file, time());
+    my $output;
+    try {
+      run [qw(git clone --mirror), $mirror->mirrorof, $path], '>&', \$output, timeout($TIMEOUT)
+        or die "git clone failed (exitcode $?)\n$output\n";
+    } catch {
+      Dutil::log($_);
+      $mirror->last_error($_);
+      $mirror->last_check(\$now);
+      $mirror->update;
+      return;
+    } or next;
+    $mirror->last_error('');
+    $mirror->last_check(\$now);
+    $mirror->last_updated(\$now);
+    $mirror->update;
     Dutil::log("run gitosis post-update hook");
     my $gitdir = '/srv/git/repositories/gitosis-admin.git';
     $ENV{GIT_DIR} = $gitdir;
@@ -135,7 +158,7 @@ while( 1 ){
       and die "gitosis failed: $!\n";
     delete $ENV{GIT_DIR};
     Dutil::log("update branch data");
-    my $git = Git->repository($gitdir);
+    my $git = Git->repository($path);
     GitWebAdmin::Utils::update_branch_data($git, $repo);
     my @triggers = $repo->triggers;
     foreach my $trigger (@triggers){

@@ -33,12 +33,16 @@ use CGI::Application::Plugin::Redirect;
 
 use GitWebAdmin::Schema;
 
+use Time::Elapsed;
 GitWebAdmin->tt_config(
   TEMPLATE_OPTIONS => {
     INCLUDE_PATH => "$FindBin::Bin/../templates",
     POST_CHOMP   => 1,
     VARIABLES => {
       DBIxRel => sub {my $res=shift or return []; return $res if ref $res eq 'ARRAY'; return [ $res ] },
+      elapsed_time => \&Time::Elapsed::elapsed,
+      elapsed_time_diff => sub { my $s = $_[0] - ($_[1] ? $_[1]->epoch : $_[0]);
+                                 return $s ? Time::Elapsed::elapsed($s) : $_[2] },
     },
   },
 );
@@ -224,7 +228,7 @@ sub has_writable {
 
   my $user = $c->param('user_obj') or return 0;
   return 0 unless $user->active;
-  return 0 if $repo->mirrorof;
+  return 0 if $repo->mirror;
   return 1 if $repo->owner->uid eq $user->uid;
   foreach my $w ($repo->w_groups){
     foreach my $u ($w->users){

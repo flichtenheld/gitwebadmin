@@ -96,24 +96,32 @@
       <td><code>[% c.cfg('links').ssh.replace('%name', repo.name) | html %]</code></td>
     </tr>
     [% END %]
-    [% IF repo.mirrorof %]
+    [% IF repo.mirror %]
     <tr>
       [% IF c.has_admin(repo) %]
       <th><label for="mirrorof">Mirror of:</label></th>
-      <td><input type="text" name="mirrorof" size="50" value="[% repo.mirrorof | html %]"></td>
+      <td><input type="text" name="mirrorof" size="50" value="[% repo.mirror.mirrorof | html %]"></td>
       <td>[% err_mirrorof %]</td>
     </tr>
     <tr>
       <th><label for="mirrorupd">Mirror Update Intervall:</label></th>
-      <td><input type="text" name="mirrorupd" size="10" value="[% repo.mirrorupd | html %]"></td>
+      <td><input type="text" name="mirrorupd" size="10" value="[% repo.mirror.mirrorupd | html %]"> ([% elapsed_time(repo.mirror.mirrorupd) %])</td>
       <td>[% err_mirrorupd %]</td>
       [% ELSE %]
       <th>Mirror of:</th>
-      <td><code>[% repo.mirrorof | html %]</code></td>
+      <td><code>[% repo.mirror.mirrorof | html %]</code></td>
     </tr>
     <tr>
       <th>Mirror Update Intervall:</th>
-      <td><code>[% repo.mirrorupd | html %]</code></td>
+      <td><code>[% repo.mirror.mirrorupd | html %]</code> ([% elapsed_time(repo.mirror.mirrorupd) %])</td>
+      [% END %]
+    </tr>
+    <tr>
+      <th><a href="[% c.url('mirror/') %]">Mirror Status:</a></th>
+      [% IF repo.mirror.last_error %]
+      <td>Error: <pre>[% repo.mirror.last_error %]</pre> (since [% elapsed_time_diff(now, repo.mirror.last_error_change, 'now') %])</td>
+      [% ELSE %]
+      <td>Last updated: [% elapsed_time_diff(now, repo.mirror.last_updated, 'unknown') %] (last checked: [% elapsed_time_diff(now, repo.mirror.last_check, 'now') %])</td>
       [% END %]
     </tr>
     [% END %]

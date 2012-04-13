@@ -1,0 +1,37 @@
+[% INCLUDE header.tmpl page_title="Mirrors"
+   navigation=[ { name => 'Mirrors' },
+              ]
+%]
+
+<h1>Mirrors</h1>
+
+<table id="repolist">
+  <thead>
+    <tr>
+      <th>Enabled</th>
+      <th><a href="?sort_by=repo.name#repolist">Repository</a></th>
+      <th><a href="?sort_by=me.mirrorof#repolist">Mirror of</a></th>
+      <th>Update Interval</th>
+      <th><a href="?sort_by=me.last_check#repolist">Last Checked</a></th>
+      <th><a href="?sort_by=me.last_updated#repolist">Last Updated</a></th>
+      <th><a href="?sort_by=me.last_error#repolist">Last Error</a></th>
+      <th><a href="?sort_by=me.last_error_change#repolist">Last Change of Error</a></th>
+    </tr>
+  </thead>
+  <tbody>
+[% FOREACH m IN mirrors %]
+   <tr>
+     <td>[% IF m.enabled; 'yes'; ELSE; 'no'; END %]</td>
+     <td><a href="[% c.url('repo/' _ m.repo.name) %]">[% m.repo.name | html %]</a></td>
+     <td>[% m.mirrorof | html %]</td>
+     <td>[% elapsed_time(m.mirrorupd) %]</td>
+     <td>[% elapsed_time_diff(now, m.last_check, 'now') | html %]</td>
+     <td>[% elapsed_time_diff(now, m.last_updated, 'unknown') | html %]</td>
+     <td style="color: red"><pre>[% m.last_error | html %]</pre></td>
+     <td>[% elapsed_time_diff(now, m.last_error_change, 'never') | html %]</td>
+   </tr>
+[% END %]
+  </tbody>
+</table>
+
+[% INCLUDE footer.tmpl %]

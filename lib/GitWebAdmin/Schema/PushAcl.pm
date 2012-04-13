@@ -8,6 +8,7 @@ use warnings;
 
 use base 'DBIx::Class::Core';
 
+__PACKAGE__->load_components("InflateColumn::DateTime");
 
 =head1 NAME
 
@@ -30,12 +31,6 @@ __PACKAGE__->table("push_acl");
 
   data_type: 'integer'
   is_nullable: 0
-
-=head2 user
-
-  data_type: 'integer'
-  is_foreign_key: 1
-  is_nullable: 1
 
 =head2 group
 
@@ -66,20 +61,26 @@ __PACKAGE__->table("push_acl");
 
 =head2 action
 
-  data_type: 'enum'
-  extra: {custom_type_name => "push_action_type",list => ["create","update","replace","delete"]}
+  data_type: 'push_action_type'
   is_nullable: 1
+  size: 4
 
 =head2 result
 
-  data_type: 'enum'
+  data_type: 'acl_result_type'
   default_value: 'deny'
-  extra: {custom_type_name => "acl_result_type",list => ["allow","deny"]}
   is_nullable: 0
+  size: 4
 
 =head2 comment
 
   data_type: 'text'
+  is_nullable: 1
+
+=head2 user
+
+  data_type: 'integer'
+  is_foreign_key: 1
   is_nullable: 1
 
 =cut
@@ -94,8 +95,6 @@ __PACKAGE__->add_columns(
   },
   "priority",
   { data_type => "integer", is_nullable => 0 },
-  "user",
-  { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
   "group",
   { data_type => "text", is_foreign_key => 1, is_nullable => 1 },
   "repo",
@@ -107,23 +106,18 @@ __PACKAGE__->add_columns(
   "ref",
   { data_type => "text", is_nullable => 1 },
   "action",
-  {
-    data_type => "enum",
-    extra => {
-      custom_type_name => "push_action_type",
-      list => ["create", "update", "replace", "delete"],
-    },
-    is_nullable => 1,
-  },
+  { data_type => "push_action_type", is_nullable => 1, size => 4 },
   "result",
   {
-    data_type => "enum",
+    data_type => "acl_result_type",
     default_value => "deny",
-    extra => { custom_type_name => "acl_result_type", list => ["allow", "deny"] },
     is_nullable => 0,
+    size => 4,
   },
   "comment",
   { data_type => "text", is_nullable => 1 },
+  "user",
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
 );
 __PACKAGE__->set_primary_key("id");
 __PACKAGE__->add_unique_constraint("push_acl_priority_key", ["priority"]);
@@ -161,8 +155,8 @@ Related object: L<GitWebAdmin::Schema::Repos>
 __PACKAGE__->belongs_to("repo", "GitWebAdmin::Schema::Repos", { id => "repo" });
 
 
-# Created by DBIx::Class::Schema::Loader v0.07010 @ 2011-11-10 18:32:16
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:xeP1naGfin2nB9vSRI9yUA
+# Created by DBIx::Class::Schema::Loader v0.07000 @ 2012-03-31 15:57:37
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:JmIyGauc+W9EyiBZLFvXCA
 
 use List::MoreUtils qw(none);
 use Data::Dumper;
@@ -237,8 +231,11 @@ sub _check_repo_flags {
   my @flags = split m/,/, $self->repo_flags;
   foreach my $flag (@flags){
     my $negated = ($flag =~ s/^!// ? 1 : 0);
-    if( $flag =~ /^(deleted|private|daemon|gitweb|mirrorof|forkof)$/ ){
+    if( $flag =~ /^(deleted|private|daemon|gitweb|forkof)$/ ){
       return unless $self->_check_column_flag($repo, $flag, $negated);
+    }elsif( $flag eq 'mirrorof' ){
+      return if $repo->mirror and $negated;
+      return if !$repo->mirror and !$negated;
     }else{
       return unless $negated xor $repo->has_tag($flag);
     }

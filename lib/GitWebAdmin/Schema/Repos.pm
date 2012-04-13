@@ -8,6 +8,7 @@ use warnings;
 
 use base 'DBIx::Class::Core';
 
+__PACKAGE__->load_components("InflateColumn::DateTime");
 
 =head1 NAME
 
@@ -36,12 +37,6 @@ __PACKAGE__->table("repos");
   data_type: 'text'
   is_nullable: 1
 
-=head2 branch
-
-  data_type: 'text'
-  default_value: 'master'
-  is_nullable: 0
-
 =head2 private
 
   data_type: 'boolean'
@@ -60,33 +55,28 @@ __PACKAGE__->table("repos");
   default_value: false
   is_nullable: 0
 
-=head2 owner
-
-  data_type: 'integer'
-  is_foreign_key: 1
-  is_nullable: 0
-
 =head2 forkof
 
   data_type: 'integer'
   is_foreign_key: 1
   is_nullable: 1
 
-=head2 mirrorof
-
-  data_type: 'text'
-  is_nullable: 1
-
-=head2 mirrorupd
-
-  data_type: 'integer'
-  default_value: 86400
-  is_nullable: 1
-
 =head2 deleted
 
   data_type: 'boolean'
   default_value: false
+  is_nullable: 0
+
+=head2 branch
+
+  data_type: 'text'
+  default_value: 'master'
+  is_nullable: 0
+
+=head2 owner
+
+  data_type: 'integer'
+  is_foreign_key: 1
   is_nullable: 0
 
 =cut
@@ -103,24 +93,20 @@ __PACKAGE__->add_columns(
   { data_type => "text", is_nullable => 0 },
   "descr",
   { data_type => "text", is_nullable => 1 },
-  "branch",
-  { data_type => "text", default_value => "master", is_nullable => 0 },
   "private",
   { data_type => "boolean", default_value => \"false", is_nullable => 0 },
   "daemon",
   { data_type => "boolean", default_value => \"false", is_nullable => 0 },
   "gitweb",
   { data_type => "boolean", default_value => \"false", is_nullable => 0 },
-  "owner",
-  { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
   "forkof",
   { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
-  "mirrorof",
-  { data_type => "text", is_nullable => 1 },
-  "mirrorupd",
-  { data_type => "integer", default_value => 86400, is_nullable => 1 },
   "deleted",
   { data_type => "boolean", default_value => \"false", is_nullable => 0 },
+  "branch",
+  { data_type => "text", default_value => "master", is_nullable => 0 },
+  "owner",
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
 );
 __PACKAGE__->set_primary_key("id");
 __PACKAGE__->add_unique_constraint("repos_name_key", ["name"]);
@@ -142,6 +128,36 @@ __PACKAGE__->has_many(
   {},
 );
 
+=head2 commits
+
+Type: has_many
+
+Related object: L<GitWebAdmin::Schema::Commits>
+
+=cut
+
+__PACKAGE__->has_many(
+  "commits",
+  "GitWebAdmin::Schema::Commits",
+  { "foreign.rid" => "self.id" },
+  {},
+);
+
+=head2 id_branches
+
+Type: has_many
+
+Related object: L<GitWebAdmin::Schema::IdBranches>
+
+=cut
+
+__PACKAGE__->has_many(
+  "id_branches",
+  "GitWebAdmin::Schema::IdBranches",
+  { "foreign.repo" => "self.id" },
+  {},
+);
+
 =head2 logs_pushes
 
 Type: has_many
@@ -154,6 +170,21 @@ __PACKAGE__->has_many(
   "logs_pushes",
   "GitWebAdmin::Schema::LogsPush",
   { "foreign.rid" => "self.id" },
+  {},
+);
+
+=head2 mirrors
+
+Type: has_many
+
+Related object: L<GitWebAdmin::Schema::Mirrors>
+
+=cut
+
+__PACKAGE__->has_many(
+  "mirrors",
+  "GitWebAdmin::Schema::Mirrors",
+  { "foreign.repo" => "self.id" },
   {},
 );
 
@@ -283,8 +314,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07010 @ 2011-11-10 18:32:16
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:WpCIjOkXrlUyudYUqLdNYg
+# Created by DBIx::Class::Schema::Loader v0.07000 @ 2012-04-12 14:39:03
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:39Lmuxv5U2VaLdrvFKDHGw
 
 __PACKAGE__->many_to_many('w_groups' => 'writables', 'gid');
 __PACKAGE__->many_to_many('r_groups' => 'readables', 'gid');
@@ -296,10 +327,12 @@ sub TO_JSON {
   my ($self) = @_;
 
   my @optional;
-  if( $self->mirrorof ){
+  if( $self->mirror ){
     push @optional, (
-      mirrorof => $self->mirrorof,
-      mirror_intervall => int($self->mirrorupd),
+      enabled => json_bool($self->mirror->enabled),
+      mirrorof => $self->mirror->mirrorof,
+      mirror_intervall => int($self->mirror->mirrorupd),
+      last_updated => $self->mirror->last_updated,
     );
   }
   if( $self->forkof ){
@@ -320,6 +353,15 @@ sub TO_JSON {
            groups_read_access => [ map { $_->gid } $self->r_groups ],
            @optional
   };
+}
+
+sub mirror {
+  my ($self) = @_;
+
+  if( my $mirrors = $self->mirrors ){
+    return $mirrors->first;
+  }
+  return;
 }
 
 sub tags {
