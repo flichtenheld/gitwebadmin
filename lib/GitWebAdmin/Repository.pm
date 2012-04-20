@@ -408,7 +408,7 @@ sub create {
   $opts{repo_tags} = [
     map { { tag => $_ } } split m/\s*,\s*/, $params->valid('tags') ];
   my $new_repo = $rs->create({ %opts });
-  if( %mirror_opts ){
+  if( %mirror_opts && $mirror_opts{mirrorof} ){
     $new_repo->create_related('mirrors', { %mirror_opts })
       or die "500 Couldn't create mirror object\n";
   }

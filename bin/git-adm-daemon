@@ -72,7 +72,7 @@ my $gitdir = rel2abs($config->{gitosis}{repository}, $GWA);
 my $git = Git->repository($gitdir);
 
 # filter out repositories that are never writable
-my $repo_filter = { deleted => 0, mirrorof => undef };
+my $repo_filter = { deleted => 0 };
 
 my $started = time();
 while( 1 ){
