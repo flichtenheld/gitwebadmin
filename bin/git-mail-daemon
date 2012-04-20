@@ -61,7 +61,10 @@ while( 1 ){
     }
 
     $rs->reset;
+    my $processed = 0;
     while( my $row = $rs->next ){
+      $processed++;
+
 	my $repo = $row->rid;
 	my $path = catfile('/srv/git/repositories', $repo->name);
 
@@ -129,5 +132,9 @@ while( 1 ){
 	$row->update->discard_changes;
     }
 
-    sleep 10;
+    if( $processed ){
+      Dutil::log("$processed rows processed");
+    }else{
+      sleep 10;
+    }
 }
