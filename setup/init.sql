@@ -156,7 +156,7 @@ CREATE TABLE mirrors (
        repo          INT PRIMARY KEY REFERENCES repos(id) ON DELETE CASCADE,
        enabled       BOOLEAN NOT NULL DEFAULT TRUE,
        mirrorof      TEXT,
-       mirrorupd     INT DEFAULT 86400 CHECK ((mirrorupd >= 600) AND (mirrorupd <= 604800)),
+       mirrorupd     INT DEFAULT 43200 CHECK ((mirrorupd >= 600) AND (mirrorupd <= 604800)),
        last_check    TIMESTAMP WITH TIME ZONE,
        last_updated  TIMESTAMP WITH TIME ZONE,
        last_error    TEXT NOT NULL DEFAULT '',

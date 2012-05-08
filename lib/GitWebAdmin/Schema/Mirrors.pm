@@ -40,7 +40,7 @@ __PACKAGE__->table("mirrors");
 =head2 mirrorupd
 
   data_type: 'integer'
-  default_value: 86400
+  default_value: 43200
   is_nullable: 1
 
 =head2 last_check
@@ -74,7 +74,7 @@ __PACKAGE__->add_columns(
   "mirrorof",
   { data_type => "text", is_nullable => 1 },
   "mirrorupd",
-  { data_type => "integer", default_value => 86400, is_nullable => 1 },
+  { data_type => "integer", default_value => 43200, is_nullable => 1 },
   "last_check",
   { data_type => "timestamp with time zone", is_nullable => 1 },
   "last_updated",
@@ -99,8 +99,8 @@ Related object: L<GitWebAdmin::Schema::Repos>
 __PACKAGE__->belongs_to("repo", "GitWebAdmin::Schema::Repos", { id => "repo" });
 
 
-# Created by DBIx::Class::Schema::Loader v0.07000 @ 2012-04-11 14:18:46
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:5kWSA0Xl4x1nHtAMyU34xA
+# Created by DBIx::Class::Schema::Loader v0.07000 @ 2012-05-08 16:48:49
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:4MrlGwN2PDhLNTVQQNv1Og
 
 #"}};
 
