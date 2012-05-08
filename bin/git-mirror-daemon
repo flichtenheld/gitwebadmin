@@ -44,7 +44,7 @@ my $GIT      = "/srv/git";
 my $LOG      = "$GIT/mirror.log";
 my $LOCK     = "$GIT/mirror.lock";
 my $TIMEOUT  = 600; # 10 minutes
-my $ERROR_RETRY = 600;
+my $ERROR_RETRY = 300;
 
 Dutil::singularize( $LOCK );
 Dutil::daemonize;

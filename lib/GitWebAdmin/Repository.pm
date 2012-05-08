@@ -258,6 +258,7 @@ sub do {
       $changed = 0;
     }
     if( $mirror and $mirror->is_changed ){
+      $mirror->last_error('Mirror definition changed');
       $mirror->update->discard_changes;
       $changed = 1;
     }elsif( $new_mirror ){

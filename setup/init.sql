@@ -163,7 +163,6 @@ CREATE TABLE mirrors (
        last_error_change TIMESTAMP WITH TIME ZONE,
 
        CONSTRAINT timesanity_upd CHECK (last_updated IS NULL OR last_check >= last_updated),
-       CONSTRAINT timesanity_err CHECK (last_error_change IS NULL OR last_check >= last_error_change)
 );
 GRANT ALL ON mirrors TO gwa_webaccess;
 GRANT SELECT, INSERT, UPDATE ON mirrors TO gwa_gitaccess;
