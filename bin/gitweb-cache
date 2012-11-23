@@ -82,6 +82,7 @@ while( my $repo = $repos->next ){
   $repo{forks} = scalar @{$repo{forklist}};
 
   my @activity = git_get_last_activity($repo->name);
+  warn "git_get_last_activity failed for ".$repo->name."\n" unless @activity;
   ($repo{age}, $repo{age_string}) = @activity;
 
   push @data, \%repo;
@@ -117,7 +118,7 @@ sub git_get_last_activity {
                    '--count=1',
                    'refs/heads') or return;
 	my $most_recent = <$fd>;
-	close $fd or return;
+	CORE::close($fd) or return;
 	if (defined $most_recent &&
 	    $most_recent =~ / (\d+) [-+][01]\d\d\d$/) {
 		my $timestamp = $1;
