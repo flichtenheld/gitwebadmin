@@ -310,6 +310,11 @@ my $constraints = {
       constraint_method => qr{^[a-zA-Z\d][\w@.-]+(/[a-zA-Z\d][\w@.-]+)*$},
     }],
   description => FV_max_length(200),
+  tags => [
+    {
+      name => 'tags_chars',
+      constraint_method => qr{^[\w.+-]+(?:\s*,\s*[\w.+-]+)*$},
+    }],
 };
 my $constraint_msgs = {
   constraints => {
@@ -319,6 +324,7 @@ my $constraint_msgs = {
     path_abs => "repository path can't be absolute",
     path_git => "repository path has to end in .git",
     path_chars => "repository path can only contain letters, numbers and characters @.-",
+    tags_chars => "tags are a comma-separated list of words that contain letters, numbers, and characters .+-",
   }
 };
 

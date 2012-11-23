@@ -192,7 +192,8 @@
     <tr>
       [% IF c.has_admin(repo) %]
       <th><label for="tags">Repository Tags:</label></th>
-      <td><input type="text" name="tags" size="40" value="[% repo.tags.join(', ') | html %]"></td>
+      <td><input type="text" name="tags" size="40" value="[% repo.tags.sort.join(', ') | html %]"></td>
+      <td>[% err_tags %]</td>
       [% ELSE %]
       <th>Repository Tags:</th>
       <td>[% repo.tags.join(', ') | html %]</td>
