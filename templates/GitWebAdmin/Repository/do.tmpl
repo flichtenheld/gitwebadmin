@@ -152,7 +152,7 @@
       [%- IF default_branch;
            INCLUDE gitweb_branch repo=repo.name branch=repo.branch;
          ELSE;
-           repo.branch | html;
+           repo.branch _ ' (Does not exist in repository)' | html;
          END -%]</td>
       [%- END %]
     </tr>
