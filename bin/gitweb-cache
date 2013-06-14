@@ -38,7 +38,7 @@ use File::Spec::Functions qw(:ALL);
 use File::Slurp;
 use File::Temp qw(tempfile);
 #use Git;
-use Storable qw(store_fd);
+use Storable qw(nstore_fd);
 
 use FindBin;
 use Cwd qw(realpath);
@@ -93,7 +93,7 @@ while( my $repo = $repos->next ){
 my ($fh, $outfile) = tempfile( 'gitweb.index.cache.XXXXXX',
                                DIR => dirname($cachefile),
                                UNLINK => 0 );
-store_fd \@data, $fh;
+nstore_fd \@data, $fh;
 close $fh;
 chmod 0644, $outfile;
 #print "rename($outfile, $cachefile)\n";
