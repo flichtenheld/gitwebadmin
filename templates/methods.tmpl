@@ -21,7 +21,7 @@
 <select name="[% select_name %]">
 [% db = c.param('db');
    FOREACH u IN DBIxRel(db.resultset('Users').search).sort('uid'); %]
-  <option value="[% u.uid %]"[% ' selected="selected"' IF selected == u.uid %]>[% u.name | html %]</option>
+  <option [% 'class="inactive"' UNLESS u.active %] value="[% u.uid %]"[% ' selected="selected"' IF selected == u.uid %]>[% u.name | html %]</option>
 [% END %]
 </select>
 [% END %]
@@ -67,7 +67,7 @@
    SET susers.${us.uid} = 1;
    END;
    FOREACH u IN DBIxRel(db.resultset('Users').search).sort('name'); %]
-  <option value="[% u.uid %]"[% ' selected="selected"' IF susers.${u.uid} %]>[% u.name | html %]</option>
+  <option [% 'class="inactive"' UNLESS u.active %] value="[% u.uid %]"[% ' selected="selected"' IF susers.${u.uid} %]>[% u.name | html %]</option>
   [% END %]
 </select>
 [% END %]
