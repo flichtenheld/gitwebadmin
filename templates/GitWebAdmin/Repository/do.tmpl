@@ -138,7 +138,7 @@
     </tr>
     [% END %]
     <tr>
-      [% IF c.has_admin(repo) -%]
+      [% IF c.has_change(repo) -%]
       <th><label for="branch">Default Branch:</label></th>
       <td><input type="text" name="branch" size="40" value="[% repo.branch | html %]">
       [%- IF default_branch;

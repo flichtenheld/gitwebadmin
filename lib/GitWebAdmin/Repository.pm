@@ -205,13 +205,14 @@ sub do {
 
     # owner can always change description
     $repo->descr($params->valid('description'));
+    # and default branch
+    $repo->branch($params->valid('branch'));
 
     my $mirror = $repo->mirror;
     my $new_mirror;
     if( $c->has_admin($repo) ) {
       # the following things can only be changed
       # by admins and owners in private repositories
-      $repo->branch($params->valid('branch'));
 
       if( $params->valid('mirrorof') ){
         if( $mirror ){
