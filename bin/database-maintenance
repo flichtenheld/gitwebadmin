@@ -1,0 +1,66 @@
+#!/usr/bin/perl
+#
+#  Copyright (C) 2012 Astaro GmbH & Co. KG  www.astaro.com
+#
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License along
+#  with this program; if not, write to the Free Software Foundation, Inc.,
+#  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+#
+#  Author: Frank Lichtenheld <flichtenheld@astaro.com> 05.09.2012
+#
+##############################################################################
+
+use strict;
+use warnings;
+
+use Config::Tiny;
+use File::Spec::Functions qw(catfile);
+
+use FindBin;
+use Cwd qw(realpath);
+use lib "$FindBin::Bin/../lib";
+
+use Dutil;
+use GitWebAdmin::Schema;
+
+my $GWA      = realpath("$FindBin::Bin/../");
+my $LOCK     = "$GWA/maint.lock";
+
+Dutil::singularize( $LOCK );
+
+my $config = Config::Tiny->read("$GWA/gitwebadmin.ini");
+
+my $db_cfg = $config->{database};
+my $schema = GitWebAdmin::Schema->connect(
+  "dbi:$db_cfg->{driver}:dbname=$db_cfg->{name}");
+
+$schema->txn_begin;
+
+my $repos = $schema->resultset("Repos")->search({ deleted => 1 },
+                                                { order_by => 'name' })
+  or die "Couldn't search for repos\n";
+my $repo_path = $config->{gitosis}{repositories}
+  or die "Couldn't determine repository path\n";
+
+while( my $repo = $repos->next ){
+  my $repo_name = $repo->name;
+  unless( -d catfile($repo_path, $repo_name) ){
+    warn "DELETE: repository $repo_name doesn't exist";
+    $repo->delete;
+  }
+#  else{
+#    warn "PASS  : repository $repo_name exists";
+#  }
+}
+
+$schema->txn_commit;
