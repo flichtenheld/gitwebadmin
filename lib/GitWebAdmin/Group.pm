@@ -59,11 +59,12 @@ sub create {
 
   $c->param('id', $c->query->param('gid'));
   my $group = $c->find_group;
-  die "409 Group already exists\n" if $group;
   die "403 Not authorized\n" unless $c->is_admin;
+  die "409 Group already exists\n" if $group;
+  die "409 Group ID missing\n" unless $c->param('id');
 
   my %opts = (
-    gid => $c->query->param('gid') || '',
+    gid => $c->query->param('gid'),
     name => $c->query->param('name') || '',
     );
 
@@ -85,8 +86,8 @@ sub delete {
   my $c = shift;
 
   my $group = $c->find_group;
-  die "404 Group not found\n" unless $group;
   die "403 Not authorized\n" unless $c->is_admin;
+  die "404 Group not found\n" unless $group;
 
   $group->delete;
 
