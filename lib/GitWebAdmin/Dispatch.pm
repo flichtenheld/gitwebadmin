@@ -61,6 +61,8 @@ sub dispatch_args {
       'acl/'              => { app => 'ACL', rm => 'list' },
       'branch/:id/repo/:repo' => { app => 'Branch', rm => 'do' },
       'branch/repo/:repo'     => { app => 'Branch', rm => 'list' },
+      'logs/repo/:repo/branch/*' => { app => 'PushLogs', rm => 'do', '*' => 'branch_name' },
+      'logs/repo/:repo'      => { app => 'PushLogs', rm => 'list' },
       ':app/create[get]'     => { rm => 'create_form' },
       ':app/create[put]'     => { rm => 'create' },
       ':app/:id[delete]'     => { rm => 'delete' },

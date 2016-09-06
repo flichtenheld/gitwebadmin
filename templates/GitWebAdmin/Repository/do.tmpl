@@ -57,6 +57,7 @@
 <h2>Links</h2>
 <ul>
 <li><a href="[% c.cfg('links').gitweb.replace('%name', repo.name) | url %]">gitweb</a></li>
+<li><a href="[% c.url('logs/repo/' _ repo.id) | url %]">push logs</a></li>
 </ul>
 [% END %]
 [% IF repo.repo({ deleted => 0 }) %]

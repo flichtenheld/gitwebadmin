@@ -262,6 +262,7 @@ CREATE TABLE logs_push (
        notified BOOLEAN NOT NULL DEFAULT FALSE
 );
 GRANT SELECT, INSERT, UPDATE ON logs_push TO gwa_gitaccess;
+GRANT SELECT ON logs_push TO gwa_webaccess;
 GRANT ALL ON logs_push_logid_seq TO gwa_gitaccess;
 GRANT ALL ON logs_push TO gwa_admin;
 CREATE INDEX logs_push_uid_idx ON logs_push (uid);

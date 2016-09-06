@@ -1,0 +1,36 @@
+[% PROCESS methods.tmpl %]
+[% SET nav = [ { url => 'logs/', name => 'Logs' } ];
+   nav.push({ url => 'logs/repo/' _ repo.id, name => repo.name });
+   nav.push({ name => ref });
+   INCLUDE header.tmpl page_title="Push Logs"
+   navigation=nav
+%]
+
+<div id="actions">
+[% INCLUDE admin_actions %]
+</div> <!-- end actions -->
+
+<h1>Ref [% ref | html %] in [% repo.name | html %]</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>User</th>
+      <th>Old Commit</th>
+      <th>New Commit</th>
+    </tr>
+  </thead>
+  <tbody>
+[% FOREACH l IN DBIxRel(log.all) %]
+    <tr>
+      <td>[% l.date %]</td>
+      <td style="padding-right:.5em"><a href="[% c.url('user/' _ l.uid.uid) | html %]">[% l.uid.name | html %]</a></td>
+      <td style="width: 8em;text-align:center">[% INCLUDE gitweb_commit repo=l.rid.name commit=l.old_id %]</td>
+      <td style="width: 8em;text-align:center">[% INCLUDE gitweb_commit repo=l.rid.name commit=l.new_id %]</td>
+[% END %]
+  </tbody>
+</table>
+
+
+[% INCLUDE footer.tmpl %]
