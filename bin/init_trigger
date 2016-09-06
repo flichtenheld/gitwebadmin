@@ -48,7 +48,7 @@ my $trigger = $schema->resultset('ExternalTriggers')->find($tid)
   or die "Couldn't find trigger with id $tid\n";
 my $rt = $schema->resultset('RepoTriggers')->search({tid => $tid});
 my $lp = $schema->resultset('LogsPush');
-my $upd = $lp->new({ ref => 'refs/head/master',
+my $upd = $lp->new({ ref => 'refs/heads/master',
                      old_id => '0'x40,
                      new_id => '0'x40,
                      uid => 76 });
