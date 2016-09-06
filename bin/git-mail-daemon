@@ -78,7 +78,7 @@ while( 1 ){
           goto FINISHED;
         }
 
-        my @triggers = $repo->triggers;
+        my @triggers = $repo->triggers({}, { order_by => 'name' });
         foreach my $trigger (@triggers){
           Dutil::log($repo->name.": Calling trigger ".$trigger->name);
           GitWebAdmin::Utils::call_trigger($config, $repo, $row, $trigger);
