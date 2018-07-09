@@ -41,16 +41,15 @@ sub check_key {
   my ($fh, $fname) = tempfile();
   write_file($fh, \$key)
     or die "500 Error during key check\n";
-  open my $out, '-|', qw(ssh-keygen -l -f), $fname
+  open my $out, '-|', qw(ssh-keygen -l -E md5 -f), $fname
     or die "500 Error during key check\n";
   my $line = <$out>;
+  chomp $line;
   close $out or return;
-  if( $line =~ /^(\d+) ((?:[0-9a-f]{2}:){15}[0-9a-f]{2}) \Q$fname\E \(([DR]SA)\)$/ ){
+  if( $line =~ /^(\d+) +(?:MD5:)?((?:[0-9a-f]{2}:){15}[0-9a-f]{2}) +.*? +\(([DR]SA)\)$/ ){
     return ($1, $2, $3);
-  }elsif( $line =~ /^(\d+) ((?:[0-9a-f]{2}:){15}[0-9a-f]{2}) \Q$fname\E$/ ){
-    # older ssh-keygen doesn't display the type
-    return ($1, $2, undef);
   }
+  die "500 Unexpected string '$line' while checking key format\n";
   return;
 }
 
