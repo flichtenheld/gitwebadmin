@@ -36,6 +36,20 @@ use GitWebAdmin::Schema;
 
 my $config = Config::Auto::parse("$FindBin::Bin/../gitwebadmin.ini");
 $config = { %$config, %{Config::Auto::parse("$FindBin::Bin/../ldap.ini")} };
+my %map = (
+  '&' =>  '\\26',
+  '(' =>  '\\28',
+  ')' =>  '\\29',
+  '*' =>  '\\2a',
+  '/' =>  '\\2f',
+  '<' =>  '\\3c',
+#  '=' =>  '\\3d', # ignore, because we also use it as "CN=..."
+  '>' =>  '\\3e',
+  '\\' => '\\5c',
+  '|' =>  '\\7c', 
+  '~' =>  '\\7e',
+);
+my $pattern = '([&()*/<>\\|~])'; # corresponds to keys(%map)
 
 my $quiet;
 GetOptions("quiet|q" => \$quiet)
@@ -66,6 +80,9 @@ $mesg->code && die $mesg->error;
 die "Group not unique\n" if $mesg->entries > 1;
 
 my @members = map { s/^(CN=.*?),.*/$1/i; $_ } ($mesg->entries)[0]->get_value('member');
+map { s/$pattern/$map{$1}/geo } @members;
+# Add external contractors, NQD-1434
+@members = uniq @members, ( qw(CN=external-stash-net-NMIRROR) );
 print "\tmembers = @members\n" unless $quiet;
 
 # get members of group members
@@ -83,6 +100,8 @@ foreach my $group ($mesg->entries){
   print "\tadd_members = @add_members\n" unless $quiet;
   @members = uniq @members, @add_members;
 }
+map { s/$pattern/$map{$1}/geo } @members;
+print "\tincluding groups (1 iteration): @members\n" unless $quiet;
 
 print "Get member data\n"      unless $quiet;
 $mesg = $ldap->search(
