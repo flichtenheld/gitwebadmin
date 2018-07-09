@@ -160,7 +160,7 @@ while( 1 ){
     Dutil::log("update branch data");
     my $git = Git->repository($path);
     GitWebAdmin::Utils::update_branch_data($git, $repo);
-    my @triggers = $repo->triggers;
+    my @triggers = $repo->triggers({}, { order_by => 'name' });
     foreach my $trigger (@triggers){
       Dutil::log($repo->name.": Calling trigger ".$trigger->name);
       GitWebAdmin::Utils::call_trigger($config, $repo, $upd, $trigger);
