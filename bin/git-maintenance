@@ -17,7 +17,9 @@
 #  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 #  Author: Frank Lichtenheld <flichtenheld@astaro.com> 02.11.2009
-#
+#  Modified: Frank Hunszinger, 21.1.2016
+#            Moved "warn"s to file to suppress mail if no other/real error
+ #
 ##############################################################################
 
 use strict;
@@ -33,6 +35,10 @@ use lib "$FindBin::Bin/../lib";;
 
 use GitWebAdmin::Schema;
 
+my $logfile = "/tmp/git-maintenance.log";
+open (LOGFILE, ">> $logfile") || warn "problem opening $logfile\n";
+print LOGFILE "--- NEW ITERATION ---\n";
+
 my $schema = GitWebAdmin::Schema->connect("dbi:Pg:dbname=gitwebadmin");
 
 my $repos = $schema->resultset('Repos')->search({forkof => undef,
@@ -42,14 +48,16 @@ while( my $repo = $repos->next ){
   my $path = catfile('/srv/git/repositories', $repo->name);
 
   unless( -d $path ){
-    warn "SKIP: $path. Does not exist\n";
+    print LOGFILE "SKIP: $path. Does not exist\n";
     next;
   }
 
   my $git = Git->repository(Directory => $path);
-  warn "CLEANUP START: $path\n";
+  print LOGFILE "CLEANUP START: $path\n";
   $git->command_noisy(qw(gc --auto));
-  warn "CLEANUP END: $path\n";
+  print LOGFILE "CLEANUP END: $path\n";
 
   sleep 1;
 }
+close (LOGFILE);
+
