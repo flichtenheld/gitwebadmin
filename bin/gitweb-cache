@@ -53,7 +53,7 @@ my $config = Config::Auto::parse("$GWA/gitwebadmin.ini");
 my $cachefile = $config->{gitweb}{cache};
 my $lockfile = "$cachefile.lock";
 
-$Dutil::silent = 0;
+#$Dutil::silent = 0;
 Dutil::singularize( $lockfile );
 
 my $db_cfg = $config->{database};
