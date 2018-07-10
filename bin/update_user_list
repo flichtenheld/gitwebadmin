@@ -107,7 +107,7 @@ print "Get member data\n"      unless $quiet;
 $mesg = $ldap->search(
   base   => "DC=intranet,DC=astaro,DC=de",
   filter => "(&(ObjectClass=user)(|".join(' ', map { "($_)" } @members)."))",
-  attrs  => [qw(cn sAMAccountName mail)],
+  attrs  => [qw(cn sAMAccountName extensionAttribute10 mail userAccountControl)],
   );
 
 $mesg->code && die $mesg->error;
@@ -115,10 +115,13 @@ $mesg->code && die $mesg->error;
 my $rs = $schema->resultset('Users');
 my %uids = ();
 foreach my $entry ($mesg->entries){
+  next if $entry->get_value('userAccountControl') & 2; # check disabled flag
   my $uid = lc $entry->get_value('sAMAccountName');
-  print "\tmember ".$entry->get_value('cn')." (uid=$uid)\n" unless $quiet;
+  my $legacy_uid = lc( $entry->get_value('extensionAttribute10') || '' );
+  my $name = $entry->get_value('cn') || '';
+  print "\tmember $name (uid=$uid, legacy_uid=$legacy_uid)\n" unless $quiet;
   $rs->update_or_create({ uid => $uid,
-                          name => $entry->get_value('cn') || '',
+                          name => $name,
                           mail => $entry->get_value('mail') || '',
                           directory => 'dc.astaro.com',
                           active => 1 },
