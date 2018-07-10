@@ -23,6 +23,8 @@
 use strict;
 use warnings;
 
+use open ':encoding(utf8)';
+
 use Net::LDAP;
 use Config::Auto;
 use Data::Dumper;
@@ -119,7 +121,9 @@ foreach my $entry ($mesg->entries){
   my $uid = lc $entry->get_value('sAMAccountName');
   my $legacy_uid = lc( $entry->get_value('extensionAttribute10') || '' );
   my $name = $entry->get_value('cn') || '';
-  print "\tmember $name (uid=$uid, legacy_uid=$legacy_uid)\n" unless $quiet;
+  utf8::decode($name);
+  my $utf8 = utf8::is_utf8($name);
+  print "\tmember $name (uid=$uid, legacy_uid=$legacy_uid, utf8=$utf8)\n" unless $quiet;
   $rs->update_or_create({ uid => $uid,
                           name => $name,
                           mail => $entry->get_value('mail') || '',
