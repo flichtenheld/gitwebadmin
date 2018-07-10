@@ -25,6 +25,7 @@ REQUIREMENTS
    CGI::Application
    Config::Auto
    DBIx::Class
+   File::Slurper
    JSON::XS
    LWP
    Template

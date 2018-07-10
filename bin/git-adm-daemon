@@ -28,7 +28,7 @@ use Config::Auto;
 use Template;
 use Data::Dumper;
 use File::Spec::Functions qw(:ALL);
-use File::Slurp;
+use File::Slurper qw(write_text);
 use Git;
 use XML::Simple;
 use LWP::UserAgent;
@@ -152,8 +152,7 @@ while( 1 ){
       my $key_file = catfile($keydir, $usr->uid.".pub");
       delete $old_keys{$key_file};
 #	print "\twrite $key_file\n" unless $quiet;
-      write_file($key_file, \@keys)
-          or die "write_file failed: $!\n";
+      write_text($key_file, join("",@keys));
       $git->command_noisy('add', catfile("keydir", $usr->uid.".pub"));
     }
     $owners->reset;
@@ -180,8 +179,7 @@ while( 1 ){
       my $xml = XMLout( { repo => \@mantis_r }, RootName => 'Repositories' );
       my $old_xml = read_file($repolist) || '';
       if( $xml ne $old_xml ){
-        write_file("$repolist.new", $xml)
-          or die "writing of repolist failed\n";
+        write_text("$repolist.new", $xml);
         rename("$repolist.new", $repolist)
           or die "rename of repolist failed\n";
         Dutil::log("Updated $repolist");
